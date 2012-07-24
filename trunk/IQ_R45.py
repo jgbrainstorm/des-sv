@@ -60,7 +60,7 @@ def complexMoments(data=None,sigma=None):
     return M20, M22, M31, M33
 
 
-def wisker(data=None, sigma = None):
+def whisker(data=None, sigma = None):
     """
     This code calculate the wisker length defined as sqrt(e1^2+e2^2)
     input: 
@@ -68,8 +68,8 @@ def wisker(data=None, sigma = None):
          sigma: std of the Gaussian weight Kernel in pixel
     """
     M20, M22, M31, M33 = complexMoments(data=data,sigma=sigma)
-    wisker_length = np.sqrt(M22.real**2+M22.imag**2)
-    return wisker_length
+    whisker_length = np.sqrt(np.abs(M22))
+    return whisker_length
 
 
 def rowcol2XY(row,col,CCD):
