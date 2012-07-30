@@ -8,8 +8,19 @@ import pyfits as pf
 import scipy.ndimage as nd
 import pylab as pl
 import sys
+import binplot as bp
 
 scale = 0.27
+
+def sech(x,width,height):
+    """
+    hyperbolic secant function
+    """
+    z = x/width
+    res = height*2./(np.exp(z)+np.exp(-z))
+    return res
+
+
 def findbstr(data=None, hdr=None):
     """
     find the bright stars on the image
@@ -63,7 +74,6 @@ def adaptiveCentroid(data=None,sigma=None):
     maxItr = 50
     EP = 0.0001
     for i in range(maxItr):
-        print i
         wrmat = wr(ROW,COL,rowmean,colmean,sigma)
         IWmat = data*wrmat
         wrcol = wrmat.sum(axis=0)
@@ -144,6 +154,75 @@ def fwhm_whisker(image=None, sigma = None):
     whisker_length = np.sqrt(np.abs(M22))*scale
     return fwhm,whisker_length
 
+def fitFWHM(img=None,sigma=None):
+    rowCen,colCen = adaptiveCentroid(data=img,sigma=sigma)
+    row,col = np.mgrid[0:npix,0:npix]
+    row = row - rowCen
+    col = col - colCen
+    radius = np.sqrt(row**2+col**2)
+    radius = radius.flatten()
+    img = img.flatten()
+    idx = np.argsort(radius)
+    img = img[idx]
+    radius = radius[idx]
+    rad,im,imerr=bp.bin_scatter(radius,img,binsize=1,fmt='b.',plot=False)
+    halfmax = max(im)/2.
+    idx =np.argsort(im)
+    rad = rad[idx]
+    im = im[idx]
+    fwhm = 2.*np.interp(halfmax,im,rad)
+    return fwhm
+
+def dispStamp(stampImg=None,sigma=1.1/scale,npix=40):
+    pl.figure(figsize=(12,6))
+    pl.subplot(1,2,1)
+    pl.matshow(stampImg,fignum=False)
+    pl.xlabel('Pixel')
+    pl.ylabel('Pixel')
+    pl.grid(color='y')
+    rowCen,colCen = adaptiveCentroid(data=stampImg,sigma=sigma)
+    M20, M22, M31, M33 =complexMoments(stampImg,sigma=sigma)
+    e1 = M22.real/M20.real
+    e2 = M22.imag/M20.real
+    whiskerLength = np.sqrt(np.abs(M22))*scale
+    fwhm = np.sqrt(M20)*2.35482*scale
+    pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
+    pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
+    pl.figtext(0.15,0.7, 'PSF whisker: '+str(round(whiskerLength,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.65, 'PSF fwhm: '+str(round(fwhm,4))+' [arcsec]', color='r')
+    pl.subplot(1,2,2)
+    row,col = np.mgrid[0:npix,0:npix]
+    row = row - rowCen
+    col = col - colCen
+    radius = np.sqrt(row**2+col**2)
+    img = stampImg.flatten()
+    radius = radius.flatten()
+    idx = np.argsort(radius)
+    img = img[idx]
+    radius = radius[idx]
+    rad,im,imerr=bp.bin_scatter(radius,img,binsize=1,fmt='b.',plot=False)
+    halfmax = max(im)/2.
+    pl.plot(radius,img,'b.')
+    pl.grid(color='g')
+    pl.hlines(halfmax,0,radius.max(),linestyle='solid',colors='r')
+    pl.vlines(fwhm/scale/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='r')
+    pl.ylim(0,halfmax*2+halfmax*0.2)
+    pl.xlim(0,npix/4.) 
+    pl.xlabel('Radius [pixels]')
+    pl.ylabel('Mean counts [ADU]')
+    pl.title('Radial profile')
+    pl.figtext(0.6,0.7,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec')
+    return '---- Done! ----'
+    
+def dispStampList(stampImgList=None,sigma=None,npix=None):
+    Nstamp = len(stampImgList)
+    for i in range(Nstamp):
+        t=dispStamp(stampImg=stampImgList[i],sigma=sigma,npix=npix)
+        raw_input('--- hit the enter key to proceed ---')
+        pl.close()
+    return ' ---- Done ! ----'
+    
+
 
 def rowcol2XY(row,col,CCD):
     """
@@ -169,13 +248,15 @@ def rowcol2XY(row,col,CCD):
 
 if __name__ == "__main__":
     from IQ_R45 import *
+    pl.ion()
     dir = '/home/jghao/research/data/des_optics_psf/dc6b_image/'
-    imgname = 'decam-34-0-r-0_01.fits'
-    bkgname = 'decam-34-0-r-0_01_bkg.fits'
+    imgname = 'decam-34-0-r-0_02.fits'
+    bkgname = 'decam-34-0-r-0_02_bkg.fits'
+    catname = 'decam-34-0-r-0_02_cat.fits'
     hdr = pf.getheader(dir+imgname)
     data = pf.getdata(dir+imgname) - pf.getdata(dir+bkgname)
     xc,yc=findbstr(data=data, hdr=hdr)
-    stamp=getStamp(data=data,xcoord=xc,ycoord=yc,Npix =20)
+    stamp=getStamp(data=data,xcoord=xc,ycoord=yc,Npix =40)
     Nstamp = len(stamp)
     for i in range(Nstamp):
         print fwhm_whisker(image=stamp[i], sigma = 4.)
