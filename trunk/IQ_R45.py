@@ -142,7 +142,7 @@ def complexMoments(image=None,sigma=None):
     M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
     return M20, M22, M31, M33
 
-def fwhm_whisker(image=None, sigma = None):
+def fwhm_whisker(image=None, sigma = 1.1/scale):
     """
     This code calculate the fwhm and wisker length defined as (M22.real^2 + M22.imag^2)^{1/4}
     input: 
@@ -150,30 +150,14 @@ def fwhm_whisker(image=None, sigma = None):
          sigma: std of the Gaussian weight Kernel in pixel
     """
     M20, M22, M31, M33 = complexMoments(image=image,sigma=sigma)
-    fwhm = np.sqrt(M20)*2.35482*scale
+    #fwhm = np.sqrt(M20/2.)*2.35482*scale
     whisker_length = np.sqrt(np.abs(M22))*scale
+    fwhm = (1./(M20/2.) - 1./sigma**2)**(-0.5)*2.35482*scale
     return fwhm,whisker_length
 
-def fitFWHM(img=None,sigma=None):
-    rowCen,colCen = adaptiveCentroid(data=img,sigma=sigma)
-    row,col = np.mgrid[0:npix,0:npix]
-    row = row - rowCen
-    col = col - colCen
-    radius = np.sqrt(row**2+col**2)
-    radius = radius.flatten()
-    img = img.flatten()
-    idx = np.argsort(radius)
-    img = img[idx]
-    radius = radius[idx]
-    rad,im,imerr=bp.bin_scatter(radius,img,binsize=1,fmt='b.',plot=False)
-    halfmax = max(im)/2.
-    idx =np.argsort(im)
-    rad = rad[idx]
-    im = im[idx]
-    fwhm = 2.*np.interp(halfmax,im,rad)
-    return fwhm
 
-def dispStamp(stampImg=None,sigma=1.1/scale,npix=40):
+def dispStamp(stampImg=None,sigma=1.1/scale):
+    npix = stampImg.shape[0]
     pl.figure(figsize=(12,6))
     pl.subplot(1,2,1)
     pl.matshow(stampImg,fignum=False)
@@ -185,7 +169,8 @@ def dispStamp(stampImg=None,sigma=1.1/scale,npix=40):
     e1 = M22.real/M20.real
     e2 = M22.imag/M20.real
     whiskerLength = np.sqrt(np.abs(M22))*scale
-    fwhm = np.sqrt(M20)*2.35482*scale
+    #fwhm = np.sqrt(M20/2.)*2.35482*scale
+    fwhm = (1./(M20/2.) - 1./sigma**2)**(-0.5)*2.35482*scale
     pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
     pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
     pl.figtext(0.15,0.7, 'PSF whisker: '+str(round(whiskerLength,4))+' [arcsec]', color='r')
@@ -214,10 +199,13 @@ def dispStamp(stampImg=None,sigma=1.1/scale,npix=40):
     pl.figtext(0.6,0.7,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec')
     return '---- Done! ----'
     
-def dispStampList(stampImgList=None,sigma=None,npix=None):
+def dispStampList(stampImgList=None,sigma=None):
+    if sigma == None:
+        print 'syntax: dispStampList(stampImgList,sigma)'
+        sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
-        t=dispStamp(stampImg=stampImgList[i],sigma=sigma,npix=npix)
+        t=dispStamp(stampImg=stampImgList[i],sigma=sigma)
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
