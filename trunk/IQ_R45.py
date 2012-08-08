@@ -9,6 +9,7 @@ import scipy.ndimage as nd
 import pylab as pl
 import sys
 import binplot as bp
+from decamRay import *
 
 scale = 0.27
 
@@ -152,15 +153,22 @@ def fwhm_whisker(image=None, sigma = 1.1/scale):
     M20, M22, M31, M33 = complexMoments(image=image,sigma=sigma)
     #fwhm = np.sqrt(M20/2.)*2.35482*scale
     whisker_length = np.sqrt(np.abs(M22))*scale
-    fwhm = (1./(M20/2.) - 1./sigma**2)**(-0.5)*2.35482*scale
+    lambdap = 0.5*(M20 + abs(M22))
+    lambdam = 0.5*(M20 - abs(M22))
+    fwhm = np.sqrt(2.*np.log(2.))*(np.sqrt(lambdap)+np.sqrt(lambdam))*scale
+    #fwhm = (1./(M20/2.) - 1./sigma**2)**(-0.5)*2.35482*scale
     return fwhm,whisker_length
 
 
 def dispStamp(stampImg=None,sigma=1.1/scale):
     npix = stampImg.shape[0]
-    pl.figure(figsize=(12,6))
-    pl.subplot(1,2,1)
+    pl.figure(figsize=(18,6))
+    pl.subplot(1,3,1)
     pl.matshow(stampImg,fignum=False)
+    mfit = mfwhm(stampImg)
+    gfit = gfwhm(stampImg)
+    s2fit = s2fwhm(stampImg)
+    g2dfit = g2dfwhm(stampImg)
     pl.xlabel('Pixel')
     pl.ylabel('Pixel')
     pl.grid(color='y')
@@ -169,13 +177,16 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     e1 = M22.real/M20.real
     e2 = M22.imag/M20.real
     whiskerLength = np.sqrt(np.abs(M22))*scale
+    lambdap = 0.5*(M20 + abs(M22))
+    lambdam = 0.5*(M20 - abs(M22))
+    #fwhm = np.sqrt(2.*np.log(2.))*(np.sqrt(lambdap)+np.sqrt(lambdam))*scale
     #fwhm = np.sqrt(M20/2.)*2.35482*scale
     fwhm = (1./(M20/2.) - 1./sigma**2)**(-0.5)*2.35482*scale
     pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
     pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
-    pl.figtext(0.15,0.7, 'PSF whisker: '+str(round(whiskerLength,4))+' [arcsec]', color='r')
-    pl.figtext(0.15,0.65, 'PSF fwhm: '+str(round(fwhm,4))+' [arcsec]', color='r')
-    pl.subplot(1,2,2)
+    pl.figtext(0.15,0.7, 'PSF whisker_Wmoments: '+str(round(whiskerLength,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.65, 'PSF whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
+    pl.subplot(1,3,2)
     row,col = np.mgrid[0:npix,0:npix]
     row = row - rowCen
     col = col - colCen
@@ -185,18 +196,35 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     idx = np.argsort(radius)
     img = img[idx]
     radius = radius[idx]
-    rad,im,imerr=bp.bin_scatter(radius,img,binsize=1,fmt='b.',plot=False)
-    halfmax = max(im)/2.
-    pl.plot(radius,img,'b.')
-    pl.grid(color='g')
-    pl.hlines(halfmax,0,radius.max(),linestyle='solid',colors='r')
-    pl.vlines(fwhm/scale/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='r')
-    pl.ylim(0,halfmax*2+halfmax*0.2)
+    rad,im,imerr=bp.bin_scatter(radius,img,binsize=1,fmt='bo',plot=False)
+    halfmax = np.median(img[0:10])/2.
+    pl.plot(radius,img,'k.')
+    pl.grid(color='y')
+    pl.hlines(halfmax,0,radius.max(),linestyle='solid',colors='b')
+    pl.hlines(mfit[2]/2.,0,radius.max(),linestyle='solid',colors='r')
+    pl.hlines(gfit[1]/2.,0,radius.max(),linestyle='solid',colors='g')
+    pl.hlines(s2fit[1]/2.,0,radius.max(),linestyle='solid',colors='m')
+    pl.hlines(g2dfit[0]/2.,0,radius.max(),linestyle='solid',colors='c',label='Adaptive Moments')
+    pl.vlines(fwhm/scale/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='b',label='Weighted Moments')
+    pl.vlines(mfit[4]/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='r')
+    pl.vlines(gfit[3]/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='g')
+    pl.vlines(s2fit[3]/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='m')
+    pl.vlines(g2dfit[3]/2.,0, halfmax*2,linestyle='solid',colors='c')
+    pl.plot(radius,mprofile(radius,mfit[0],mfit[1],mfit[2],mfit[3]),'r-',label='Moffat Fit')
+    pl.plot(radius,gprofile(radius,gfit[0],gfit[1],gfit[2]),'g-',label='Gaussian Fit')
+    pl.plot(radius,s2profile(radius,s2fit[0],s2fit[1],s2fit[2]),'m-',label='Sech2 Fit')
+    pl.legend(loc='best')
+    pl.ylim(0,halfmax*2+halfmax*0.5)
     pl.xlim(0,npix/4.) 
     pl.xlabel('Radius [pixels]')
     pl.ylabel('Mean counts [ADU]')
     pl.title('Radial profile')
-    pl.figtext(0.6,0.7,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec')
+    pl.figtext(0.65,0.7,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec',color='r')
+    pl.figtext(0.65,0.6,'FWHM_Gaussian: '+str(round(gfit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.65,0.55,'FWHM_Moffat: '+str(round(mfit[4]*scale,3))+ ' arcsec')
+    pl.figtext(0.65,0.5,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(fwhm,3))+ ' arcsec') 
+    pl.figtext(0.65,0.4,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
     return '---- Done! ----'
     
 def dispStampList(stampImgList=None,sigma=None):
@@ -238,9 +266,9 @@ if __name__ == "__main__":
     from IQ_R45 import *
     pl.ion()
     dir = '/home/jghao/research/data/des_optics_psf/dc6b_image/'
-    imgname = 'decam-34-0-r-0_02.fits'
-    bkgname = 'decam-34-0-r-0_02_bkg.fits'
-    catname = 'decam-34-0-r-0_02_cat.fits'
+    imgname = 'decam-34-0-r-0_30.fits'
+    bkgname = 'decam-34-0-r-0_30_bkg.fits'
+    catname = 'decam-34-0-r-0_scamp.fits'
     hdr = pf.getheader(dir+imgname)
     data = pf.getdata(dir+imgname) - pf.getdata(dir+bkgname)
     xc,yc=findbstr(data=data, hdr=hdr)
