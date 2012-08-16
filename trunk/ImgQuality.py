@@ -13,9 +13,8 @@ try:
     import pylab as pl
     import sys
     from scipy.optimize import leastsq
-    import newrd
 except ImportError:
-    print "Error: missing one of the libraries (numpy, pyfits, scipy)"
+    print "Error: missing one of the libraries (numpy, pyfits, scipy, matplotlib)"
     sys.exit()
 
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
