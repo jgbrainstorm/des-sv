@@ -6,14 +6,17 @@
 # Created by: Jiangang Hao @ Fermilab, 8/1/2012
 #-------------------------------------------------------------
 
-import numpy as np
-import pyfits as pf
-import scipy.ndimage as nd
-import pylab as pl
-import sys
-from scipy.optimize import leastsq
-
-scale = 0.27
+try:
+    import numpy as np
+    import pyfits as pf
+    import scipy.ndimage as nd
+    import pylab as pl
+    import sys
+    from scipy.optimize import leastsq
+    import newrd
+except ImportError:
+    print "Error: missing one of the libraries (numpy, pyfits, scipy)"
+    sys.exit()
 
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     """
@@ -172,10 +175,10 @@ def rowcol2XY(row,col,CCD):
     2. the direction row increase is West
     3. the direction col increase is North.
     4. In my Focal Plane definition file: DECam_def.py,
-        positive X is South
-        positive Y is East
+    positive X is South
+    positive Y is East
     So, the row increase as -Y direction.
-        the col increase as -X direction.
+    the col increase as -X direction.
     """
     pixscale = 0.015 #mm/pix
     X = CCD[1]+1024*pixscale-(col*pixscale+pixscale/2.)
