@@ -179,8 +179,6 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     whiskerLength = np.sqrt(np.abs(M22))*scale
     lambdap = 0.5*(M20 + abs(M22))
     lambdam = 0.5*(M20 - abs(M22))
-    #fwhm = np.sqrt(2.*np.log(2.))*(np.sqrt(lambdap)+np.sqrt(lambdam))*scale
-    #fwhm = np.sqrt(M20/2.)*2.35482*scale
     fwhm = (1./(M20/2.) - 1./sigma**2)**(-0.5)*2.35482*scale
     pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
     pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
@@ -196,7 +194,6 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     idx = np.argsort(radius)
     img = img[idx]
     radius = radius[idx]
-    rad,im,imerr=bp.bin_scatter(radius,img,binsize=1,fmt='bo',plot=False)
     halfmax = np.median(img[0:10])/2.
     pl.plot(radius,img,'k.')
     pl.grid(color='y')
@@ -205,16 +202,16 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     pl.hlines(gfit[1]/2.,0,radius.max(),linestyle='solid',colors='g')
     pl.hlines(s2fit[1]/2.,0,radius.max(),linestyle='solid',colors='m')
     pl.hlines(g2dfit[0]/2.,0,radius.max(),linestyle='solid',colors='c',label='Adaptive Moments')
-    pl.vlines(fwhm/scale/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='b',label='Weighted Moments')
-    pl.vlines(mfit[4]/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='r')
-    pl.vlines(gfit[3]/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='g')
-    pl.vlines(s2fit[3]/2.,0, halfmax*2+halfmax*0.5,linestyle='solid',colors='m')
-    pl.vlines(g2dfit[3]/2.,0, halfmax*2,linestyle='solid',colors='c')
+    pl.vlines(fwhm/scale/2.,0, halfmax*4,linestyle='solid',colors='b',label='Weighted Moments')
+    pl.vlines(mfit[4]/2.,0, halfmax*4,linestyle='solid',colors='r')
+    pl.vlines(gfit[3]/2.,0, halfmax*4,linestyle='solid',colors='g')
+    pl.vlines(s2fit[3]/2.,0, halfmax*4,linestyle='solid',colors='m')
+    pl.vlines(g2dfit[3]/2.,0, halfmax*4,linestyle='solid',colors='c')
     pl.plot(radius,mprofile(radius,mfit[0],mfit[1],mfit[2],mfit[3]),'r-',label='Moffat Fit')
     pl.plot(radius,gprofile(radius,gfit[0],gfit[1],gfit[2]),'g-',label='Gaussian Fit')
     pl.plot(radius,s2profile(radius,s2fit[0],s2fit[1],s2fit[2]),'m-',label='Sech2 Fit')
     pl.legend(loc='best')
-    pl.ylim(0,halfmax*2+halfmax*0.5)
+    pl.ylim(0,halfmax*4)
     pl.xlim(0,npix/4.) 
     pl.xlabel('Radius [pixels]')
     pl.ylabel('Mean counts [ADU]')
@@ -237,8 +234,7 @@ def dispStampList(stampImgList=None,sigma=None):
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
-    
-
+        
 
 def rowcol2XY(row,col,CCD):
     """
@@ -265,14 +261,25 @@ def rowcol2XY(row,col,CCD):
 if __name__ == "__main__":
     from IQ_R45 import *
     pl.ion()
-    dir = '/home/jghao/research/data/des_optics_psf/dc6b_image/'
-    imgname = 'decam-34-0-r-0_30.fits'
-    bkgname = 'decam-34-0-r-0_30_bkg.fits'
-    catname = 'decam-34-0-r-0_scamp.fits'
-    hdr = pf.getheader(dir+imgname)
-    data = pf.getdata(dir+imgname) - pf.getdata(dir+bkgname)
-    xc,yc=findbstr(data=data, hdr=hdr)
-    stamp=getStamp(data=data,xcoord=xc,ycoord=yc,Npix =40)
+    #dir = '/home/jghao/research/data/des_optics_psf/dc6b_image/'
+    dr = '/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/decam--28--49-r-1/'
+    starfile='/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/catfile/decam_-27.72186_-48.60000-objects.fit'
+    #imgname = 'decam-34-0-r-0_30.fits'
+    #bkgname = 'decam-34-0-r-0_30_bkg.fits'
+    #catname = 'decam-34-0-r-0_scamp.fits'
+    ext='01'
+    imgname= 'decam--28--49-r-1_'+ext+'.fits.fz'
+    bkgname = 'decam--28--49-r-1_'+ext+'_bkg.fits.fz'
+    hdr = pf.getheader(dr+imgname,1)
+    data = pf.getdata(dr+imgname) - pf.getdata(dr+bkgname)
+    #xc,yc=findbstr(data=data, hdr=hdr)
+    xc = pf.getdata(starfile,int(ext)).xccd
+    yc = pf.getdata(starfile,int(ext)).yccd
+    rmag = pf.getdata(starfile,int(ext)).mag_3
+    ok = (rmag > 12)*(rmag < 16)
+    xc=xc[ok]
+    yc = yc[ok]
+    stamp=getStamp(data=data,xcoord=xc,ycoord=yc,Npix =25)
     Nstamp = len(stamp)
     for i in range(Nstamp):
         print fwhm_whisker(image=stamp[i], sigma = 4.)
