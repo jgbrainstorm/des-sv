@@ -17,6 +17,9 @@ except ImportError:
     print "Error: missing one of the libraries (numpy, pyfits, scipy, matplotlib)"
     sys.exit()
 
+
+scale=0.27
+
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     """
     Input: CCD image in maxtrix, x, y centroid of stars,the stamp npix
@@ -78,40 +81,37 @@ def wr(x=None,y=None,xcen=None,ycen=None,sigma=None):
     res=np.exp(-((x-xcen)**2+(y-ycen)**2)/(2.*sigma**2))/(2.*np.pi*sigma**2) 
     return res
 
-def adaptiveCentroid(data=None,sigma=1.1/scale):
+def adaptiveCentroid(data=None,sigma=None):
     """
-    calculate the windowed centroid of a stamp image
+    calculate the centroid using the adaptive approach
     """
     nrow,ncol=data.shape
     Isum = data.sum()
     Icol = data.sum(axis=0) # sum over all rows
     Irow = data.sum(axis=1) # sum over all cols
-    IcolSum = np.sum(Icol)
-    IrowSum = np.sum(Irow)
     colgrid = np.arange(ncol)
     rowgrid = np.arange(nrow)
+    rowmean=np.sum(rowgrid*Irow)/Isum
+    colmean=np.sum(colgrid*Icol)/Isum
     ROW,COL=np.indices((nrow,ncol))
-    rowmean=np.sum(rowgrid*Irow)/IrowSum
-    colmean=np.sum(colgrid*Icol)/IcolSum
     maxItr = 50
     EP = 0.0001
     for i in range(maxItr):
         wrmat = wr(ROW,COL,rowmean,colmean,sigma)
         IWmat = data*wrmat
-        wrcol = wrmat.sum(axis=0)
-        wrrow = wrmat.sum(axis=1)
-        wrcolsum = np.sum(Icol*wrcol)
-        wrrowsum = np.sum(Irow*wrrow)
-        drowmean = np.sum((rowgrid-rowmean)*Irow*wrrow)/wrrowsum
-        dcolmean = np.sum((colgrid-colmean)*Icol*wrcol)/wrcolsum
+        IWcol = IWmat.sum(axis=0)
+        IWrow = IWmat.sum(axis=1)
+        drowmean = np.sum((rowgrid-rowmean)*IWrow)/np.sum(IWrow)
+        dcolmean = np.sum((colgrid-colmean)*IWcol)/np.sum(IWcol)
         rowmean = rowmean+2.*drowmean
         colmean = colmean+2.*dcolmean
         if drowmean**2+dcolmean**2 <= EP:
             break
+
     return rowmean,colmean
 
-
-def complexMoments(image=None,sigma=1.1/scale):
+ 
+def complexMoments(data=None,sigma=None):
     """
     This one calcualte the 3 2nd moments and 4 thrid moments with the Gaussian weights.
     col : x direction
@@ -120,48 +120,46 @@ def complexMoments(image=None,sigma=1.1/scale):
     sigma is the stand deviation of the measurement kernel in pixel
     The output is in pixel coordinate
     """
-    nrow,ncol=image.shape
-    Isum = image.sum()
-    Icol = image.sum(axis=0) # sum over all rows
-    Irow = image.sum(axis=1) # sum over all cols
-    IcolSum = np.sum(Icol)
-    IrowSum = np.sum(Irow)
+    nrow,ncol=data.shape
+    Isum = data.sum()
+    Icol = data.sum(axis=0) # sum over all rows
+    Irow = data.sum(axis=1) # sum over all cols
     colgrid = np.arange(ncol)
     rowgrid = np.arange(nrow)
+    rowmean=np.sum(rowgrid*Irow)/Isum
+    colmean=np.sum(colgrid*Icol)/Isum
     ROW,COL=np.indices((nrow,ncol))
-    rowmean=np.sum(rowgrid*Irow)/IrowSum
-    colmean=np.sum(colgrid*Icol)/IcolSum
     maxItr = 50
-    EP = 0.0001 # start getting the adaptive centroid
-    for i in range(maxItr):  
+    EP = 0.0001
+    for i in range(maxItr):
         wrmat = wr(ROW,COL,rowmean,colmean,sigma)
-        IWmat = image*wrmat
-        wrcol = wrmat.sum(axis=0)
-        wrrow = wrmat.sum(axis=1)
-        wrcolsum = np.sum(Icol*wrcol)
-        wrrowsum = np.sum(Irow*wrrow)
-        drowmean = np.sum((rowgrid-rowmean)*Irow*wrrow)/wrrowsum
-        dcolmean = np.sum((colgrid-colmean)*Icol*wrcol)/wrcolsum
+        IWmat = data*wrmat
+        IWcol = IWmat.sum(axis=0)
+        IWrow = IWmat.sum(axis=1)
+        IWsum = IWmat.sum()
+        drowmean = np.sum((rowgrid-rowmean)*IWrow)/IWsum
+        dcolmean = np.sum((colgrid-colmean)*IWcol)/IWsum
         rowmean = rowmean+2.*drowmean
         colmean = colmean+2.*dcolmean
         if drowmean**2+dcolmean**2 <= EP:
             break
     rowgrid = rowgrid - rowmean # centered
     colgrid = colgrid - colmean
-    Mr = np.sum(rowgrid*Irow*wrrow)/wrrowsum
-    Mc = np.sum(colgrid*Icol*wrcol)/wrcolsum
-    Mrr = np.sum(rowgrid**2*Irow*wrrow)/(wrrowsum)
-    Mcc = np.sum(colgrid**2*Icol*wrcol)/(wrcolsum)
-    Mrc = np.sum(np.outer(rowgrid,colgrid)*IWmat)/np.sum(IWmat)
-    Mrrr = np.sum(rowgrid**3*Irow*wrrow)/(wrrowsum)
-    Mccc = np.sum(colgrid**3*Icol*wrcol)/(wrcolsum)
-    Mrrc = np.sum(np.outer(rowgrid**2,colgrid)*IWmat)/np.sum(IWmat)
-    Mrcc = np.sum(np.outer(rowgrid,colgrid**2)*IWmat)/np.sum(IWmat)
+    Mr = np.sum(rowgrid*IWrow)/IWsum
+    Mc = np.sum(colgrid*IWcol)/IWsum
+    Mrr = np.sum(rowgrid**2*IWrow)/IWsum
+    Mcc = np.sum(colgrid**2*IWcol)/IWsum
+    Mrc = np.sum(np.outer(rowgrid,colgrid)*IWmat)/IWsum
+    Mrrr = np.sum(rowgrid**3*IWrow)/IWsum
+    Mccc = np.sum(colgrid**3*IWcol)/IWsum
+    Mrrc = np.sum(np.outer(rowgrid**2,colgrid)*IWmat)/IWsum
+    Mrcc = np.sum(np.outer(rowgrid,colgrid**2)*IWmat)/IWsum
     M20 = Mrr + Mcc
     M22 = complex(Mcc - Mrr,2*Mrc)
     M31 = complex(3*Mc - (Mccc+Mrrc)/sigma**2, 3*Mr - (Mrcc + Mrrr)/sigma**2)
     M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
     return M20, M22, M31, M33
+
 
 def rowcol2XY(row,col,CCD):
     """
@@ -304,19 +302,56 @@ def g2dfwhm(img):
     fwhm_g2d = np.sqrt(2.*np.log(2.))*(np.sqrt(lambdap)+np.sqrt(lambdam))
     return A, B, whisker_g2d, fwhm_g2d
 
-def wfwhm(image=None, sigma = 1.1/scale):
+def wfwhm(img,sigma):
     """
     This code calculate the fwhm and wisker length defined as (M22.real^2 + M22.imag^2)^{1/4} using the weighted moments method.
     input: 
          data: 2d stamp image
          sigma: std of the Gaussian weight Kernel in pixel
     """
-    M20, M22, M31, M33 = complexMoments(image=image,sigma=sigma)
-    whisker_w = np.sqrt(np.abs(M22))
+    nrow,ncol=img.shape
+    Isum = img.sum()
+    Icol = img.sum(axis=0) # sum over all rows
+    Irow = img.sum(axis=1) # sum over all cols
+    colgrid = np.arange(ncol)
+    rowgrid = np.arange(nrow)
+    rowmean=np.sum(rowgrid*Irow)/Isum
+    colmean=np.sum(colgrid*Icol)/Isum
+    ROW,COL=np.indices((nrow,ncol))
+    maxItr = 50
+    EP = 0.0001
+    for i in range(maxItr):
+        wrmat = wr(ROW,COL,rowmean,colmean,sigma)
+        IWmat = img*wrmat
+        IWcol = IWmat.sum(axis=0)
+        IWrow = IWmat.sum(axis=1)
+        IWsum = IWmat.sum()
+        drowmean = np.sum((rowgrid-rowmean)*IWrow)/IWsum
+        dcolmean = np.sum((colgrid-colmean)*IWcol)/IWsum
+        rowmean = rowmean+2.*drowmean
+        colmean = colmean+2.*dcolmean
+        if drowmean**2+dcolmean**2 <= EP:
+            break
+    rowgrid = rowgrid - rowmean # centered
+    colgrid = colgrid - colmean
+    Mrr = np.sum(rowgrid**2*IWrow)/IWsum
+    Mcc = np.sum(colgrid**2*IWcol)/IWsum
+    Mrc = np.sum(np.outer(rowgrid,colgrid)*IWmat)/IWsum
+    Cm = np.matrix([[Mcc,Mrc],[Mrc,Mrr]])
+    Cw = np.matrix([[sigma**2,0.],[0.,sigma**2]])
+    Cimg = (Cm.I - Cw.I).I
+    Mcc = Cimg[0,0]
+    Mrr = Cimg[1,1]
+    Mrc = Cimg[0,1]
+    M20 = Mrr + Mcc
+    M22 = complex(Mcc - Mrr,2*Mrc)
+    e1 = M22.real/M20.real
+    e2 = M22.imag/M20.real
+    whiskerLength = np.sqrt(np.abs(M22))
     lambdap = 0.5*(M20 + abs(M22))
     lambdam = 0.5*(M20 - abs(M22))
-    fwhm_w = np.sqrt(2.*np.log(2.))*(np.sqrt(lambdap)+np.sqrt(lambdam))
-    return whisker_w,fwhm_w
+    fwhmw = np.sqrt(2.*np.log(2.))*(np.sqrt(lambdap)+np.sqrt(lambdam))
+    return e1,e2,whiskerLength,fwhmw 
 
 
 def mfwhm(img=None):
@@ -350,7 +385,7 @@ def mfwhm(img=None):
     return alpha,beta,A,B,fwhm_moffat
 
     
-def get_fwhm_whisker(stampImg=None):
+def get_fwhm_whisker(stampImg=None,sigma=1.1/scale):
     """
     Calcualte the fwhm, whisker using various approach. 
     return the results in arcsec. 
@@ -364,9 +399,9 @@ def get_fwhm_whisker(stampImg=None):
         gfit = gfwhm(stampImg)
         s2fit = s2fwhm(stampImg)
         g2dfit = g2dfwhm(stampImg)
-        wfit = wfwhm(stampImg)
-        fwhm = np.array([wfit[1],g2dfit[3],mfit[4],gfit[3],s2fit[3]])*scale
-        whisker = np.array([wfit[0],g2dfit[2]])*scale
+        wfit = wfwhm(stampImg,sigma=sigma)
+        fwhm = np.array([wfit[3],g2dfit[3],mfit[4],gfit[3],s2fit[3]])*scale
+        whisker = np.array([wfit[2],g2dfit[2]])*scale
         fwhm[np.isnan(fwhm)]=-999
         whisker[np.isnan(whisker)]=-999
     else:
@@ -420,7 +455,7 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     gfit = gfwhm(stampImg)
     s2fit = s2fwhm(stampImg)
     g2dfit = g2dfwhm(stampImg)
-    wfit = wfwhm(stampImg)
+    wfit = wfwhm(stampImg,sigma=sigma)
     pl.xlabel('Pixel')
     pl.ylabel('Pixel')
     pl.grid(color='y')
@@ -430,7 +465,7 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     e2 = M22.imag/M20.real
     pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
     pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
-    pl.figtext(0.15,0.7, 'PSF whisker_Wmoments: '+str(round(wfit[0]*scale,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.7, 'PSF whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
     pl.figtext(0.15,0.65, 'PSF whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
     pl.subplot(1,3,2)
     row,col = np.mgrid[0:npix,0:npix]
@@ -450,7 +485,7 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     pl.hlines(gfit[1]/2.,0,radius.max(),linestyle='solid',colors='g')
     pl.hlines(s2fit[1]/2.,0,radius.max(),linestyle='solid',colors='m')
     pl.hlines(g2dfit[0]/2.,0,radius.max(),linestyle='solid',colors='c',label='Adaptive Moments')
-    pl.vlines(wfit[1]/2.,0, halfmax*4,linestyle='solid',colors='b',label='Weighted Moments')
+    pl.vlines(wfit[3]/2.,0, halfmax*4,linestyle='solid',colors='b',label='Weighted Moments')
     pl.vlines(mfit[4]/2.,0, halfmax*4,linestyle='solid',colors='r')
     pl.vlines(gfit[3]/2.,0, halfmax*4,linestyle='solid',colors='g')
     pl.vlines(s2fit[3]/2.,0, halfmax*4,linestyle='solid',colors='m')
@@ -468,7 +503,7 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     pl.figtext(0.65,0.6,'FWHM_Gaussian: '+str(round(gfit[3]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.55,'FWHM_Moffat: '+str(round(mfit[4]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.5,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
-    pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(wfit[1]*scale,3))+ ' arcsec') 
+    pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
     pl.figtext(0.65,0.4,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
     return '---- Done! ----'
    
@@ -479,7 +514,7 @@ if __name__ == "__main__":
     pl.ion()
     dr = '/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/decam--28--49-r-1/'
     starfile='/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/catfile/decam_-27.72186_-48.60000-objects.fit'
-    extension = np.arange(1,63)
+    extension = np.arange(1,10)
     stamp=[]
     for ext in extension:
         print ext
@@ -493,8 +528,9 @@ if __name__ == "__main__":
         xc = pf.getdata(starfile,3*(int(ext)-1)+1).xccd
         yc = pf.getdata(starfile,3*(int(ext)-1)+1).yccd
         rmag = pf.getdata(starfile,3*(int(ext)-1)+1).mag_3
-        ok = (rmag > 16)*(rmag < 17.5)
+        ok = (rmag > 16.5)*(rmag < 17.5)
         xc=xc[ok]
         yc = yc[ok]
         stamp=stamp+getStamp(data=data,xcoord=xc,ycoord=yc,Npix =25)
     fwhm_whisker_plot(stamp)
+    pl.savefig()
