@@ -337,9 +337,9 @@ def wfwhm(img,sigma):
     Mrr = np.sum(rowgrid**2*IWrow)/IWsum
     Mcc = np.sum(colgrid**2*IWcol)/IWsum
     Mrc = np.sum(np.outer(rowgrid,colgrid)*IWmat)/IWsum
-    Cm = np.matrix([[Mcc,Mrc],[Mrc,Mrr]])
-    Cw = np.matrix([[sigma**2,0.],[0.,sigma**2]])
-    Cimg = (Cm.I - Cw.I).I
+    Cm = np.matrix([[Mcc,Mrc],[Mrc,Mrr]]) # cov matrix from measurement
+    Cw = np.matrix([[sigma**2,0.],[0.,sigma**2]])# cov matrix from weight
+    Cimg = (Cm.I - Cw.I).I #cov matrix after subtract weight
     Mcc = Cimg[0,0]
     Mrr = Cimg[1,1]
     Mrc = Cimg[0,1]
