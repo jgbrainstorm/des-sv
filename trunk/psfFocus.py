@@ -10,12 +10,21 @@ try:
     import cPickle as p
     import sklearn.neighbors as nb
     from sklearn.svm import SVR
+    from ImgQuality import *
 except ImportError:
     print "Error: missing one of the libraries (numpy, pyfits, scipy, matplotlib)"
     sys.exit()
 
 
 scale=0.27
+
+def regulate_img(img=None):
+    """
+    trim and normalize the image
+    """
+    #img = (img - img.min())/img.sum()
+    img = img*(img>=0)
+    return img/img.sum()
 
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     """
@@ -157,7 +166,7 @@ def complexMoments(data=None,sigma=None):
     M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
     return M20, M22, M31, M33
 
-def measure_stamp_moments(stamp):
+def measure_stamp_moments(stamp,bkg=None):
     """
     measure the moments of stamp image on one CCD
     return the median moments
@@ -169,7 +178,10 @@ def measure_stamp_moments(stamp):
     M31=np.zeros(Nobj).astype(complex)
     M33=np.zeros(Nobj).astype(complex)
     for i in range(Nobj):
-        M20[i],M22[i],M31[i],M33[i]=complexMoments(data=stamp[i],sigma=sigma)
+        if bkg == None:
+            M20[i],M22[i],M31[i],M33[i]=complexMoments(data=stamp[i],sigma=sigma)
+        else:
+            M20[i],M22[i],M31[i],M33[i]=complexMoments(data=stamp[i]-bkg[i],sigma=sigma)
     return [np.median(M20), np.median(M22), np.median(M31), np.median(M33)]
 
 
@@ -260,6 +272,8 @@ def measure_stamp_coeff(data = None, zernike_max_order=20):
 
 
 def display_moments(data=None):
+    # remove the mean for M31 and M33
+    data = subMeanM3x(data)
     pl.figure(figsize=(12,12))
     pl.subplot(2,2,1)
     phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
@@ -336,8 +350,8 @@ def showZernike(beta=None,betaErr=None,gridsize = 1, max_rad = 1,significance=Fa
     return znk
 
 
-
-def display_zernike(data=None,zernike_max_order=20):
+def display_zernike(data,zernike_max_order=20):
+    
     colnames = ['x','y','M20','M22','M31','M33']
     data=np.array(data)
     pl.figure(figsize=(15,15))
@@ -451,6 +465,16 @@ def KNeighborRegression(trainingObs,trainingParam,Obs,n_neighbors):
     knn = nb.KNeighborsRegressor(algorithm='ball_tree',n_neighbors=n_neighbors)
     knn.fit(trainingObs,trainingParam)
     return knn.predict(Obs)
+
+def remM3xZernike(tdata):
+    """
+    This code remove the 0th zernike coefficient for the M31, M33 from the training and validation data object. The data has 140 columns, from 0 - 59 are the 2nd moments coefficients. 60, 80, 100, 120 are the 0th coefficients for the 3rd moments. We remove them from the data structure.    
+    """
+    idx = np.concatenate((np.arange(0,60),np.arange(61,80),np.arange(81,100),np.arange(101,120),np.arange(121,140)))
+    datanew = tdata[:,idx]
+    return datanew
+
+
   
 def get_hexapod_pos(data=None):
     """
@@ -459,18 +483,36 @@ def get_hexapod_pos(data=None):
     unit for tilt angle is arcsec
     """
     betaAll, betaErrAll, R2adjAll=measure_stamp_coeff(data)
-    Tfile='/home/jghao/research/decamFocus/psf_withseeing/finerGrid_coeff_matrix/zernike_coeff_finerGrid_training.cp'
+    Tfile='/home/jghao/research/decamFocus/psf_withseeing/finerGrid_coeff_matrix/zernike_coeff_finerGrid_all.cp'
     b=p.load(open(Tfile))
     nobs = len(b)
-    tdata=b[:,8:]
-    ttpara=b[:,0:5]
-    tpara=b[:,0:5]
+    tdata=b[:,8:].copy()
+    ttpara=b[:,0:5].copy()
+    tpara=b[:,0:5].copy()
     tpara[:,3] = ttpara[:,3]*np.cos(np.deg2rad(ttpara[:,4]))
     tpara[:,4] = ttpara[:,3]*np.sin(np.deg2rad(ttpara[:,4]))
     vdata = betaAll.flatten()
+    # remove the 0th coeff for 3rd moments
+    tdata = remM3xZernike(tdata)
+    vdata = remM3xZernike(vdata)
     tdata,vdata = standardizeData(tdata,vdata)
     vparaReg=KNeighborRegression(tdata,tpara,vdata,15)
-    return vparaReg[0]
+    xshift = np.round(vparaReg[0][0]*1000,2)
+    yshift = np.round(vparaReg[0][1]*1000,2)
+    zshift = np.round(vparaReg[0][2]*1000,2)
+    xtilt = np.round(vparaReg[0][3],2)
+    ytilt = np.round(vparaReg[0][4],2)
+    print '--- x,y,z are in microns, tilt is in arcsec ---'
+    return xshift,yshift,zshift,xtilt,ytilt
+
+def subMeanM3x(data=None):
+    """
+    this code subtract the mean of the 3rd moments from the data. This is to remove the tracking errors.
+    """
+    datamean = data.mean(axis = 0)
+    data[:,4:6] = data[:,4:6] - datamean[4:6]
+    return data
+
 
 if __name__ == "__main__":
     from psfFocus import *
