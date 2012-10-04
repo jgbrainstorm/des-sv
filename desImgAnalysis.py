@@ -4,15 +4,18 @@
 #------------------------------------------------
 
 import sys, glob
+sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
+sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
 from psfFocus import *
 
 
 if len(sys.argv) == 1:
     print 'syntax: '
-    print 'desImgAnalysis imgname'
+    print 'desImgAnalysis expid'
     print 'The image need to be reduced'
 else:
-    image_name = sys.argv[1]
+    expid = sys.argv[1]
+    img_name = 'DECam_'+expid+'.fits'
     os.system('getstar.py '+image_name)
     catname = img_name[0:-5]+'_star_catalog.fits'
     imghdu = pf.open(image_name)
@@ -23,7 +26,7 @@ else:
     dataSex=[]
     fwhmSex = np.array([])
     whiskerSex = np.array([])
-
+    starFwhm = selectStarFwhm(catname)
     for i in range(1,63):
         print i
         img = imghdu[i].data
@@ -39,8 +42,7 @@ else:
         Mrr = cat.Y2WIN_IMAGE
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
-        ok = (rad > 1.7)*(rad < 2.25)*(mag > -14)*(mag < -12)
-        #ok = selectStar(rad,mag,classStar)
+        ok = np.abs(fwhm_sex - starFwhm) < 0.2
         x = x[ok]
         y = y[ok]
         bkg = bkg[ok]
@@ -71,10 +73,11 @@ else:
     data = np.array(data)
     dataSex = np.array(dataSex)
     display_2nd_moments(dataSex)
-    pl.savefig('moments_sextractor.png')
+    pl.savefig('moments_sextractor_'+expid+'.png')
     pl.close()
     display_moments(data)
-    pl.savefig('moments_measurement.png')
+    pl.savefig('moments_measurement_'+expid+'.png')
     pl.close()
     fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27)
-    pl.savefig('fwhm_whisker.png')
+    pl.savefig('fwhm_whisker_'+expid+'.png')
+    pl.close()
