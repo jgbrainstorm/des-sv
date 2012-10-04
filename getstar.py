@@ -22,7 +22,7 @@ else:
    img_name = sys.argv[1]
    output=img_name[0:-5]+'_star_catalog.fits'
    ckimg=img_name[0:-5]+'check.fits'
-   t=sex(img_name,output,sexdir=sexdir,check_img=ckimg,config="initial.sex")
+   t=sex(img_name,output,check_img=ckimg,config="initial.sex")
 
 print '----done !---'
 
