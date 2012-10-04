@@ -20,6 +20,23 @@ except ImportError:
 
 scale=0.27
 
+
+def findbstr(data=None, hdr=None):
+    """
+    find the bright stars on the image
+    """
+    saturate = hdr['saturate']
+    bsIDX = (data >= 0.3*saturate)* (data <= 0.5*saturate)
+    good=nd.binary_opening(bsIDX,structure=np.ones((3,3)))  
+    objData = data*good
+    seg,nseg=nd.label(good,structure=np.ones((3,3)))  
+    coords=nd.center_of_mass(objData,seg,range(1,nseg+1))
+    xcoord=np.array([x[1] for x in coords])
+    ycoord=np.array([x[0] for x in coords])
+    return xcoord, ycoord
+
+
+
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     """
     Input: CCD image in maxtrix, x, y centroid of stars,the stamp npix
@@ -154,6 +171,7 @@ def complexMoments(data=None,sigma=None):
     Mccc = np.sum(colgrid**3*IWcol)/IWsum
     Mrrc = np.sum(np.outer(rowgrid**2,colgrid)*IWmat)/IWsum
     Mrcc = np.sum(np.outer(rowgrid,colgrid**2)*IWmat)/IWsum
+    print Mrrr, Mccc, Mrrc, Mrcc
     M20 = Mrr + Mcc
     M22 = complex(Mcc - Mrr,2*Mrc)
     M31 = complex(3*Mc - (Mccc+Mrrc)/sigma**2, 3*Mr - (Mrcc + Mrrr)/sigma**2)
@@ -208,7 +226,7 @@ def gaussian2d(x,y,xc,yc,sigmax,sigmay,rho,A,B):
     """
     2D Gaussian profile with a constant
     """
-    res = A*np.exp(-0.5/(1-rho**2)*(x**2/sigmax**2+y**2/sigmay**2-2.*rho*x*y/(sigmax*sigmay)))
+    res = A*np.exp(-0.5/(1-rho**2)*(x**2/sigmax**2+y**2/sigmay**2-2.*rho*x*y/(sigmax*sigmay)))+B
     return res
 
 
@@ -432,7 +450,7 @@ def fwhm_whisker_plot(stampImgList=None):
     whk,fwhm = get_fwhm_whisker_list(stampImgList)
     whk=list(whk.T)
     fwh=list(fwhm.T)
-    pl.figure(figsize=(8,5))
+    pl.figure(figsize=(7,5))
     pl.boxplot(whk)
     pl.hlines(0.2,0,3,linestyle='solid',color='g')
     pl.ylim(0.,.4)
@@ -444,13 +462,38 @@ def fwhm_whisker_plot(stampImgList=None):
     pl.xticks(np.arange(1,6),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2'])
     return '-----done !----'
 
-def dispStamp(stampImg=None,sigma=1.1/scale):
+
+def fwhm_whisker_des_plot(stampImgList=None,whkSex=None,fwhmSex=None):
+    whk,fwhm = get_fwhm_whisker_list(stampImgList)
+    whk=list(whk.T)
+    fwh=list(fwhm.T)
+    fwh.append(fwhmSex)
+    whk.append(whkSex)
+    pl.figure(figsize=(15,10))
+    pl.subplot(2,1,1)
+    pl.boxplot(whk)
+    pl.hlines(0.2,0,4,linestyle='solid',color='g')
+    pl.ylim(0.,.4)
+    pl.grid()
+    pl.xticks(np.arange(1,4),['whisker_Wmoments','whisker_Amoments','whisker_sx'])
+    pl.subplot(2,1,2)
+    pl.boxplot(fwh)
+    pl.ylim(0.4,5)
+    pl.grid()
+    pl.hlines(0.9,0,7,linestyle='solid',color='g')
+    pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
+    return '-----done !----'
+
+
+
+def dispStamp(stampImg=None,sigma=1.08/scale):
     if stampImg.shape[0] != stampImg.shape[1]:
         sys.exit('bad stamp image')
     npix = stampImg.shape[0]
     pl.figure(figsize=(18,6))
     pl.subplot(1,3,1)
     pl.matshow(stampImg,fignum=False)
+    #pl.contour(stampImg,nlevels=20)
     mfit = mfwhm(stampImg)
     gfit = gfwhm(stampImg)
     s2fit = s2fwhm(stampImg)
@@ -461,6 +504,7 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     pl.grid(color='y')
     rowCen,colCen = adaptiveCentroid(data=stampImg,sigma=sigma)
     M20, M22, M31, M33 =complexMoments(stampImg,sigma=sigma)
+    print M20, M22, M31, M33
     e1 = M22.real/M20.real
     e2 = M22.imag/M20.real
     pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
@@ -495,7 +539,7 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     pl.plot(radius,s2profile(radius,s2fit[0],s2fit[1],s2fit[2]),'m-',label='Sech2 Fit')
     pl.legend(loc='best')
     pl.ylim(0,halfmax*4)
-    pl.xlim(0,npix/4.) 
+    pl.xlim(0,npix/2.) 
     pl.xlabel('Radius [pixels]')
     pl.ylabel('Mean counts [ADU]')
     pl.title('Radial profile')
@@ -505,9 +549,25 @@ def dispStamp(stampImg=None,sigma=1.1/scale):
     pl.figtext(0.65,0.5,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
     pl.figtext(0.65,0.4,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.65,0.35,'M20: '+str(round(M20,5))+ ' pix')
+    pl.figtext(0.65,0.3,'M22.real: '+str(round(M22.real,5))+ ' pix')
+    pl.figtext(0.8,0.3,'M22.imag: '+str(round(M22.imag,5))+ ' pix')
+    pl.figtext(0.65,0.25,'M31.real: '+str(round(M31.real,5))+ ' pix')
+    pl.figtext(0.8,0.25,'M31.imag: '+str(round(M31.imag,5))+ ' pix')
+    pl.figtext(0.65,0.2,'M33.real: '+str(round(M33.real,5))+ ' pix')
+    pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix')
     return '---- Done! ----'
    
-
+def dispStampList(stampImgList=None,sigma=1.08/scale):
+    if sigma == None:
+        print 'syntax: dispStampList(stampImgList,sigma)'
+        sys.exit()
+    Nstamp = len(stampImgList)
+    for i in range(Nstamp):
+        t=dispStamp(stampImg=stampImgList[i],sigma=sigma)
+        raw_input('--- hit the enter key to proceed ---')
+        pl.close()
+    return ' ---- Done ! ----'
 
 if __name__ == "__main__":
     from ImgQuality import *
