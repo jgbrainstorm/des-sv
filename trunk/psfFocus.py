@@ -166,13 +166,12 @@ def complexMoments(data=None,sigma=None):
     M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
     return M20, M22, M31, M33
 
-def measure_stamp_moments(stamp,bkg=None):
+def measure_stamp_moments(stamp,bkg=None,sigma=4.):
     """
     measure the moments of stamp image on one CCD
     return the median moments
     """
     Nobj = len(stamp)
-    sigma = 1.08/0.27
     M20=np.zeros(Nobj)
     M22=np.zeros(Nobj).astype(complex)
     M31=np.zeros(Nobj).astype(complex)
@@ -273,8 +272,8 @@ def measure_stamp_coeff(data = None, zernike_max_order=20):
 
 def display_moments(data=None):
     # remove the mean for M31 and M33
-    data = subMeanM3x(data)
-    pl.figure(figsize=(12,12))
+    #data = subMeanM3x(data)
+    pl.figure(figsize=(11,11))
     pl.subplot(2,2,1)
     phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
     x = data[:,0].real
@@ -282,7 +281,8 @@ def display_moments(data=None):
     phi22[x<0] = phi22+np.deg2rad(180)
     u = np.sqrt(np.abs(data[:,3]))*np.cos(phi22)
     v = np.sqrt(np.abs(data[:,3]))*np.sin(phi22)
-    pl.quiver(x,y,u,v,width=0.004,color='r',pivot='middle',headwidth=2)
+    qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -294,7 +294,8 @@ def display_moments(data=None):
     phi31 = np.arctan2(data[:,4].imag,data[:,4].real)
     u = np.sqrt(np.abs(data[:,4]))*np.cos(phi31)
     v = np.sqrt(np.abs(data[:,4]))*np.sin(phi31)
-    pl.quiver(x,y,u,v,width=0.003,color='r',pivot='middle',headwidth=4)
+    qvr=pl.quiver(x,y,u,v,width=0.003,color='r',pivot='middle',headwidth=4)
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -312,7 +313,8 @@ def display_moments(data=None):
     pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
     u = np.sqrt(np.abs(data[:,5]))*np.cos(phi33+np.deg2rad(240))
     v = np.sqrt(np.abs(data[:,5]))*np.sin(phi33+np.deg2rad(240))
-    pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
+    qvr=pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -321,14 +323,50 @@ def display_moments(data=None):
     pl.ylabel('Y [mm]')
     pl.title('M33')
     pl.subplot(2,2,4)
-    pl.quiver(x,y,np.sqrt(data[:,2].real),np.zeros(len(data[:,2].real)),headwidth=2,color='r',width=0.003,pivot='middle')
+    u = np.sqrt(data[:,2].real) - np.sqrt(data[:,2].real).min()
+    v = np.zeros(len(data[:,2].real))
+    qvr = pl.quiver(x,y,u,v,width = 0.008, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(u),str(round(max(u),3))+' pix',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.grid(color='g')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
-    #pl.boxplot(np.sqrt(data[:,2].real)*scale)
     pl.title('median '+r'$\sqrt{M20}$: '+str(round(np.median(scale*np.sqrt(data[:,2].real)),3))+' [arcsec]')
-    return '----done!---'
+    return '---done!--'
+
+def display_2nd_moments(data=None):
+    # remove the mean for M31 and M33
+    #data = subMeanM3x(data)
+    pl.figure(figsize=(11,5.5))
+    pl.subplot(1,2,1)
+    phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    phi22[x<0] = phi22+np.deg2rad(180)
+    u = np.sqrt(np.abs(data[:,3]))*np.cos(phi22)
+    v = np.sqrt(np.abs(data[:,3]))*np.sin(phi22)
+    qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
+    pl.plot(x,y,'b,')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.grid(color='g')
+    pl.xlabel('X [mm]')
+    pl.ylabel('Y [mm]')
+    pl.title('M22')
+    pl.subplot(1,2,2)
+    u = np.sqrt(data[:,2].real) - np.sqrt(data[:,2].real).min()
+    v = np.zeros(len(data[:,2].real))
+    qvr = pl.quiver(x,y,u,v,width = 0.008, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(u),str(round(max(u),3))+' pix',coordinates='data',color='blue')
+    pl.plot(x,y,'b,')
+    pl.grid(color='g')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.title('median '+r'$\sqrt{M20}$: '+str(round(np.median(scale*np.sqrt(data[:,2].real)),3))+' [arcsec]')
+    return '---done!--'
+
+
 
 
 def showZernike(beta=None,betaErr=None,gridsize = 1, max_rad = 1,significance=False):
@@ -493,8 +531,8 @@ def get_hexapod_pos(data=None):
     tpara[:,4] = ttpara[:,3]*np.sin(np.deg2rad(ttpara[:,4]))
     vdata = betaAll.flatten()
     # remove the 0th coeff for 3rd moments
-    tdata = remM3xZernike(tdata)
-    vdata = remM3xZernike(vdata)
+    #tdata = remM3xZernike(tdata)
+    #vdata = remM3xZernike(vdata)
     tdata,vdata = standardizeData(tdata,vdata)
     vparaReg=KNeighborRegression(tdata,tpara,vdata,15)
     xshift = np.round(vparaReg[0][0]*1000,2)
@@ -513,6 +551,19 @@ def subMeanM3x(data=None):
     data[:,4:6] = data[:,4:6] - datamean[4:6]
     return data
 
+def selectStar(rad,mag,classStar=None):
+    """
+    select stars based on the mag and radius relation from sextractor output
+    """
+    idx = np.arange(len(rad))
+    if classStar:
+        ok = (mag < -11)*(mag > -14)*(classStar>0.8)
+    else:
+        ok = (mag < -11)*(mag > -14)
+    idx = idx[ok]
+    med = np.median(rad[idx])
+    ok = abs(rad[idx] - med)<0.5
+    return idx[ok]
 
 if __name__ == "__main__":
     from psfFocus import *
@@ -541,8 +592,8 @@ if __name__ == "__main__":
         ok = (rmag > 16.5)*(rmag < 17.5)*(xc > 100)*(xc<1900)*(yc>200)*(yc<3900)
         xc=xc[ok]
         yc = yc[ok]    
-        stamp=stamp+getStamp(data=img,xcoord=xc,ycoord=yc,Npix =30)
-        moms = measure_stamp_moments(stamp)
+        stamp=stamp+getStamp(data=img,xcoord=xc,ycoord=yc,Npix =40)
+        moms = measure_stamp_moments(stamp,sigma=1.)
         data.append([xccd,yccd]+ list(moms))
     data = np.array(data)
     display_moments(data)
