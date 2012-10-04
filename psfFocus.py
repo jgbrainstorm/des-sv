@@ -551,16 +551,21 @@ def subMeanM3x(data=None):
     data[:,4:6] = data[:,4:6] - datamean[4:6]
     return data
 
-def selectStar(mag,fwhm_sex):
-    """
-    select stars based on the mag and radius relation from sextractor output
-    """
-    idx = np.arange(len(mag))
-    ok = (mag < -11.5)*(mag > -14.5)
-    idx = idx[ok]
-    med = np.median(fwhm_sex[idx])
-    ok = (abs(fwhm_sex[idx] - med)<0.2)*(fwhm_sex[idx] > 0)
-    return idx[ok]
+def selectStarFwhm(catname)
+    ext = [1,2,3,4]
+    fwhm_sex=[] 
+    mag = []
+    for i in ext:
+        cat=pf.getdata(catname,ext)
+        fwhm_sex.append(cat.FWHM_IMAGE)
+        mag.append(cat.MAG_AUTO)
+    fwhm_sex = np.array(fwhm_sex)
+    mag = np.array(mag)
+    ok = (mag < -11.5)*(mag > -14.5)*(fwhm_sex > 0)
+    md = np.median(fwhm_sex[ok])
+    return md
+    
+
 
 if __name__ == "__main__":
     from psfFocus import *
