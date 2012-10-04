@@ -14,7 +14,7 @@ else:
    def sex(image, output, sexdir='/usr/remote/user/sispi/jiangang/sexconfig/', check_img=None,config=None):
       '''Construct a sextractor command and run it.'''
       if sexdir[-1] != '/':  sexdir += '/'
-      com = ["sextractor", image, "-c "+sexdir+config,"-CATALOG_NAME "+output,"-CHECKIMAGE_NAME "+check_img]
+      com = ["sex", image, "-c "+sexdir+config,"-CATALOG_NAME "+output,"-CHECKIMAGE_NAME "+check_img]
       com = string.join(com)
       res = os.system(com)
       return res
