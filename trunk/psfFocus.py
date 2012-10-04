@@ -551,18 +551,15 @@ def subMeanM3x(data=None):
     data[:,4:6] = data[:,4:6] - datamean[4:6]
     return data
 
-def selectStar(rad,mag,classStar=None):
+def selectStar(mag,fwhm_sex):
     """
     select stars based on the mag and radius relation from sextractor output
     """
-    idx = np.arange(len(rad))
-    if classStar:
-        ok = (mag < -11)*(mag > -14)*(classStar>0.8)
-    else:
-        ok = (mag < -11)*(mag > -14)
+    idx = np.arange(len(mag))
+    ok = (mag < -12)*(mag > -14.5)
     idx = idx[ok]
-    med = np.median(rad[idx])
-    ok = abs(rad[idx] - med)<0.5
+    med = np.median(fwhm_sex[idx])
+    ok = abs(fwhm_sex[idx] - med)<0.5
     return idx[ok]
 
 if __name__ == "__main__":
