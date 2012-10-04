@@ -478,7 +478,7 @@ def fwhm_whisker_des_plot(stampImgList=None,whkSex=None,fwhmSex=None):
     pl.xticks(np.arange(1,4),['whisker_Wmoments','whisker_Amoments','whisker_sx'])
     pl.subplot(2,1,2)
     pl.boxplot(fwh)
-    pl.ylim(np.median(fwh[5])-2,np.median(fwh[5])+2)
+    pl.ylim(0,np.median(fwh[5])+2)
     pl.grid()
     pl.hlines(0.9,0,7,linestyle='solid',color='g')
     pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
