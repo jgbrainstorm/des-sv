@@ -556,10 +556,10 @@ def selectStar(mag,fwhm_sex):
     select stars based on the mag and radius relation from sextractor output
     """
     idx = np.arange(len(mag))
-    ok = (mag < -12)*(mag > -14.5)
+    ok = (mag < -11.5)*(mag > -14.5)
     idx = idx[ok]
     med = np.median(fwhm_sex[idx])
-    ok = abs(fwhm_sex[idx] - med)<0.5
+    ok = (abs(fwhm_sex[idx] - med)<0.2)*(fwhm_sex[idx] > 0)
     return idx[ok]
 
 if __name__ == "__main__":
