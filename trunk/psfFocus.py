@@ -180,7 +180,9 @@ def measure_stamp_moments(stamp,bkg=None,sigma=4.):
         if bkg == None:
             M20[i],M22[i],M31[i],M33[i]=complexMoments(data=stamp[i],sigma=sigma)
         else:
-            M20[i],M22[i],M31[i],M33[i]=complexMoments(data=stamp[i]-bkg[i],sigma=sigma)
+            data = stamp[i]-bkg[i]
+            if data.sum > 0.:
+                M20[i],M22[i],M31[i],M33[i]=complexMoments(data=data,sigma=sigma)               
     return [np.median(M20), np.median(M22), np.median(M31), np.median(M33)]
 
 
