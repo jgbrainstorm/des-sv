@@ -477,7 +477,7 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.subplot(2,1,1)
     pl.boxplot(whk)
     pl.hlines(0.2,0,4,linestyle='solid',color='g')
-    pl.ylim(np.median(whk[2])-0.3,np.median(whk[2])+0.3)
+    pl.ylim(np.median(whk[2])-0.3,np.median(whk[2])+0.6)
     pl.grid()
     pl.xticks(np.arange(1,4),['whisker_Wmoments','whisker_Amoments','whisker_sx'])
     pl.subplot(2,1,2)
