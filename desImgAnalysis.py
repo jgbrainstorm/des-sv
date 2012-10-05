@@ -23,6 +23,7 @@ else:
 
     data=[]
     stamplist=[]
+    bkglist=[]
     dataSex=[]
     fwhmSex = np.array([])
     whiskerSex = np.array([])
@@ -61,6 +62,7 @@ else:
         M22 = np.median(M22)
         stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
         stamplist = stamplist+stamp
+        bkglist = bkglist+list(bkg)
         xccd = eval(imghdu[i].header['extname'])[1]
         yccd = eval(imghdu[i].header['extname'])[2]
         moms = measure_stamp_moments(stamp,bkg,4.)

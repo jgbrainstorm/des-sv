@@ -403,7 +403,7 @@ def mfwhm(img=None):
     return alpha,beta,A,B,fwhm_moffat
 
     
-def get_fwhm_whisker(stampImg=None,sigma=1.1/scale):
+def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
     """
     Calcualte the fwhm, whisker using various approach. 
     return the results in arcsec. 
@@ -411,7 +411,8 @@ def get_fwhm_whisker(stampImg=None,sigma=1.1/scale):
             [fwhm_weighted, fwhm_Amoments,fwhm_moffat, fwhm_gauss,fwhm_sech2]
     """
     if stampImg.shape[0] == stampImg.shape[1] and stampImg.shape[1] != 0:
-        stampImg = stampImg - np.min(stampImg) # this renormalize the negative pixel values
+        if bkg != None:
+            stampImg = stampImg - bkg
         npix = stampImg.shape[0]
         mfit = mfwhm(stampImg)
         gfit = gfwhm(stampImg)
@@ -427,7 +428,7 @@ def get_fwhm_whisker(stampImg=None,sigma=1.1/scale):
         whisker = np.array([-999,-999])
     return whisker, fwhm
 
-def get_fwhm_whisker_list(stampImgList=None,sigma=1.1/scale):
+def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     """
     Calcualte the fwhm, whisker using various approach from the list of stamp image.
     return the results in arcsec. 
@@ -439,15 +440,15 @@ def get_fwhm_whisker_list(stampImgList=None,sigma=1.1/scale):
     fwhm=[]
     for i in range(n):
         print i
-        whker,fw = get_fwhm_whisker(stampImgList[i],sigma=sigma)
+        whker,fw = get_fwhm_whisker(stampImgList[i],bgkList[i],sigma=sigma)
         whisker.append(whker)
         fwhm.append(fw)
     whisker = np.array(whisker)
     fwhm = np.array(fwhm)
     return whisker, fwhm
 
-def fwhm_whisker_plot(stampImgList=None,sigma=1.1/scale):
-    whk,fwhm = get_fwhm_whisker_list(stampImgList,sigma=sigma)
+def fwhm_whisker_plot(stampImgList=None,bkgList=None,sigma=1.1/scale):
+    whk,fwhm = get_fwhm_whisker_list(stampImgList,bkgList,sigma=sigma)
     whk=list(whk.T)
     fwh=list(fwhm.T)
     pl.figure(figsize=(7,5))
@@ -463,8 +464,8 @@ def fwhm_whisker_plot(stampImgList=None,sigma=1.1/scale):
     return '-----done !----'
 
 
-def fwhm_whisker_des_plot(stampImgList=None,whkSex=None,fwhmSex=None,sigma=1.1/scale):
-    whk,fwhm = get_fwhm_whisker_list(stampImgList,sigma=sigma)
+def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=None,sigma=1.1/scale):
+    whk,fwhm = get_fwhm_whisker_list(stampImgList,bkgList,sigma=sigma)
     whk=list(whk.T)
     fwh=list(fwhm.T)
     fwh.append(fwhmSex)
@@ -486,9 +487,11 @@ def fwhm_whisker_des_plot(stampImgList=None,whkSex=None,fwhmSex=None,sigma=1.1/s
 
 
 
-def dispStamp(stampImg=None,sigma=1.08/scale):
+def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
     if stampImg.shape[0] != stampImg.shape[1]:
         sys.exit('bad stamp image')
+    if bkg != None:
+        stampImg=stampImg - bkg
     npix = stampImg.shape[0]
     pl.figure(figsize=(18,6))
     pl.subplot(1,3,1)
@@ -558,13 +561,13 @@ def dispStamp(stampImg=None,sigma=1.08/scale):
     pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix')
     return '---- Done! ----'
    
-def dispStampList(stampImgList=None,sigma=1.08/scale):
+def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):
     if sigma == None:
         print 'syntax: dispStampList(stampImgList,sigma)'
         sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
-        t=dispStamp(stampImg=stampImgList[i],sigma=sigma)
+        t=dispStamp(stampImg=stampImgList[i],bkgList[i],sigma=sigma)
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
