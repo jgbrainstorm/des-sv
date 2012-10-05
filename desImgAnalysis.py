@@ -15,8 +15,8 @@ if len(sys.argv) == 1:
     print 'The image need to be reduced'
 else:
     expid = sys.argv[1]
-    img_name = 'DECam_'+expid+'.fits'
-    os.system('getstar.py '+image_name)
+    img_name = 'DECam_'+expid+'_reduced.fits'
+    os.system('getstar.py '+img_name)
     catname = img_name[0:-5]+'_star_catalog.fits'
     imghdu = pf.open(image_name)
     cathdu = pf.open(catname)
