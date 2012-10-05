@@ -12,8 +12,8 @@ def hexapodAdj(beta):
     """
     This codes give the suggested hexapod adjustment relative to the position the image is taken. The input is the zernike coefficients correpsonding to M20
     """
-    knn = p.load(open('finerGridKnnObj.cp','r'))
-    tmean,tstd = p.load(open('finerGridStdConst.cp','r'))
+    knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
+    tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
     beta = (bata - tmean)/tstd
     hexapodParameter = knn.predict(beta) #this gives the current optics status
     hexapodParameter[0] = hexapodParameter[0]*1000.
