@@ -44,34 +44,33 @@ else:
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
         ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12)*(mag>-14)
-        x = x[ok]
-        y = y[ok]
-        bkg = bkg[ok]
-        Mrr = Mrr[ok]
-        Mcc = Mcc[ok]
-        Mrc = Mrc[ok]
-        Nobj = len(Mrr)
-        M20=np.zeros(Nobj)
-        M22=np.zeros(Nobj).astype(complex)
-        for k in range(Nobj):
-            M20[k] = Mrr[k] + Mcc[k]
-            M22[k] = np.complex(Mcc[k] - Mrr[k],2*Mrc[k])
-        whisker_sex = np.sqrt(np.abs(M22))
-        fwhm_sex = fwhm_sex[ok]
-        M20 = np.median(M20)
-        M22 = np.median(M22)
-        stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
-        stamplist = stamplist+stamp
-        bkglist = bkglist+list(bkg)
-        xccd = eval(imghdu[i].header['extname'])[1]
-        yccd = eval(imghdu[i].header['extname'])[2]
-        moms = measure_stamp_moments(stamp,bkg,4.)
-        data.append([xccd,yccd]+ list(moms))
-        dataSex.append([xccd,yccd,M20,M22])
-        fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
-        whiskerSex = np.concatenate((whiskerSex,whisker_sex))
-
-
+        if ok.any():
+            bkg = bkg[ok]
+            Mrr = Mrr[ok]
+            Mcc = Mcc[ok]
+            Mrc = Mrc[ok]
+            Nobj = len(Mrr)
+            M20=np.zeros(Nobj)
+            M22=np.zeros(Nobj).astype(complex)
+            for k in range(Nobj):
+                M20[k] = Mrr[k] + Mcc[k]
+                M22[k] = np.complex(Mcc[k] - Mrr[k],2*Mrc[k])
+            whisker_sex = np.sqrt(np.abs(M22))
+            fwhm_sex = fwhm_sex[ok]
+            M20 = np.median(M20)
+            M22 = np.median(M22)
+            stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
+            stamplist = stamplist+stamp
+            bkglist = bkglist+list(bkg)
+            xccd = eval(imghdu[i].header['extname'])[1]
+            yccd = eval(imghdu[i].header['extname'])[2]
+            moms = measure_stamp_moments(stamp,bkg,4.)
+            data.append([xccd,yccd]+ list(moms))
+            dataSex.append([xccd,yccd,M20,M22])
+            fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
+            whiskerSex = np.concatenate((whiskerSex,whisker_sex))
+        else:
+            continue
     data = np.array(data)
     dataSex = np.array(dataSex)
     display_2nd_moments(dataSex)
