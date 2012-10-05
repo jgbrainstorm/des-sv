@@ -553,15 +553,12 @@ def subMeanM3x(data=None):
 
 def selectStarFwhm(catname):
     ext = [1,2,3,4]
-    fwhm_sex=[] 
-    mag = []
+    fwhm_sex=np.zeros(0)
+    mag = np.zeros(0)
     for i in ext:
         cat=pf.getdata(catname,i)
-        fwhm_sex.append(cat.FWHM_IMAGE)
-        mag.append(cat.MAG_AUTO)
-    fwhm_sex = np.array(fwhm_sex)
-    mag = np.array(mag)
-    ok = (mag < -11.5)*(mag > -14.5)*(fwhm_sex > 0)
+        fwhm_sex=np.concatenate((fwhm_sex,cat.FWHM_IMAGE))
+        mag = np.concatenate((mag,cat.MAG_AUTO))
     md = np.median(fwhm_sex[ok])
     return md
     
