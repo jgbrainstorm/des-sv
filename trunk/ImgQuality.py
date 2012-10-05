@@ -441,8 +441,11 @@ def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     for i in range(n):
         print i
         whker,fw = get_fwhm_whisker(stampImgList[i],bgkList[i],sigma=sigma)
-        whisker.append(whker)
-        fwhm.append(fw)
+        if len(whker[whker>1])>0 or len(fw[fw=-999])>0:
+            continue
+        else:
+            whisker.append(whker)
+            fwhm.append(fw)
     whisker = np.array(whisker)
     fwhm = np.array(fwhm)
     return whisker, fwhm
@@ -567,7 +570,7 @@ def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):
         sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
-        t=dispStamp(stampImg=stampImgList[i],bkgList[i],sigma=sigma)
+        t=dispStamp(stampImg=stampImgList[i],bkg=bkgList[i],sigma=sigma)
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
