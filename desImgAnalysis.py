@@ -42,7 +42,7 @@ else:
         Mrr = cat.Y2WIN_IMAGE
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
-        ok = np.abs(fwhm_sex - starFwhm) < 0.2
+        ok = np.abs(fwhm_sex - starFwhm) < 0.3
         x = x[ok]
         y = y[ok]
         bkg = bkg[ok]
