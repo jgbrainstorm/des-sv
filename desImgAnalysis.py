@@ -6,6 +6,8 @@
 import sys, glob
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
+sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
+
 from psfFocus import *
 
 def hexapodAdj(beta):

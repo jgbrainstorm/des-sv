@@ -1,9 +1,14 @@
+import sys
+sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
+sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
+sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
+
+
 try:
     import numpy as np
     import pyfits as pf
     import scipy.ndimage as nd
     import pylab as pl
-    import sys
     from scipy.optimize import leastsq
     from DECamCCD_def import *
     from scipy.misc import factorial as fac
