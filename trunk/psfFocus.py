@@ -556,7 +556,7 @@ def selectStarFwhm(catname):
     fwhm_sex=[] 
     mag = []
     for i in ext:
-        cat=pf.getdata(catname,ext)
+        cat=pf.getdata(catname,i)
         fwhm_sex.append(cat.FWHM_IMAGE)
         mag.append(cat.MAG_AUTO)
     fwhm_sex = np.array(fwhm_sex)
