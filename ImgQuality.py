@@ -440,7 +440,7 @@ def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     fwhm=[]
     for i in range(n):
         print i
-        whker,fw = get_fwhm_whisker(stampImgList[i],bgkList[i],sigma=sigma)
+        whker,fw = get_fwhm_whisker(stampImgList[i],bkgList[i],sigma=sigma)
         if len(whker[whker>1])>0 or len(fw[fw==-999])>0:
             continue
         else:
