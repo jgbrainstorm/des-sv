@@ -27,7 +27,7 @@ else:
     dataSex=[]
     fwhmSex = np.array([])
     whiskerSex = np.array([])
-    starFwhm = selectStarFwhm(catname)
+    #starFwhm = selectStarFwhm(catname)
     for i in range(1,63):
         print i
         img = imghdu[i].data
@@ -42,6 +42,7 @@ else:
         Mrr = cat.Y2WIN_IMAGE
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
+        starFwhm = selectStarFwhm(mag,fwhm_sex)
         ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12)*(mag>-14)
         x = x[ok]
         y = y[ok]

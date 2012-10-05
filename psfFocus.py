@@ -565,7 +565,11 @@ def selectStarFwhm(catname):
     md = np.median(fwhm_sex[ok])
     return md
     
-
+def selectStar(mag,fwhm_sex):
+    ok = (mag > -15)*(mag<-13)*(fwhm_sex > 0)*(fwhm_sex < 20.)
+    md = np.median(fwhm_sex[ok])
+    return md
+   
 
 if __name__ == "__main__":
     from psfFocus import *
