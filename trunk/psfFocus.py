@@ -559,7 +559,7 @@ def selectStarFwhm(catname):
         cat=pf.getdata(catname,i)
         fwhm_sex=np.concatenate((fwhm_sex,cat.FWHM_IMAGE))
         mag = np.concatenate((mag,cat.MAG_AUTO))
-    ok = (mag > -14)*(mag<-11.5)*(fwhm_sex > 0)*(fwhm_sex < 8.)
+    ok = (mag > -14)*(mag<-12)*(fwhm_sex > 0)*(fwhm_sex < 8.)
     md = np.median(fwhm_sex[ok])
     return md
     

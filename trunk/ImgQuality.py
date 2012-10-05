@@ -427,7 +427,7 @@ def get_fwhm_whisker(stampImg=None,sigma=1.1/scale):
         whisker = np.array([-999,-999])
     return whisker, fwhm
 
-def get_fwhm_whisker_list(stampImgList=None):
+def get_fwhm_whisker_list(stampImgList=None,sigma=1.1/scale):
     """
     Calcualte the fwhm, whisker using various approach from the list of stamp image.
     return the results in arcsec. 
@@ -439,15 +439,15 @@ def get_fwhm_whisker_list(stampImgList=None):
     fwhm=[]
     for i in range(n):
         print i
-        whker,fw = get_fwhm_whisker(stampImgList[i])
+        whker,fw = get_fwhm_whisker(stampImgList[i],sigma=sigma)
         whisker.append(whker)
         fwhm.append(fw)
     whisker = np.array(whisker)
     fwhm = np.array(fwhm)
     return whisker, fwhm
 
-def fwhm_whisker_plot(stampImgList=None):
-    whk,fwhm = get_fwhm_whisker_list(stampImgList)
+def fwhm_whisker_plot(stampImgList=None,sigma=1.1/scale):
+    whk,fwhm = get_fwhm_whisker_list(stampImgList,sigma=sigma)
     whk=list(whk.T)
     fwh=list(fwhm.T)
     pl.figure(figsize=(7,5))
@@ -463,8 +463,8 @@ def fwhm_whisker_plot(stampImgList=None):
     return '-----done !----'
 
 
-def fwhm_whisker_des_plot(stampImgList=None,whkSex=None,fwhmSex=None):
-    whk,fwhm = get_fwhm_whisker_list(stampImgList)
+def fwhm_whisker_des_plot(stampImgList=None,whkSex=None,fwhmSex=None,sigma=1.1/scale):
+    whk,fwhm = get_fwhm_whisker_list(stampImgList,sigma=sigma)
     whk=list(whk.T)
     fwh=list(fwhm.T)
     fwh.append(fwhmSex)
