@@ -551,7 +551,7 @@ def subMeanM3x(data=None):
     data[:,4:6] = data[:,4:6] - datamean[4:6]
     return data
 
-def selectStarFwhm(catname)
+def selectStarFwhm(catname):
     ext = [1,2,3,4]
     fwhm_sex=[] 
     mag = []
