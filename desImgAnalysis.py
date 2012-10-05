@@ -8,6 +8,18 @@ sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
 from psfFocus import *
 
+def hexapodAdj(beta):
+    """
+    This codes give the suggested hexapod adjustment relative to the position the image is taken. The input is the zernike coefficients correpsonding to M20
+    """
+    knn = p.load(open('finerGridKnnObj.cp','r'))
+    tmean,tstd = p.load(open('finerGridStdConst.cp','r'))
+    beta = (bata - tmean)/tstd
+    hexapodParameter = knn.predict(beta) #this gives the current optics status
+    hexapodParameter[0] = hexapodParameter[0]*1000.
+    hexapodParameter[1] = hexapodParameter[1]*1000.
+    hexapodParameter[2] = hexapodParameter[2]*1000.
+    return hexapodParameter*(-1)
 
 if len(sys.argv) == 1:
     print 'syntax: '
@@ -82,3 +94,16 @@ else:
     fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
+
+    #---the hexapod adjustment ---
+    beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
+    hexHao = hexapodAdj(beta)
+    betaSex,betaErrSex,R2_adjSex = zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)
+    hexSex = hexapodAdj(betaSex)
+    print '--------the suggested relative hexapod adjustment -----'
+    print '        ------based on moments from Jiangang measurement --------'
+    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    print hexHao
+    print '        ------based on moments from sextractor --------'
+    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    print hexSex
