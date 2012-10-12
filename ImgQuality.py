@@ -178,6 +178,37 @@ def complexMoments(data=None,sigma=None):
     M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
     return M20, M22, M31, M33
 
+def AcomplexMoments(img,sigma=1.1/scale):
+    """
+    calculate M20, M22 using the adaptive moments.
+    x is col, y is row
+    sigmax -> sigmac, sigmay -> sigmar
+    """
+    npix = img.shape[0]
+    rowCen,colCen = adaptiveCentroid(img,sigma)
+    row,col = np.mgrid[0:npix,0:npix]
+    row = row - rowCen
+    col = col - colCen
+    A0,sigmac0 = moments(img)
+    sigmar0 = sigmac0
+    rho0 = 0.
+    B0 = 0.
+    p0=np.array([sigmac0,sigmar0,rho0,A0, B0])
+    def residualg2d(p,x,y,xc,yc,I):
+        sigmax,sigmay,rho,A,B = p
+        Ierr = np.sqrt(abs(I))+0.00001 # to avoid those = 0, add a small number 
+        res = (gaussian2d(x,y,xc,yc,sigmax,sigmay,rho,A,B) - I)/Ierr
+        return res.flatten()
+    p = leastsq(residualg2d,p0,args=(col,row,colCen,rowCen,img))[0]
+    sigmac,sigmar,rho,A,B = p
+    Mcc = sigmac**2
+    Mrr = sigmar**2
+    Mrc = rho**2*Mcc*Mrr
+    M20 = Mrr + Mcc
+    M22 = complex(Mcc - Mrr,2*Mrc)
+    return M20, M22
+
+
 
 def rowcol2XY(row,col,CCD):
     """
