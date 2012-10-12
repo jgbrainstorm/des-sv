@@ -10,12 +10,17 @@ sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
 
 from psfFocus import *
 
-def hexapodAdj(beta):
+def hexapodAdj(beta,removeMean=True):
     """
     This codes give the suggested hexapod adjustment relative to the position the image is taken. The input is the zernike coefficients correpsonding to M20
     """
-    knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
-    tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
+    if removeMean == True:
+        knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj_remMean.cp','r'))
+        tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst_remMean.cp','r'))
+        beta = beta[:,1:]
+    else:
+        knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
+        tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
     beta = (bata - tmean)/tstd
     hexapodParameter = knn.predict(beta) #this gives the current optics status
     hexapodParameter[0] = hexapodParameter[0]*1000.
@@ -30,8 +35,9 @@ if len(sys.argv) == 1:
 else:
     expid = sys.argv[1]
     img_name = 'DECam_'+expid+'_reduced.fits'
-    os.system('getstar.py '+img_name)
     catname = img_name[0:-5]+'_star_catalog.fits'
+    if not os.path.isfile(catname):
+        os.system('getstar.py '+img_name)
     imghdu = pf.open(image_name)
     cathdu = pf.open(catname)
 
