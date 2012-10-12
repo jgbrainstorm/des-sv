@@ -171,7 +171,7 @@ def complexMoments(data=None,sigma=None):
     Mccc = np.sum(colgrid**3*IWcol)/IWsum
     Mrrc = np.sum(np.outer(rowgrid**2,colgrid)*IWmat)/IWsum
     Mrcc = np.sum(np.outer(rowgrid,colgrid**2)*IWmat)/IWsum
-    print Mrrr, Mccc, Mrrc, Mrcc
+    #print Mrrr, Mccc, Mrrc, Mrcc
     M20 = Mrr + Mcc
     M22 = complex(Mcc - Mrr,2*Mrc)
     M31 = complex(3*Mc - (Mccc+Mrrc)/sigma**2, 3*Mr - (Mrcc + Mrrr)/sigma**2)
