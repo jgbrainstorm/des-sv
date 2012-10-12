@@ -92,86 +92,9 @@ def wr(x=None,y=None,xcen=None,ycen=None,sigma=None):
     res=np.exp(-((x-xcen)**2+(y-ycen)**2)/(2.*sigma**2))/(2.*np.pi*sigma**2) 
     return res
 
-def adaptiveCentroid(data=None,sigma=None):
-    """
-    calculate the centroid using the adaptive approach
-    """
-    nrow,ncol=data.shape
-    Isum = data.sum()
-    Icol = data.sum(axis=0) # sum over all rows
-    Irow = data.sum(axis=1) # sum over all cols
-    colgrid = np.arange(ncol)
-    rowgrid = np.arange(nrow)
-    rowmean=np.sum(rowgrid*Irow)/Isum
-    colmean=np.sum(colgrid*Icol)/Isum
-    ROW,COL=np.indices((nrow,ncol))
-    maxItr = 50
-    EP = 0.0001
-    for i in range(maxItr):
-        wrmat = wr(ROW,COL,rowmean,colmean,sigma)
-        IWmat = data*wrmat
-        IWcol = IWmat.sum(axis=0)
-        IWrow = IWmat.sum(axis=1)
-        drowmean = np.sum((rowgrid-rowmean)*IWrow)/np.sum(IWrow)
-        dcolmean = np.sum((colgrid-colmean)*IWcol)/np.sum(IWcol)
-        rowmean = rowmean+2.*drowmean
-        colmean = colmean+2.*dcolmean
-        if drowmean**2+dcolmean**2 <= EP:
-            break
 
-    return rowmean,colmean
 
- 
-def complexMoments(data=None,sigma=None):
-    """
-    This one calcualte the 3 2nd moments and 4 thrid moments with the Gaussian weights.
-    col : x direction
-    row : y direction
-    the centroid is using the adpative centroid.
-    sigma is the stand deviation of the measurement kernel in pixel
-    The output is in pixel coordinate
-    """
-    nrow,ncol=data.shape
-    Isum = data.sum()
-    Icol = data.sum(axis=0) # sum over all rows
-    Irow = data.sum(axis=1) # sum over all cols
-    colgrid = np.arange(ncol)
-    rowgrid = np.arange(nrow)
-    rowmean=np.sum(rowgrid*Irow)/Isum
-    colmean=np.sum(colgrid*Icol)/Isum
-    ROW,COL=np.indices((nrow,ncol))
-    maxItr = 50
-    EP = 0.0001
-    for i in range(maxItr):
-        wrmat = wr(ROW,COL,rowmean,colmean,sigma)
-        IWmat = data*wrmat
-        IWcol = IWmat.sum(axis=0)
-        IWrow = IWmat.sum(axis=1)
-        IWsum = IWmat.sum()
-        drowmean = np.sum((rowgrid-rowmean)*IWrow)/IWsum
-        dcolmean = np.sum((colgrid-colmean)*IWcol)/IWsum
-        rowmean = rowmean+2.*drowmean
-        colmean = colmean+2.*dcolmean
-        if drowmean**2+dcolmean**2 <= EP:
-            break
-    rowgrid = rowgrid - rowmean # centered
-    colgrid = colgrid - colmean
-    Mr = np.sum(rowgrid*IWrow)/IWsum
-    Mc = np.sum(colgrid*IWcol)/IWsum
-    Mrr = np.sum(rowgrid**2*IWrow)/IWsum
-    Mcc = np.sum(colgrid**2*IWcol)/IWsum
-    Mrc = np.sum(np.outer(rowgrid,colgrid)*IWmat)/IWsum
-    Mrrr = np.sum(rowgrid**3*IWrow)/IWsum
-    Mccc = np.sum(colgrid**3*IWcol)/IWsum
-    Mrrc = np.sum(np.outer(rowgrid**2,colgrid)*IWmat)/IWsum
-    Mrcc = np.sum(np.outer(rowgrid,colgrid**2)*IWmat)/IWsum
-    M20 = Mrr + Mcc
-    M22 = complex(Mcc - Mrr,2*Mrc)
-    M31 = complex(3*Mc - (Mccc+Mrrc)/sigma**2, 3*Mr - (Mrcc + Mrrr)/sigma**2)
-    M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
-    return M20, M22, M31, M33
-
-def measure_stamp_moments(stamp,bkg=None,sigma=4.):
+def measure_stamp_moments(stamp,bkg=None,sigma=4.,adaptive=False):
     """
     measure the moments of stamp image on one CCD
     return the median moments
@@ -187,7 +110,10 @@ def measure_stamp_moments(stamp,bkg=None,sigma=4.):
         else:
             data = stamp[i]-bkg[i]
             if data.sum > 0.:
-                M20[i],M22[i],M31[i],M33[i]=complexMoments(data=data,sigma=sigma)               
+                if adaptive == False:
+                    M20[i],M22[i],M31[i],M33[i]=complexMoments(data=data,sigma=sigma)               
+                else:
+                    M20[i],M22[i] = AcomplexMoments(data=data,sigma = sigma)
     return [np.median(M20), np.median(M22), np.median(M31), np.median(M33)]
 
 

@@ -26,7 +26,7 @@ def hexapodAdj(beta):
 if len(sys.argv) == 1:
     print 'syntax: '
     print 'desImgAnalysis expid'
-    print 'The image need to be reduced'
+    print 'The image need to be reduced (bias subtraction, flat fielding'
 else:
     expid = sys.argv[1]
     img_name = 'DECam_'+expid+'_reduced.fits'
@@ -39,8 +39,12 @@ else:
     stamplist=[]
     bkglist=[]
     dataSex=[]
+    dataAmom=[]  # for the adaptive moments, only M20 and M22
     fwhmSex = np.array([])
     whiskerSex = np.array([])
+    magall = []
+    radall = []
+    okall = []
     #starFwhm = selectStarFwhm(catname)
     for i in range(1,63):
         print i
@@ -58,6 +62,9 @@ else:
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
         ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12)*(mag>-14)
+        magall.append(mag)
+        radall.append(rad)
+        okall.append(ok)
         if ok.any():
             bkg = bkg[ok]
             Mrr = Mrr[ok]
@@ -79,7 +86,9 @@ else:
             xccd = eval(imghdu[i].header['extname'])[1]
             yccd = eval(imghdu[i].header['extname'])[2]
             moms = measure_stamp_moments(stamp,bkg,4.)
+            momsA = measure_stamp_moments(stamp,bkg,4.,adaptive=True)
             data.append([xccd,yccd]+ list(moms))
+            dataAmom.append([xccd,yccd]+ list(momsA))
             dataSex.append([xccd,yccd,M20,M22])
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
             whiskerSex = np.concatenate((whiskerSex,whisker_sex))
@@ -87,8 +96,15 @@ else:
             continue
     data = np.array(data)
     dataSex = np.array(dataSex)
+    dataAmom = np.array(dataAmom)
+    magall = np.array(magall)
+    radall = np.array(radall)
+    okall = np.array(okall)
     display_2nd_moments(dataSex)
     pl.savefig('moments_sextractor_'+expid+'.png')
+    pl.close()
+    display_2nd_moments(dataAmom)
+    pl.savefig('moments_adaptive_'+expid+'.png')
     pl.close()
     display_moments(data)
     pl.savefig('moments_measurement_'+expid+'.png')
@@ -96,16 +112,30 @@ else:
     fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
+    pl.plot(magall,radall,'b,')
+    pl.plot(magall[ok],radall[ok],'r,')
+    pl.ylim(0,10)
+    pl.savefig('mag_radius_'+expid+'.png')
+    pl.close()
+    
 
     #---the hexapod adjustment ---
     beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
     hexHao = hexapodAdj(beta)
     betaSex,betaErrSex,R2_adjSex = zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)
     hexSex = hexapodAdj(betaSex)
+    betaA,betaErrA,R2_adjA = zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)
+    hexA = hexapodAdj(betaA)
+
     print '--------the suggested relative hexapod adjustment -----'
-    print '        ------based on moments from Jiangang measurement --------'
+    print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexHao
+    print '        ------based on Adaptive moments  --------'
+    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    print hexA
     print '        ------based on moments from sextractor --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexSex
+
+    
