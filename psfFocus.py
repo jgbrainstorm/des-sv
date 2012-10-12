@@ -256,13 +256,14 @@ def display_moments(data=None):
     pl.ylabel('Y [mm] (NORTH)')
     pl.title('M33')
     pl.subplot(2,2,4)
-    uo = np.sqrt(data[:,2].real) - np.median(np.sqrt(data[:,2].real))
+    m20med = np.median(np.sqrt(data[:,2].real))
+    uo = np.sqrt(data[:,2].real) - m20med
     idxl = uo < 0
     u = np.abs(uo)
     v = np.zeros(len(data[:,2].real))
     qvr = pl.quiver(x,y,u,v,width = 0.008, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
     qvr = pl.quiver(x[idxl],y[idxl],u[idxl],v[idxl],width = 0.008, color='b',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
-    qk = pl.quiverkey(qvr, -150,-240,np.median(uo),str(round(np.median(uo),3))+' pix',coordinates='data',color='green')
+    qk = pl.quiverkey(qvr, -150,-240,m20med,str(round(m20med,3))+' pix',coordinates='data',color='green')
     pl.plot(x,y,'y,')
     pl.grid(color='g')
     pl.xlim(-250,250)
@@ -293,13 +294,14 @@ def display_2nd_moments(data=None):
     pl.ylabel('Y [mm] (NORTH)')
     pl.title('M22')
     pl.subplot(1,2,2)
-    uo = np.sqrt(data[:,2].real) - np.median(np.sqrt(data[:,2].real))
+    m20med = np.median(np.sqrt(data[:,2].real))
+    uo = np.sqrt(data[:,2].real) - m20med
     idxl = uo < 0
     u = np.abs(uo)
     v = np.zeros(len(data[:,2].real))
     qvr = pl.quiver(x,y,u,v,width = 0.008, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
     qvr = pl.quiver(x[idxl],y[idxl],u[idxl],v[idxl],width = 0.008, color='b',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
-    qk = pl.quiverkey(qvr, -150,-240,np.median(uo),str(round(np.median(uo),3))+' pix',coordinates='data',color='green')
+    qk = pl.quiverkey(qvr, -150,-240,m20med,str(round(m20med,3))+' pix',coordinates='data',color='green')
     pl.plot(x,y,'y,')
     pl.grid(color='g')
     pl.xlim(-250,250)
