@@ -17,12 +17,12 @@ def hexapodAdj(beta,removeMean=True):
     if removeMean == True:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj_remMean.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst_remMean.cp','r'))
-        beta = beta[:,1:]
+        beta = beta[1:]
     else:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
     beta = (bata - tmean)/tstd
-    hexapodParameter = knn.predict(beta) #this gives the current optics status
+    hexapodParameter = knn.predict(beta)[0] #this gives the current optics status
     hexapodParameter[0] = hexapodParameter[0]*1000.
     hexapodParameter[1] = hexapodParameter[1]*1000.
     hexapodParameter[2] = hexapodParameter[2]*1000.
@@ -38,7 +38,7 @@ else:
     catname = img_name[0:-5]+'_star_catalog.fits'
     if not os.path.isfile(catname):
         os.system('getstar.py '+img_name)
-    imghdu = pf.open(image_name)
+    imghdu = pf.open(img_name)
     cathdu = pf.open(catname)
 
     data=[]
