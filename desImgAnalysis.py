@@ -21,7 +21,7 @@ def hexapodAdj(beta,removeMean=True):
     else:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
-    beta = (bata - tmean)/tstd
+    beta = (beta - tmean)/tstd
     hexapodParameter = knn.predict(beta)[0] #this gives the current optics status
     hexapodParameter[0] = hexapodParameter[0]*1000.
     hexapodParameter[1] = hexapodParameter[1]*1000.
