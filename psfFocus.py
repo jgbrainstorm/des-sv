@@ -113,7 +113,7 @@ def measure_stamp_moments(stamp,bkg=None,sigma=4.,adaptive=False):
                 if adaptive == False:
                     M20[i],M22[i],M31[i],M33[i]=complexMoments(data=data,sigma=sigma)               
                 else:
-                    M20[i],M22[i] = AcomplexMoments(data=data,sigma = sigma)
+                    M20[i],M22[i] = AcomplexMoments(img=data,sigma = sigma)
     return [np.median(M20), np.median(M22), np.median(M31), np.median(M33)]
 
 
@@ -204,8 +204,8 @@ def measure_stamp_coeff(data = None, zernike_max_order=20):
 
 
 def display_moments(data=None):
-    # remove the mean for M31 and M33
-    #data = subMeanM3x(data)
+    # remove the mean for all moments
+    data = subMeanAll(data)
     pl.figure(figsize=(11,11))
     pl.subplot(2,2,1)
     phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
@@ -268,8 +268,8 @@ def display_moments(data=None):
     return '---done!--'
 
 def display_2nd_moments(data=None):
-    # remove the mean for M31 and M33
-    #data = subMeanM3x(data)
+    # remove the mean for all moments
+    data = subMeanAll(data)
     pl.figure(figsize=(11,5.5))
     pl.subplot(1,2,1)
     phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
@@ -482,6 +482,14 @@ def subMeanM3x(data=None):
     """
     datamean = data.mean(axis = 0)
     data[:,4:6] = data[:,4:6] - datamean[4:6]
+    return data
+
+def subMeanAll(data=None):
+    """
+    this subtract the mean of all moments from the data
+    """
+    datamean = data.mean(axis = 0)
+    data[:,2:] = data[:,2:] - datamean[2:]
     return data
 
 def selectStarFwhm(catname):
