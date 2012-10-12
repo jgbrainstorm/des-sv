@@ -486,10 +486,10 @@ def subMeanM3x(data=None):
 
 def subMeanAll(data=None):
     """
-    this subtract the mean of all moments from the data
+    this subtract the mean of all moments except M20 from the data
     """
     datamean = data.mean(axis = 0)
-    data[:,2:] = data[:,2:] - datamean[2:]
+    data[:,2:] = data[:,3:] - datamean[3:]
     return data
 
 def selectStarFwhm(catname):
