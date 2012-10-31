@@ -21,7 +21,7 @@ def hexapodAdj(beta,removeMean=True):
     else:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
-    beta = (beta - tmean)/tstd
+        beta = (beta - tmean)/tstd
     hexapodParameter = knn.predict(beta)[0] #this gives the current optics status
     hexapodParameter[0] = hexapodParameter[0]*1000.
     hexapodParameter[1] = hexapodParameter[1]*1000.
@@ -40,7 +40,7 @@ else:
         os.system('getstar.py '+img_name)
     imghdu = pf.open(img_name)
     cathdu = pf.open(catname)
-
+    dimmfwhm = pf.getheader('img_name',0)['dimmsee']
     data=[]
     stamplist=[]
     bkglist=[]
@@ -115,7 +115,9 @@ else:
     display_moments(data)
     pl.savefig('moments_measurement_'+expid+'.png')
     pl.close()
-    fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27)
+    kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
+    fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex,fwhmSex=fwhmSex,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
+    #fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27,dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
     pl.plot(magall,radall,'b,')
