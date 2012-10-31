@@ -42,7 +42,7 @@ xshift,yshift,zshift,thetax,thetay = get_hexapod_pos(data)
 phi = np.rad2deg(np.arctan2(thetay,thetax))
 theta = np.sqrt(thetax**2+thetay**2)
 
-moments_display(Nstar=1,npix = npix,x=xshift*0.001,y=yshift*0.001,z=zshift*0.001,theta=theta,phi=phi)
+moments_display_new(Nstar=1,npix = npix,x=xshift*0.001,y=yshift*0.001,z=zshift*0.001,theta=theta,phi=phi)
 fwhm_whisker_plot(stamplist)
 
 #---on new star catalog. 

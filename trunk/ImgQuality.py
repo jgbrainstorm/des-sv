@@ -498,7 +498,7 @@ def fwhm_whisker_plot(stampImgList=None,bkgList=None,sigma=1.1/scale):
     return '-----done !----'
 
 
-def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=None,sigma=1.1/scale):
+def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=None,sigma=1.1/scale,dimmfwhm=None):
     whk,fwhm = get_fwhm_whisker_list(stampImgList,bkgList,sigma=sigma)
     whk=list(whk.T)
     fwh=list(fwhm.T)
@@ -511,6 +511,8 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.ylim(np.median(whk[2])-0.3,np.median(whk[2])+0.6)
     pl.grid()
     pl.xticks(np.arange(1,4),['whisker_Wmoments','whisker_Amoments','whisker_sx'])
+    if dimmfwhm != None:
+        pl.title('DIMM Seeing FWHM: '+str(dimmfwhm) +'(arcsec)    sqrt(DIMM fwhm^2 + 0.55^2): '+str(round(np.sqrt(dimmfwhm**2 + 0.55**2)),3))
     pl.subplot(2,1,2)
     pl.boxplot(fwh)
     pl.ylim(0,np.median(fwh[5])+2)
@@ -606,6 +608,62 @@ def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):
         pl.close()
     return ' ---- Done ! ----'
 
+def diagDC6B(ext=None,sigma=2.):
+    dr = '/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/decam--28--49-r-1/'
+    starfile='/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/catfile/decam_-27.72186_-48.60000-objects.fit'
+    extension = np.arange(1,10)
+    stamp=[]
+    if ext < 10:
+        ext = '0'+str(ext)
+    else:
+        ext = str(ext)
+    imgname= 'decam--28--49-r-1_'+ext+'.fits.fz'
+    bkgname = 'decam--28--49-r-1_'+ext+'_bkg.fits.fz'
+    data = pf.getdata(dr+imgname) - pf.getdata(dr+bkgname)
+    xc = pf.getdata(starfile,3*(int(ext)-1)+1).xccd
+    yc = pf.getdata(starfile,3*(int(ext)-1)+1).yccd
+    rmag = pf.getdata(starfile,3*(int(ext)-1)+1).mag_3
+    ok = (rmag > 16.5)*(rmag < 17.5)
+    xc=xc[ok]
+    yc = yc[ok]
+    momsA = []
+    momsW = []
+    stamp = getStamp(data=data,xcoord=xc,ycoord=yc,Npix =30)
+    for img in stamp:
+        if img.shape[0] == img.shape[1]:
+            momsA.append(AcomplexMoments(img,sigma))
+            momsW.append(complexMoments(img,sigma))
+    momsA = np.array(momsA)
+    momsW = np.array(momsW)
+    pl.figure(figsize=(15,9))
+    pl.subplot(2,3,1)
+    pl.hist(momsA[:,0].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momsA[:,0].real),6)) + r'$\pm$'+str(round(np.std(momsA[:,0].real)/np.sqrt(momsA.shape[0]),6)))
+    pl.xlabel('Amoment M20')
+    pl.subplot(2,3,2)
+    pl.hist(momsA[:,1].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momsA[:,1].real),6)) + r'$\pm$'+str(round(np.std(momsA[:,1].real)/np.sqrt(momsA.shape[0]),6)))
+    pl.xlabel('Amoment M22.real')
+    pl.subplot(2,3,3)
+    pl.hist(momsA[:,1].imag,bins=10,normed=False)
+    pl.title(str(round(np.median(momsA[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momsA[:,1].imag)/np.sqrt(momsA.shape[0]),6)))
+    pl.xlabel('Amoment M22.imag')
+    pl.subplot(2,3,4)
+    pl.hist(momsW[:,0].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momsW[:,0].real),6)) + r'$\pm$'+str(round(np.std(momsW[:,0].real)/np.sqrt(momsW.shape[0]),6)))
+    pl.xlabel('Wmoment M20')
+    pl.subplot(2,3,5)
+    pl.hist(momsW[:,1].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momsW[:,1].real),6)) + r'$\pm$'+str(round(np.std(momsW[:,1].real)/np.sqrt(momsW.shape[0]),6)))
+    pl.xlabel('Wmoment M22.real')
+    pl.subplot(2,3,6)
+    pl.hist(momsW[:,1].imag,bins=10,normed=False)
+    pl.title(str(round(np.median(momsW[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momsW[:,1].imag)/np.sqrt(momsW.shape[0]),6)))
+    pl.xlabel('Wmoment M22.imag')
+    return '---done --'
+
+
+
 if __name__ == "__main__":
     from ImgQuality import *
     pl.ion()
@@ -625,7 +683,7 @@ if __name__ == "__main__":
         xc = pf.getdata(starfile,3*(int(ext)-1)+1).xccd
         yc = pf.getdata(starfile,3*(int(ext)-1)+1).yccd
         rmag = pf.getdata(starfile,3*(int(ext)-1)+1).mag_3
-        ok = (rmag > 16.5)*(rmag < 17.5)
+        ok = (rmag > 16.5)*(rmag < 20)
         xc=xc[ok]
         yc = yc[ok]
         stamp=stamp+getStamp(data=data,xcoord=xc,ycoord=yc,Npix =25)

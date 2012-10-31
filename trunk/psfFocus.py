@@ -15,13 +15,15 @@ try:
     import cPickle as p
     import sklearn.neighbors as nb
     from sklearn.svm import SVR
+    from decamRay import *
     from ImgQuality import *
 except ImportError:
     print "Error: missing one of the libraries (numpy, pyfits, scipy, matplotlib)"
     sys.exit()
 
 
-scale=0.27
+scale=0.27/4.
+npix=160
 
 def regulate_img(img=None):
     """
@@ -524,6 +526,37 @@ def selectStar(mag,fwhm_sex):
     return md
    
 
+def moments_uncertainty(ccd=None,mag=15,Nstar=1,seeing=[0.9,0.,0.],theta=0,phi=0,x=0,y=0,z=0,npix=npix):
+    momtsW = []
+    momtsA = []
+    momtsWTrue = []
+    momtsATrue = []
+    for i in range(50):        
+        img,bkg,psf = des_image(exptime=100,mag=mag, Nstar=Nstar,ccd=ccd,seeing=seeing,npix=npix,zenith=0,filter='r', theta=theta, phi=phi,corrector='corrector',x=x,y=y,z=z)
+        momtsW.append(complexMoments(img-bkg,sigma = 2.))
+        momtsWTrue.append(complexMoments(psf,sigma = 2.))
+        momtsA.append(AcomplexMoments(img - bkg))
+        momtsATrue.append(AcomplexMoments(psf))
+    return np.array(momtsW),np.array(momtsWTrue),np.array(momtsA),np.array(momtsATrue)
+
+
+def moments_uncertainty_new(ccd=None,Nstar=1,mag=None,seeing=[0.9,0.,0.],theta=0,phi=0,x=0,y=0,z=0,npix=npix):
+    momtsW = []
+    momtsA = []
+    momtsWTrue = []
+    momtsATrue = []
+    img,bkg,psf,magg = des_image(exptime=100,mag=[16.5,18], Nstar=Nstar,ccd=ccd,seeing=seeing,npix=npix,zenith=0,filter='r', theta=theta, phi=phi,corrector='corrector',x=x,y=y,z=z)
+    for i in range(len(img)):
+        momtsW.append(complexMoments(img[i]-bkg,sigma = 2.))
+        momtsWTrue.append(complexMoments(psf[i],sigma = 2.))
+        momtsA.append(AcomplexMoments(img[i] - bkg,sigma = 2.))
+        momtsATrue.append(AcomplexMoments(psf[i],sigma = 2.))
+    return np.array(momtsW),np.array(momtsWTrue),np.array(momtsA),np.array(momtsATrue)
+
+
+
+    
+
 if __name__ == "__main__":
     from psfFocus import *
     pl.ion()
@@ -548,7 +581,7 @@ if __name__ == "__main__":
         xc = pf.getdata(starfile,3*(int(ext)-1)+1).xccd
         yc = pf.getdata(starfile,3*(int(ext)-1)+1).yccd
         rmag = pf.getdata(starfile,3*(int(ext)-1)+1).mag_3
-        ok = (rmag > 16.5)*(rmag < 17.5)*(xc > 100)*(xc<1900)*(yc>200)*(yc<3900)
+        ok = (rmag > 16.5)*(rmag < 19.5)*(xc > 100)*(xc<1900)*(yc>200)*(yc<3900)
         xc=xc[ok]
         yc = yc[ok]    
         stamp=stamp+getStamp(data=img,xcoord=xc,ycoord=yc,Npix =40)
@@ -558,3 +591,83 @@ if __name__ == "__main__":
     display_moments(data)
     display_coeff(data)
     get_hexapod_pos(data)
+
+    #-----verify the noise effect ---
+    momtsW,momtsWTrue,momtsA,momtsATrue = moments_uncertainty_new(ccd=S4,mag=[16.5,18],Nstar=50)
+
+    pl.figure(figsize=(10,8))
+    pl.subplot(2,1,1)
+    pl.boxplot(momtsW.real)
+    pl.xticks(np.arange(1,5),['M20.real','M22.real','M31.real','M33.real'])
+    pl.grid()
+    pl.title('mag: 15, CCD: S4')
+    pl.subplot(2,1,2)
+    pl.boxplot(momtsW.imag)
+    pl.xticks(np.arange(1,5),['M20.imag','M22.imag','M31.imag','M33.imag'])
+    pl.grid()
+    
+    pl.figure(figsize=(10,8))
+    pl.subplot(2,1,1)
+    pl.boxplot(momtsWTrue.real)
+    pl.xticks(np.arange(1,5),['M20.real','M22.real','M31.real','M33.real'])
+    pl.grid()
+    pl.title('mag: 15, CCD: S4, Truth')
+    pl.subplot(2,1,2)
+    pl.boxplot(momtsWTrue.imag)
+    pl.xticks(np.arange(1,5),['M20.imag','M22.imag','M31.imag','M33.imag'])
+    pl.grid()
+
+    #----distribution ----
+    pl.figure(figsize=(15,9))
+    pl.subplot(2,3,1)
+    pl.hist(momtsW[:,0].real,bins=10,normed=False)
+    pl.title(str(round(np.mean(momtsW[:,0].real),6)) + r'$\pm$'+str(round(np.std(momtsW[:,0].real)/np.sqrt(momtsW.shape[0]),6)))
+    pl.xlabel('Wmoment M20')
+    pl.subplot(2,3,2)
+    pl.hist(momtsW[:,1].real,bins=10,normed=False)
+    pl.title(str(round(np.mean(momtsW[:,1].real),6)) + r'$\pm$'+str(round(np.std(momtsW[:,1].real)/np.sqrt(momtsW.shape[0]),6)))
+    pl.xlabel('Wmoment M22.real')
+    pl.subplot(2,3,3)
+    pl.hist(momtsW[:,1].imag,bins=10,normed=False)
+    pl.title(str(round(np.mean(momtsW[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momtsW[:,1].imag)/np.sqrt(momtsW.shape[0]),6)))
+    pl.xlabel('Wmoment M22.imag')
+    pl.subplot(2,3,4)
+    pl.hist(momtsA[:,0].real,bins=10,normed=False)
+    pl.title(str(round(np.mean(momtsA[:,0].real),6)) + r'$\pm$'+str(round(np.std(momtsA[:,0].real)/np.sqrt(momtsA.shape[0]),6)))
+    pl.xlabel('Amoment M20')
+    pl.subplot(2,3,5)
+    pl.hist(momtsA[:,1].real,bins=10,normed=False)
+    pl.title(str(round(np.mean(momtsA[:,1].real),6)) + r'$\pm$'+str(round(np.std(momtsA[:,1].real)/np.sqrt(momtsA.shape[0]),6)))
+    pl.xlabel('Amoment M22.real')
+    pl.subplot(2,3,6)
+    pl.hist(momtsA[:,1].imag,bins=10,normed=False)
+    pl.title(str(round(np.mean(momtsA[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momtsA[:,1].imag)/np.sqrt(momtsA.shape[0]),6)))
+    pl.xlabel('Amoment M22.imag')
+  
+    #--true value --
+    pl.figure(figsize=(15,9))
+    pl.subplot(2,3,1)
+    pl.hist(momtsW[:,0].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momtsWTrue[:,0].real),6)) + r'$\pm$'+str(round(np.std(momtsWTrue[:,0].real)/np.sqrt(momtsWTrue.shape[0]),6)))
+    pl.xlabel('Wmoment M20')
+    pl.subplot(2,3,2)
+    pl.hist(momtsWTrue[:,1].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momtsWTrue[:,1].real),6)) + r'$\pm$'+str(round(np.std(momtsWTrue[:,1].real)/np.sqrt(momtsWTrue.shape[0]),6)))
+    pl.xlabel('Wmoment M22.real')
+    pl.subplot(2,3,3)
+    pl.hist(momtsWTrue[:,1].imag,bins=10,normed=False)
+    pl.title(str(round(np.median(momtsWTrue[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momtsWTrue[:,1].imag)/np.sqrt(momtsWTrue.shape[0]),6)))
+    pl.xlabel('Wmoment M22.imag')
+    pl.subplot(2,3,4)
+    pl.hist(momtsATrue[:,0].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momtsATrue[:,0].real),6)) + r'$\pm$'+str(round(np.std(momtsATrue[:,0].real)/np.sqrt(momtsATrue.shape[0]),6)))
+    pl.xlabel('Amoment M20')
+    pl.subplot(2,3,5)
+    pl.hist(momtsATrue[:,1].real,bins=10,normed=False)
+    pl.title(str(round(np.median(momtsATrue[:,1].real),6)) + r'$\pm$'+str(round(np.std(momtsATrue[:,1].real)/np.sqrt(momtsATrue.shape[0]),6)))
+    pl.xlabel('Amoment M22.real')
+    pl.subplot(2,3,6)
+    pl.hist(momtsATrue[:,1].imag,bins=10,normed=False)
+    pl.title(str(round(np.median(momtsATrue[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momtsATrue[:,1].imag)/np.sqrt(momtsATrue.shape[0]),6)))
+    pl.xlabel('Amoment M22.imag')
+  
