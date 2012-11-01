@@ -512,7 +512,7 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.grid()
     pl.xticks(np.arange(1,4),['whisker_Wmoments','whisker_Amoments','whisker_sx'])
     if dimmfwhm != None:
-        pl.title('DIMM Seeing FWHM: '+str(dimmfwhm) +'(arcsec)    sqrt(DIMM fwhm^2 + 0.55^2): '+str(round(np.sqrt(dimmfwhm**2 + 0.55**2)),3))
+        pl.title('DIMM Seeing FWHM: '+str(round(dimmfwhm,3)) +'(arcsec)    sqrt(DIMM fwhm^2 + 0.55^2): '+str(round(np.sqrt(dimmfwhm**2 + 0.55**2),3)))
     pl.subplot(2,1,2)
     pl.boxplot(fwh)
     pl.ylim(0,np.median(fwh[5])+2)

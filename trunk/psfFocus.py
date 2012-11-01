@@ -22,8 +22,8 @@ except ImportError:
     sys.exit()
 
 
-scale=0.27/4.
-npix=160
+#scale=0.27/4.
+#npix=160
 
 def regulate_img(img=None):
     """
