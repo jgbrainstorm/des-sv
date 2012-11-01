@@ -116,7 +116,7 @@ else:
     pl.savefig('moments_measurement_'+expid+'.png')
     pl.close()
     kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
-    fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex,fwhmSex=fwhmSex,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
+    fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
     #fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27,dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
