@@ -5,7 +5,7 @@
 
 import sys, glob
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
-sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
+sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi/pyRaytrace')
 sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
 
 from psfFocus import *
@@ -40,7 +40,7 @@ else:
         os.system('getstar.py '+img_name)
     imghdu = pf.open(img_name)
     cathdu = pf.open(catname)
-    dimmfwhm = pf.getheader('img_name',0)['dimmsee']
+    dimmfwhm = pf.getheader(img_name,0)['dimmsee']
     data=[]
     stamplist=[]
     bkglist=[]
