@@ -41,6 +41,7 @@ else:
     imghdu = pf.open(img_name)
     cathdu = pf.open(catname)
     dimmfwhm = pf.getheader(img_name,0)['dimmsee']
+    hexposhdr = pf.getheader(img_name,0)['telfocus']
     data=[]
     stamplist=[]
     bkglist=[]
@@ -134,6 +135,9 @@ else:
     hexSex = hexapodAdj(betaSex)
     betaA,betaErrA,R2_adjA = zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)
     hexA = hexapodAdj(betaA)
+
+    print '----hexpod configuration from header -----'
+    print hexposhdr
 
     print '--------the suggested relative hexapod adjustment -----'
     print '        ------based on weighted moments --------'
