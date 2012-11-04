@@ -161,7 +161,7 @@ else:
     print '----hexpod configuration from header -----'
     print hexposhdr
 
-    print '--------the suggested relative hexapod adjustment -----'
+    print '--------the hexapod positions -----'
     print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexHao
@@ -171,6 +171,22 @@ else:
     print '        ------based on moments from sextractor --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexSex
+    print ' '
+    print ' '
+    print ' '
+    print ' '
+    print '--------the CRAY positions -----'
+    print '        ------based on weighted moments --------'
+    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    print hexHaoCRAY
+    print '        ------based on Adaptive moments  --------'
+    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    print hexACRAY
+    print '        ------based on moments from sextractor --------'
+    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    print hexSexCRAY
+
+
 
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
     p.dump([hexposhdr,hexHao,hexA,hexSex],open(img_name[0:-5]+'_hexpod.p','w'))
