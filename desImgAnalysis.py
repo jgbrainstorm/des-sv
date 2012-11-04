@@ -10,7 +10,7 @@ sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
 
 from psfFocus import *
 
-def hexapodAdj(beta,removeMean=True):
+def CRAYposition(beta,removeMean=True):
     """
     This codes give the suggested hexapod adjustment relative to the position the image is taken. The input is the zernike coefficients correpsonding to M20
     """
@@ -22,11 +22,30 @@ def hexapodAdj(beta,removeMean=True):
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
         beta = (beta - tmean)/tstd
-    hexapodParameter = knn.predict(beta)[0] #this gives the current optics status
-    hexapodParameter[0] = hexapodParameter[0]*1000.
-    hexapodParameter[1] = hexapodParameter[1]*1000.
-    hexapodParameter[2] = hexapodParameter[2]*1000.
-    return hexapodParameter*(-1)
+    CRAYParameter = knn.predict(beta)[0] #this gives the current optics status
+    CRAYParameter[0] = CRAYParameter[0]*1000.
+    CRAYParameter[1] = CRAY[1]*1000.
+    CRAYParameter[2] = CRAY[2]*1000.
+    return CRAYParameter
+
+
+def hexapodPosition(beta,removeMean=True):
+    """
+    This code convert the CRAY position to the hexapod position parameters
+    The 75 degree rotation between the two coordinate is measured by Steve. 
+    """
+    x,y,z,thetax,thetay = CRAYposition(beta,removeMean=removMean)
+    ang = np.deg2rad(75.)
+    xh = x*np.cos(ang) - y*np.sin(ang)
+    yh = x*np.sin(ang) - y*np.cos(ang)
+    phi = np.arctan(thetay,thetax)
+    theta = np.sqrt(thetax**2+thetay**2)
+    thetaxh = theta*np.cos(phi - ang)
+    thetayh = theta*np.sin(phi - ang)
+    zh = z
+    return np.array([xh,yh,zh,thetaxh,thetayh])
+
+
 
 if len(sys.argv) == 1:
     print 'syntax: '
@@ -41,6 +60,7 @@ else:
     imghdu = pf.open(img_name)
     cathdu = pf.open(catname)
     dimmfwhm = pf.getheader(img_name,0)['dimmsee']
+    kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
     hexposhdr = pf.getheader(img_name,0)['telfocus']
     data=[]
     stamplist=[]
@@ -92,8 +112,8 @@ else:
             bkglist = bkglist+list(bkg)
             xccd = eval(imghdu[i].header['extname'])[1]
             yccd = eval(imghdu[i].header['extname'])[2]
-            moms = measure_stamp_moments(stamp,bkg,4.)
-            momsA = measure_stamp_moments(stamp,bkg,4.,adaptive=True)
+            moms = measure_stamp_moments(stamp,bkg,kernelSigma/scale)
+            momsA = measure_stamp_moments(stamp,bkg,kernelSigma/scale,adaptive=True)
             data.append([xccd,yccd]+ list(moms))
             dataAmom.append([xccd,yccd]+ list(momsA))
             dataSex.append([xccd,yccd,M20,M22])
@@ -116,7 +136,6 @@ else:
     display_moments(data)
     pl.savefig('moments_measurement_'+expid+'.png')
     pl.close()
-    kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
     fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
     #fwhm_whisker_des_plot(stamplist,whiskerSex*0.27,fwhmSex*0.27,dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
@@ -130,11 +149,11 @@ else:
 
     #---the hexapod adjustment ---
     beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
-    hexHao = hexapodAdj(beta)
+    hexHao = hexapodPosition(beta)
     betaSex,betaErrSex,R2_adjSex = zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)
-    hexSex = hexapodAdj(betaSex)
+    hexSex = hexapodPosition(betaSex)
     betaA,betaErrA,R2_adjA = zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)
-    hexA = hexapodAdj(betaA)
+    hexA = hexapodPosition(betaA)
 
     print '----hexpod configuration from header -----'
     print hexposhdr
@@ -150,4 +169,6 @@ else:
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexSex
 
+    hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
+    p.dump([hexposhdr,hexHao,hexA,hexSex],open(img_name[0:-5]+'_hexpod.p','w'))
     
