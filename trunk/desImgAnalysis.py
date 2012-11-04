@@ -150,10 +150,13 @@ else:
     #---the hexapod adjustment ---
     beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
     hexHao = hexapodPosition(beta)
+    hexHaoCRAY = CRAYposition(beta)
     betaSex,betaErrSex,R2_adjSex = zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)
     hexSex = hexapodPosition(betaSex)
+    hexSexCRAY = CRAYposition(betaSex)
     betaA,betaErrA,R2_adjA = zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)
     hexA = hexapodPosition(betaA)
+    hexACRAY = CRAYposition(betaA)
 
     print '----hexpod configuration from header -----'
     print hexposhdr
@@ -171,4 +174,5 @@ else:
 
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
     p.dump([hexposhdr,hexHao,hexA,hexSex],open(img_name[0:-5]+'_hexpod.p','w'))
+    p.dump([hexposhdr,hexHaoCRAY,hexACRAY,hexSexCRAY],open(img_name[0:-5]+'_CRAY.p','w'))
     
