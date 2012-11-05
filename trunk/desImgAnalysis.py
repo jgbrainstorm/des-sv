@@ -34,7 +34,7 @@ def hexapodPosition(beta,removeMean=True):
     This code convert the CRAY position to the hexapod position parameters
     The 75 degree rotation between the two coordinate is measured by Steve. 
     """
-    x,y,z,thetax,thetay = CRAYposition(beta,removeMean=removMean)
+    x,y,z,thetax,thetay = CRAYposition(beta,removeMean=removeMean)
     ang = np.deg2rad(75.)
     xh = x*np.cos(ang) - y*np.sin(ang)
     yh = x*np.sin(ang) - y*np.cos(ang)
