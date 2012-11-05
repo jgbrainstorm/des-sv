@@ -24,8 +24,8 @@ def CRAYposition(beta,removeMean=True):
         beta = (beta - tmean)/tstd
     CRAYParameter = knn.predict(beta)[0] #this gives the current optics status
     CRAYParameter[0] = CRAYParameter[0]*1000.
-    CRAYParameter[1] = CRAY[1]*1000.
-    CRAYParameter[2] = CRAY[2]*1000.
+    CRAYParameter[1] = CRAYParameter[1]*1000.
+    CRAYParameter[2] = CRAYParameter[2]*1000.
     return CRAYParameter
 
 
