@@ -49,16 +49,8 @@ def hexapodPosition(beta,removeMean=True):
     #zh = z
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
-
-
-if len(sys.argv) == 1:
-    print 'syntax: '
-    print 'desImgAnalysis expid'
-    print 'The image need to be reduced (bias subtraction, flat fielding'
-else:
-    expid = sys.argv[1]
-    img_name = 'DECam_'+expid+'_reduced.fits'
-    catname = img_name[0:-5]+'_star_catalog.fits'
+def runanalysis(img_name=None):
+        catname = img_name[0:-5]+'_star_catalog.fits'
     if not os.path.isfile(catname):
         os.system('getstar.py '+img_name)
     imghdu = pf.open(img_name)
@@ -149,8 +141,6 @@ else:
     pl.ylim(0,10)
     pl.savefig('mag_radius_'+expid+'.png')
     pl.close()
-    
-
     #---the hexapod adjustment ---
     beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
     hexHao = hexapodPosition(beta)
@@ -161,10 +151,8 @@ else:
     betaA,betaErrA,R2_adjA = zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)
     hexA = hexapodPosition(betaA)
     hexACRAY = CRAYposition(betaA)
-
     print '----hexpod configuration from header -----'
     print hexposhdr
-
     print '--------the hexapod positions -----'
     print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
@@ -189,10 +177,33 @@ else:
     print '        ------based on moments from sextractor --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexSexCRAY
-
-
-
+    #---save files---
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
     p.dump([hexposhdr,hexHao,hexA,hexSex],open(img_name[0:-5]+'_hexpod.p','w'))
     p.dump([hexposhdr,hexHaoCRAY,hexACRAY,hexSexCRAY],open(img_name[0:-5]+'_CRAY.p','w'))
+    return '----finished one image ----'
     
+
+if __name__ == "__main__":
+    from desImgAnalysis import *
+    import sys,time
+    startTime=time.time()
+    if len(sys.argv) == 1:
+        print 'syntax: '
+        print 'desImgAnalysis expid'
+        print 'or'
+        print 'desImgAnalysis all'
+        print 'Note: The image need to be reduced (bias subtraction, flat fielding'
+    elif:
+        sys.argv[1] == 'all':
+        img_nameList = gl.glob('*.fits')
+        nimg = len(img_nameList)
+        for i in range(nimg):
+            t=runanalysis(img_nameList[i])
+    else:   
+        expid = sys.argv[1]
+        img_name = 'DECam_'+expid+'_reduced.fits'
+        t=runanalysis(img_name)
+    endTime=time.time()
+    elapseTime=endTime-startTime
+    print '---elapsed time: ' + str(elapseTime)
