@@ -55,6 +55,7 @@ def runanalysis(img_name=None):
         os.system('getstar.py '+img_name)
     imghdu = pf.open(img_name)
     cathdu = pf.open(catname)
+    expid = img_name[6:13]
     dimmfwhm = pf.getheader(img_name,0)['dimmsee']
     kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
     hexposhdr = pf.getheader(img_name,0)['telfocus']
