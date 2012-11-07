@@ -186,7 +186,7 @@ def runanalysis(img_name=None):
 
 if __name__ == "__main__":
     from desImgAnalysis import *
-    import sys,time
+    import sys,time,glob
     startTime=time.time()
     if len(sys.argv) == 1:
         print 'syntax: '
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         print 'desImgAnalysis all'
         print 'Note: The image need to be reduced (bias subtraction, flat fielding'
     elif sys.argv[1] == 'all':
-        img_nameList = gl.glob('*.fits')
+        img_nameList = glob.glob('*.fits')
         nimg = len(img_nameList)
         for i in range(nimg):
             t=runanalysis(img_nameList[i])
