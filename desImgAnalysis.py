@@ -60,6 +60,7 @@ def runanalysis(img_name=None):
     kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
     hexposhdr = pf.getheader(img_name,0)['telfocus']
     data=[]
+
     stamplist=[]
     bkglist=[]
     dataSex=[]
