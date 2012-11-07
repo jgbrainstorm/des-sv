@@ -15,8 +15,8 @@ def CRAYposition(beta,removeMean=True):
     This codes give the suggested hexapod adjustment relative to the position the image is taken. The input is the zernike coefficients correpsonding to M20
     """
     if removeMean == True:
-        knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj_remMean.cp','r'))
-        tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst_remMean.cp','r'))
+        knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj_M22_remMean.cp','r'))
+        tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst_M22_remMean.cp','r'))
         beta = beta[1:]
     else:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
@@ -143,16 +143,29 @@ def runanalysis(img_name=None):
     pl.ylim(0,10)
     pl.savefig('mag_radius_'+expid+'.png')
     pl.close()
-    #---the hexapod adjustment ---
-    beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
-    hexHao = hexapodPosition(beta)
-    hexHaoCRAY = CRAYposition(beta)
-    betaSex,betaErrSex,R2_adjSex = zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)
-    hexSex = hexapodPosition(betaSex)
-    hexSexCRAY = CRAYposition(betaSex)
-    betaA,betaErrA,R2_adjA = zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)
-    hexA = hexapodPosition(betaA)
-    hexACRAY = CRAYposition(betaA)
+    #---the hexapod adjustment using M22---
+    beta=[]
+    beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[0])
+    beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[0])
+    beta=np.array(beta)
+    beta=beta.flatten()
+    m22idx = np.concatenate((np.arange(1,20),np.arange(21,40)))
+    hexHao = hexapodPosition(beta[m22idx])
+    hexHaoCRAY = CRAYposition(beta[m22idx])
+    betaSex=[]
+    betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
+    betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].imag,max_order=20)[0])
+    betaSex = np.array(betaSex)
+    betaSex=betaSex.flatten()
+    hexSex = hexapodPosition(betaSex[m22idx])
+    hexSexCRAY = CRAYposition(betaSex[m22idx])
+    betaA=[]
+    betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,3].real,max_order=20)[0])
+    betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,3].imag,max_order=20)[0])
+    betaA = np.array(betaA)
+    betaA = betaA.flatten()
+    hexA = hexapodPosition(betaA[m22idx])
+    hexACRAY = CRAYposition(betaA[m22idx])
     print '----hexpod configuration from header -----'
     print hexposhdr
     print '--------the hexapod positions -----'
