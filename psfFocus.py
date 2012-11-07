@@ -217,7 +217,7 @@ def display_moments(data=None):
     u = np.sqrt(np.abs(data[:,3]))*np.cos(phi22)
     v = np.sqrt(np.abs(data[:,3]))*np.sin(phi22)
     qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
-    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^2',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -230,7 +230,7 @@ def display_moments(data=None):
     u = np.sqrt(np.abs(data[:,4]))*np.cos(phi31)
     v = np.sqrt(np.abs(data[:,4]))*np.sin(phi31)
     qvr=pl.quiver(x,y,u,v,width=0.003,color='r',pivot='middle',headwidth=4)
-    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^3',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -249,7 +249,7 @@ def display_moments(data=None):
     u = np.sqrt(np.abs(data[:,5]))*np.cos(phi33+np.deg2rad(240))
     v = np.sqrt(np.abs(data[:,5]))*np.sin(phi33+np.deg2rad(240))
     qvr=pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
-    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^3',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -258,22 +258,23 @@ def display_moments(data=None):
     pl.ylabel('Y [mm] (NORTH)')
     pl.title('M33')
     pl.subplot(2,2,4)
-    m20med = np.median(np.sqrt(data[:,2].real))
-    uo = np.sqrt(data[:,2].real) - m20med
-    idxl = uo < 0
-    u = np.abs(uo)
-    v = np.zeros(len(data[:,2].real))
-    qvr = pl.quiver(x,y,u,v,width = 0.008, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width',label='> median')
-    qvr = pl.quiver(x[idxl],y[idxl],u[idxl],v[idxl],width = 0.008, color='b',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width',label='< median')
-    pl.legend(loc='best')
-    qk = pl.quiverkey(qvr, -150,-240,max(u),str(round(max(u),3))+' pix',coordinates='data',color='green')
+    m20sqr = np.sqrt(data[:,2].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    m20sqr_med = np.median(m20sqr)
+    m20sqr_diff = m20sqr - min(m20sqr)
+    m20sqr_diff_absmed = np.median(np.abs(m20sqr_diff))
+    plotScale = 1./m20sqr_diff_absmed*100
+    pl.scatter(x,y,s=m20sqr_diff*plotScale,c='b',alpha=0.5)
+    pl.scatter(-230,-230,s=m20sqr_diff_absmed*plotScale,c='g')
+    pl.text(-200,-235,str(round(m20sqr_diff_absmed,6))+' pix')
     pl.plot(x,y,'y,')
     pl.grid(color='g')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
     pl.xlabel('X [mm] (WEST)')
     pl.ylabel('Y [mm] (NORTH)')
-    pl.title('median '+r'$\sqrt{M20}$: '+str(round(np.median(scale*np.sqrt(data[:,2].real)),3))+' [arcsec]')
+    pl.title('median '+r'$\sqrt{M20}$: '+str(round(scale*m20sqr_med,3))+' [arcsec]')
     return '---done!--'
 
 def display_2nd_moments(data=None):
@@ -288,7 +289,7 @@ def display_2nd_moments(data=None):
     u = np.sqrt(np.abs(data[:,3]))*np.cos(phi22)
     v = np.sqrt(np.abs(data[:,3]))*np.sin(phi22)
     qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
-    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix',coordinates='data',color='blue')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^2',coordinates='data',color='blue')
     pl.plot(x,y,'b,')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
@@ -297,25 +298,24 @@ def display_2nd_moments(data=None):
     pl.ylabel('Y [mm] (NORTH)')
     pl.title('M22')
     pl.subplot(1,2,2)
-    m20med = np.median(np.sqrt(data[:,2].real))
-    uo = np.sqrt(data[:,2].real) - m20med
-    idxl = uo < 0
-    u = np.abs(uo)
-    v = np.zeros(len(data[:,2].real))
-    qvr = pl.quiver(x,y,u,v,width = 0.008, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width',label='> median')
-    qvr = pl.quiver(x[idxl],y[idxl],u[idxl],v[idxl],width = 0.008, color='b',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width',label='< median')
-    pl.legend(loc='best')
-    qk = pl.quiverkey(qvr, -150,-240,max(u),str(round(max(u),3))+' pix',coordinates='data',color='green')
+    m20sqr = np.sqrt(data[:,2].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    m20sqr_med = np.median(m20sqr)
+    m20sqr_diff = m20sqr - min(m20sqr)
+    m20sqr_diff_absmed = np.median(np.abs(m20sqr_diff))
+    plotScale = 1./m20sqr_diff_absmed*100
+    pl.scatter(x,y,s=m20sqr_diff*plotScale,c='b',alpha=0.5)
+    pl.scatter(-230,-230,s=m20sqr_diff_absmed*plotScale,c='g')
+    pl.text(-200,-235,str(round(m20sqr_diff_absmed,6))+' pix')
     pl.plot(x,y,'y,')
     pl.grid(color='g')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
     pl.xlabel('X [mm] (WEST)')
     pl.ylabel('Y [mm] (NORTH)')
-    pl.title('median '+r'$\sqrt{M20}$: '+str(round(np.median(scale*np.sqrt(data[:,2].real)),3))+' [arcsec]')
+    pl.title('median '+r'$\sqrt{M20}$: '+str(round(scale*m20sqr_med,3))+' [arcsec]')
     return '---done!--'
-
-
 
 
 def showZernike(beta=None,betaErr=None,gridsize = 1, max_rad = 1,significance=False):

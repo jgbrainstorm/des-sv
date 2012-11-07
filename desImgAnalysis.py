@@ -31,18 +31,20 @@ def CRAYposition(beta,removeMean=True):
 
 def hexapodPosition(beta,removeMean=True):
     """
-    This code convert the CRAY position to the hexapod position parameters
-    The 75 degree rotation between the two coordinate is measured by Steve. 
+    the CRAY position to the hexapod position parameters. There is a 15 deg rotation between the two coordinate. However, this is accounted in the sispi. So, the hexapod position in the header is acutally rotated to its designed coordiante, which relate to the CRAY coordinate by the last page of des-docdb #6551
     """
     x,y,z,thetax,thetay = CRAYposition(beta,removeMean=removeMean)
-    ang = np.deg2rad(75.)
-    xh = x*np.cos(ang) - y*np.sin(ang)
-    yh = x*np.sin(ang) - y*np.cos(ang)
-    phi = np.arctan2(thetay,thetax)
-    theta = np.sqrt(thetax**2+thetay**2)
-    thetaxh = theta*np.cos(phi - ang)
-    thetayh = theta*np.sin(phi - ang)
-    zh = z
+    xh = x
+    yh = -y
+    zh = -z
+    #ang = np.deg2rad(75.)
+    #xh = x*np.cos(ang) - y*np.sin(ang)
+    #yh = x*np.sin(ang) - y*np.cos(ang)
+    #phi = np.arctan2(thetay,thetax)
+    #theta = np.sqrt(thetax**2+thetay**2)
+    #thetaxh = theta*np.cos(phi - ang)
+    #thetayh = theta*np.sin(phi - ang)
+    #zh = z
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
 
