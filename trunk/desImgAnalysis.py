@@ -196,7 +196,7 @@ if __name__ == "__main__":
         print 'desImgAnalysis all'
         print 'Note: The image need to be reduced (bias subtraction, flat fielding'
     elif sys.argv[1] == 'all':
-        img_nameList = glob.glob('*.fits')
+        img_nameList = glob.glob('*_reduced.fits')
         nimg = len(img_nameList)
         for i in range(nimg):
             t=runanalysis(img_nameList[i])
