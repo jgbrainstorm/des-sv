@@ -194,8 +194,7 @@ if __name__ == "__main__":
         print 'or'
         print 'desImgAnalysis all'
         print 'Note: The image need to be reduced (bias subtraction, flat fielding'
-    elif:
-        sys.argv[1] == 'all':
+    elif sys.argv[1] == 'all':
         img_nameList = gl.glob('*.fits')
         nimg = len(img_nameList)
         for i in range(nimg):
