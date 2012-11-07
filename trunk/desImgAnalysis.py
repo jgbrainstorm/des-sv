@@ -50,7 +50,7 @@ def hexapodPosition(beta,removeMean=True):
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
 def runanalysis(img_name=None):
-        catname = img_name[0:-5]+'_star_catalog.fits'
+    catname = img_name[0:-5]+'_star_catalog.fits'
     if not os.path.isfile(catname):
         os.system('getstar.py '+img_name)
     imghdu = pf.open(img_name)
