@@ -171,7 +171,7 @@ def runanalysis(img_name=None):
     betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,3].real,max_order=20)[0])
     betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,3].imag,max_order=20)[0])
     dispM202Coeff(betaA)
-    pl.savefig('coeff_Sex_'+expid+'.png')
+    pl.savefig('coeff_Adaptive_'+expid+'.png')
     pl.close()
     betaA = np.array(betaA)
     betaA = betaA.flatten()
