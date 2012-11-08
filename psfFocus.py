@@ -693,7 +693,7 @@ def dispM202Coeff(betaAll=None,betaErrAll=None):
         pl.errorbar(ind[1:],betaAll[i][1:],yerr = betaErrAll[i],fmt=fmtarr[i])
         pl.grid()
         pl.xlim(-1,len(betaAll[i])+1)
-        pl.ylim(min(betaAll[i][1:])-0.5,max(betaAll[i][1:])+0.5)
+        pl.ylim(min(betaAll[i][1:])-0.01,max(betaAll[i][1:])+0.01)
         pl.xticks(ind,('','','','','','','','','','','','','','','','','','','',''))
         pl.ylabel(momname[i])
     pl.xticks(ind,('Piston','Tip','Tilt','Defocus','Astignism','Astignism','Coma','Coma','Trefoil','Trefoil','Spherical','12','13','14','15','16','17','18','19','20'),rotation=90)
