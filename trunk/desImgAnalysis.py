@@ -17,11 +17,10 @@ def CRAYposition(beta,removeMean=True):
     if removeMean == True:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj_M22_remMean.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst_M22_remMean.cp','r'))
-        beta = beta[1:]
     else:
         knn = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridKnnObj.cp','r'))
         tmean,tstd = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/finerGridStdConst.cp','r'))
-        beta = (beta - tmean)/tstd
+    beta = (beta - tmean)/tstd
     CRAYParameter = knn.predict(beta)[0] #this gives the current optics status
     CRAYParameter[0] = CRAYParameter[0]*1000.
     CRAYParameter[1] = CRAYParameter[1]*1000.
@@ -49,6 +48,7 @@ def hexapodPosition(beta,removeMean=True):
     #zh = z
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
+
 def runanalysis(img_name=None):
     catname = img_name[0:-5]+'_star_catalog.fits'
     if not os.path.isfile(catname):
@@ -60,7 +60,6 @@ def runanalysis(img_name=None):
     kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
     hexposhdr = pf.getheader(img_name,0)['telfocus']
     data=[]
-
     stamplist=[]
     bkglist=[]
     dataSex=[]
@@ -145,24 +144,36 @@ def runanalysis(img_name=None):
     pl.close()
     #---the hexapod adjustment using M22---
     beta=[]
+    beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[0])
     beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[0])
     beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[0])
     beta=np.array(beta)
+    dispM202Coeff(beta)
+    pl.savefig('coeff_measurement_'+expid+'.png')
+    pl.close()
     beta=beta.flatten()
-    m22idx = np.concatenate((np.arange(1,20),np.arange(21,40)))
+    m22idx = np.concatenate((np.arange(21,40),np.arange(41,60)))
     hexHao = hexapodPosition(beta[m22idx])
     hexHaoCRAY = CRAYposition(beta[m22idx])
     betaSex=[]
+    betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
     betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
     betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].imag,max_order=20)[0])
     betaSex = np.array(betaSex)
+    dispM202Coeff(beta)
+    pl.savefig('coeff_Sex_'+expid+'.png')
+    pl.close()
     betaSex=betaSex.flatten()
     hexSex = hexapodPosition(betaSex[m22idx])
     hexSexCRAY = CRAYposition(betaSex[m22idx])
     betaA=[]
+    betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,2].real,max_order=20)[0])
     betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,3].real,max_order=20)[0])
     betaA.append(zernikeFit(dataAmom[:,0].real,dataAmom[:,1].real,dataAmom[:,3].imag,max_order=20)[0])
     betaA = np.array(betaA)
+    dispM202Coeff(beta)
+    pl.savefig('coeff_Sex_'+expid+'.png')
+    pl.close()
     betaA = betaA.flatten()
     hexA = hexapodPosition(betaA[m22idx])
     hexACRAY = CRAYposition(betaA[m22idx])
