@@ -690,7 +690,7 @@ def dispM202Coeff(betaAll=None,betaErrAll=None):
     pl.figure(figsize=(17,7))
     for i in range(3):
         pl.subplot(4,1,i+1)
-        pl.plot(ind[1:],betaAll[i][1:],yerr = betaErrAll[i],fmt=fmtarr[i])
+        pl.errorbar(ind[1:],betaAll[i][1:],yerr = betaErrAll[i],fmt=fmtarr[i])
         pl.grid()
         pl.xlim(-1,len(betaAll[i])+1)
         pl.ylim(min(betaAll[i][1:])-0.5,max(betaAll[i][1:])+0.5)
