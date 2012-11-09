@@ -696,6 +696,6 @@ def dispM202Coeff(betaAll=None,betaErrAll=None):
         pl.ylim(min(betaAll[i][1:])-0.01,max(betaAll[i][1:])+0.01)
         pl.xticks(ind,('','','','','','','','','','','','','','','','','','','',''))
         pl.ylabel(momname[i])
-    pl.xticks(ind,('Piston','Tip','Tilt','Defocus','Astignism','Astignism','Coma','Coma','Trefoil','Trefoil','Spherical','12','13','14','15','16','17','18','19','20'),rotation=90)
+    pl.xticks(ind,('Piston','Tip','Tilt','Astignism','Defocus','Astignism','Trefoil','Coma','Coma','Trefoil','Ashtray','Astigm.5th','Spherical','Astigm.5th','Ashtray','16','17','18','19','20'),rotation=90)
     pl.xlabel('Zernike Coefficients')
     return '---done!---'
