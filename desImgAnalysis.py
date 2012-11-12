@@ -142,6 +142,17 @@ def runanalysis(img_name=None):
     pl.ylim(0,10)
     pl.savefig('mag_radius_'+expid+'.png')
     pl.close()
+    #---check the fitted value of the moments ---
+    datafitted = data.copy()
+    datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
+    datafitted[:,3].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[3]
+    datafitted[:,3].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[3]
+    datafitted[:,4].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].real,max_order=20)[3]
+    datafitted[:,4].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].imag,max_order=20)[3]
+    datafitted[:,5].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].real,max_order=20)[3]
+    datafitted[:,5].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].imag,max_order=20)[3]
+    display_moments(datafitted)
+    pl.savefig('fitted_moments_measurement_'+expid+'.png')
     #---the hexapod adjustment using M22---
     beta=[]
     beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[0])

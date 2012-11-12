@@ -175,7 +175,8 @@ def zernikeFit(x, y, z,max_rad=225.,cm=[0,0],max_order=20):
     SST = np.var(z[ok])*(len(z[ok])-1)# SST is the sum((z_i - mean(z))^2)
     R2 = 1 - SSE/SST
     R2adj = 1-(1-R2)*(len(z[ok])-1)/(len(z[ok])-max_order)# adjusted R2 for quality of fit.             
-    return beta,betaErr, R2adj
+    fitted = np.dot(dataX,beta) # fitted value
+    return beta,betaErr, R2adj,fitted
 
 
 
