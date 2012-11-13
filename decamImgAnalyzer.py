@@ -191,7 +191,7 @@ def runanalysis(img_name=None):
     print posCRAYsex
     #---save files---
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
-    np.savetxt('hexapod_cray_position.csv',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
+    np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
     return '----finished one image ----'
     
 
