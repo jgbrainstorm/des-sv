@@ -89,6 +89,8 @@ def runanalysis(img_name=None):
             Mrr = Mrr[ok]
             Mcc = Mcc[ok]
             Mrc = Mrc[ok]
+            x=x[ok]
+            y=y[ok]
             Nobj = len(Mrr)
             M20=np.zeros(Nobj)
             M22=np.zeros(Nobj).astype(complex)
@@ -128,11 +130,11 @@ def runanalysis(img_name=None):
     fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    pl.plot(magall,radall,'b,')
-    pl.plot(magall[ok],radall[ok],'r,')
-    pl.ylim(0,10)
-    pl.savefig('mag_radius_'+expid+'.png')
-    pl.close()
+    #pl.plot(magall,radall,'b,')
+    #pl.plot(magall[ok],radall[ok],'r,')
+    #pl.ylim(0,10)
+    #pl.savefig('mag_radius_'+expid+'.png')
+    #pl.close()
     #---check the fitted value of the moments ---
     datafitted = data.copy()
     datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
