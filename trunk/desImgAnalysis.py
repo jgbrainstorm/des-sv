@@ -49,18 +49,18 @@ def hexapodPosition(beta,removeMean=True):
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
 def CRAYposLinearModel(b=None):
-    M22realTrefoil2 = b[:,29] # for x decenter
-    M22imagTrefoil1 = b[:,48] 
+    M22realTrefoil2 = b[29] # for x decenter
+    M22imagTrefoil1 = b[48] 
     M22TrefoilXshift = 0.5*(M22realTrefoil2+M22imagTrefoil1)
-    M22realTrefoil1 = b[:,26] # for y decenter
-    M22imagTrefoil2 = b[:,49] 
+    M22realTrefoil1 = b[26] # for y decenter
+    M22imagTrefoil2 = b[49] 
     M22TrefoilYshift = 0.5*(M22realTrefoil1 - M22imagTrefoil2)
-    M20defocus = b[:,4] # for defocus
-    M22realComa2 = b[:,28] # for x-tilt
-    M22imagComa1 = b[:,47]
+    M20defocus = b[4] # for defocus
+    M22realComa2 = b[28] # for x-tilt
+    M22imagComa1 = b[47]
     M22ComaXtilt = 0.5*(M22realComa2+M22imagComa1)
-    M22realComa1 = b[:,27] # for y-tilt
-    M22imagComa2 = b[:,48]
+    M22realComa1 = b[27] # for y-tilt
+    M22imagComa2 = b[48]
     M22ComaYtilt = 0.5*(M22realComa1 - M22imagComa2)
     x = -3.0063 * M22TrefoilXshift -0.0053
     y = -2.9318 * M22TrefoilYshift - 0.0005
