@@ -79,6 +79,8 @@ def runanalysis(img_name=None):
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
         ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12)*(mag>-14)
+        nstar = len(mag[ok])
+        print '--- Nstars selected: '+str(nstar)+'---'
         magall.append(mag)
         radall.append(rad)
         okall.append(ok)
