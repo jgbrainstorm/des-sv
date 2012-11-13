@@ -21,7 +21,7 @@ def hexapodPosition(beta):
     zh = -z
     thetaxh = -thetay
     thetayh = -thetax
-   return np.array([xh,yh,zh,thetaxh,thetayh])
+    return np.array([xh,yh,zh,thetaxh,thetayh])
 
 def CRAYposLinearModel(b=None):
     """
