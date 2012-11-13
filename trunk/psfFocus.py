@@ -25,13 +25,6 @@ except ImportError:
 #scale=0.27/4.
 #npix=160
 
-def regulate_img(img=None):
-    """
-    trim and normalize the image
-    """
-    #img = (img - img.min())/img.sum()
-    img = img*(img>=0)
-    return img/img.sum()
 
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     """
