@@ -510,6 +510,24 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
     return '-----done !----'
 
+def dispM202Coeff(betaAll=None,betaErrAll=None):
+    ind = np.arange(len(betaAll[0]))
+    momname = ('M20','M22.Real','M22.imag')
+    fmtarr = ['bo-','ro-','go-']
+    if betaErrAll == None:
+        betaErrAll = np.zeros(len(ind))
+    pl.figure(figsize=(17,7))
+    for i in range(3):
+        pl.subplot(4,1,i+1)
+        pl.errorbar(ind[1:],betaAll[i][1:],yerr = betaErrAll[i],fmt=fmtarr[i])
+        pl.grid()
+        pl.xlim(-1,len(betaAll[i])+1)
+        pl.ylim(min(betaAll[i][1:])-0.01,max(betaAll[i][1:])+0.01)
+        pl.xticks(ind,('','','','','','','','','','','','','','','','','','','',''))
+        pl.ylabel(momname[i])
+    pl.xticks(ind,('Piston','Tip','Tilt','Astignism','Defocus','Astignism','Trefoil','Coma','Coma','Trefoil','Ashtray','Astigm.5th','Spherical','Astigm.5th','Ashtray','16','17','18','19','20'),rotation=90)
+    pl.xlabel('Zernike Coefficients')
+    return '---done!---'
 
 
 def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
