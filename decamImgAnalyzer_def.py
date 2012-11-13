@@ -1,40 +1,30 @@
-#! /usr/bin/env python
-#-------------------------------------------------------------
-# This set of codes test the DECam image quality, IQ_R4, IQ-R5
-# It measure the FWHM and the whisker using various ways based
-# on imput image and a list of star positions
-# Created by: Jiangang Hao @ Fermilab, 8/1/2012
-#-------------------------------------------------------------
+#------------------------------------------------------
+# this file contains functions used for the decamImgAnalyzer
+# the functions are adopted from ImgQuality.py and psfFocus.py
+# this file contains only those useful functions for the decamImgAnalyzer 
+# some other functions not used are still in the ImgQuality.py and
+# psfFocus.py. 
+# created by Jiangang Hao, 11/13/2012
+
+import sys
+sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
+sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
+sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
+
 
 try:
     import numpy as np
     import pyfits as pf
     import scipy.ndimage as nd
     import pylab as pl
-    import sys
     from scipy.optimize import leastsq
+    from DECamCCD_def import *
+    from scipy.misc import factorial as fac
 except ImportError:
     print "Error: missing one of the libraries (numpy, pyfits, scipy, matplotlib)"
     sys.exit()
 
-
 scale=0.27
-
-
-def findbstr(data=None, hdr=None):
-    """
-    find the bright stars on the image
-    """
-    saturate = hdr['saturate']
-    bsIDX = (data >= 0.3*saturate)* (data <= 0.5*saturate)
-    good=nd.binary_opening(bsIDX,structure=np.ones((3,3)))  
-    objData = data*good
-    seg,nseg=nd.label(good,structure=np.ones((3,3)))  
-    coords=nd.center_of_mass(objData,seg,range(1,nseg+1))
-    xcoord=np.array([x[1] for x in coords])
-    ycoord=np.array([x[0] for x in coords])
-    return xcoord, ycoord
-
 
 def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     """
@@ -607,84 +597,380 @@ def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):
         pl.close()
     return ' ---- Done ! ----'
 
-def diagDC6B(ext=None,sigma=2.):
-    dr = '/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/decam--28--49-r-1/'
-    starfile='/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/catfile/decam_-27.72186_-48.60000-objects.fit'
-    extension = np.arange(1,10)
-    stamp=[]
-    if ext < 10:
-        ext = '0'+str(ext)
-    else:
-        ext = str(ext)
-    imgname= 'decam--28--49-r-1_'+ext+'.fits.fz'
-    bkgname = 'decam--28--49-r-1_'+ext+'_bkg.fits.fz'
-    data = pf.getdata(dr+imgname) - pf.getdata(dr+bkgname)
-    xc = pf.getdata(starfile,3*(int(ext)-1)+1).xccd
-    yc = pf.getdata(starfile,3*(int(ext)-1)+1).yccd
-    rmag = pf.getdata(starfile,3*(int(ext)-1)+1).mag_3
-    ok = (rmag > 16.5)*(rmag < 17.5)
-    xc=xc[ok]
-    yc = yc[ok]
-    momsA = []
-    momsW = []
-    stamp = getStamp(data=data,xcoord=xc,ycoord=yc,Npix =30)
-    for img in stamp:
-        if img.shape[0] == img.shape[1]:
-            momsA.append(AcomplexMoments(img,sigma))
-            momsW.append(complexMoments(img,sigma))
-    momsA = np.array(momsA)
-    momsW = np.array(momsW)
-    pl.figure(figsize=(15,9))
-    pl.subplot(2,3,1)
-    pl.hist(momsA[:,0].real,bins=10,normed=False)
-    pl.title(str(round(np.median(momsA[:,0].real),6)) + r'$\pm$'+str(round(np.std(momsA[:,0].real)/np.sqrt(momsA.shape[0]),6)))
-    pl.xlabel('Amoment M20')
-    pl.subplot(2,3,2)
-    pl.hist(momsA[:,1].real,bins=10,normed=False)
-    pl.title(str(round(np.median(momsA[:,1].real),6)) + r'$\pm$'+str(round(np.std(momsA[:,1].real)/np.sqrt(momsA.shape[0]),6)))
-    pl.xlabel('Amoment M22.real')
-    pl.subplot(2,3,3)
-    pl.hist(momsA[:,1].imag,bins=10,normed=False)
-    pl.title(str(round(np.median(momsA[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momsA[:,1].imag)/np.sqrt(momsA.shape[0]),6)))
-    pl.xlabel('Amoment M22.imag')
-    pl.subplot(2,3,4)
-    pl.hist(momsW[:,0].real,bins=10,normed=False)
-    pl.title(str(round(np.median(momsW[:,0].real),6)) + r'$\pm$'+str(round(np.std(momsW[:,0].real)/np.sqrt(momsW.shape[0]),6)))
-    pl.xlabel('Wmoment M20')
-    pl.subplot(2,3,5)
-    pl.hist(momsW[:,1].real,bins=10,normed=False)
-    pl.title(str(round(np.median(momsW[:,1].real),6)) + r'$\pm$'+str(round(np.std(momsW[:,1].real)/np.sqrt(momsW.shape[0]),6)))
-    pl.xlabel('Wmoment M22.real')
-    pl.subplot(2,3,6)
-    pl.hist(momsW[:,1].imag,bins=10,normed=False)
-    pl.title(str(round(np.median(momsW[:,1].imag),6)) + r'$\pm$'+str(round(np.std(momsW[:,1].imag)/np.sqrt(momsW.shape[0]),6)))
-    pl.xlabel('Wmoment M22.imag')
-    return '---done --'
-
-
-
-if __name__ == "__main__":
-    from ImgQuality import *
-    pl.ion()
-    dr = '/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/decam--28--49-r-1/'
-    starfile='/home/jghao/research/data/des_optics_psf/dc6b_image/goodseeing/catfile/decam_-27.72186_-48.60000-objects.fit'
-    extension = np.arange(1,10)
-    stamp=[]
-    for ext in extension:
-        print ext
-        if ext < 10:
-            ext = '0'+str(ext)
+def measure_stamp_moments(stamp,bkg=None,sigma=4.,adaptive=False):
+    """
+    measure the moments of stamp image on one CCD
+    return the median moments
+    """
+    Nobj = len(stamp)
+    M20=np.zeros(Nobj)
+    M22=np.zeros(Nobj).astype(complex)
+    M31=np.zeros(Nobj).astype(complex)
+    M33=np.zeros(Nobj).astype(complex)
+    for i in range(Nobj):
+        if bkg == None:
+            M20[i],M22[i],M31[i],M33[i]=complexMoments(data=stamp[i],sigma=sigma)
         else:
-            ext = str(ext)
-        imgname= 'decam--28--49-r-1_'+ext+'.fits.fz'
-        bkgname = 'decam--28--49-r-1_'+ext+'_bkg.fits.fz'
-        data = pf.getdata(dr+imgname) - pf.getdata(dr+bkgname)
-        xc = pf.getdata(starfile,3*(int(ext)-1)+1).xccd
-        yc = pf.getdata(starfile,3*(int(ext)-1)+1).yccd
-        rmag = pf.getdata(starfile,3*(int(ext)-1)+1).mag_3
-        ok = (rmag > 16.5)*(rmag < 20)
-        xc=xc[ok]
-        yc = yc[ok]
-        stamp=stamp+getStamp(data=data,xcoord=xc,ycoord=yc,Npix =25)
-    fwhm_whisker_plot(stamp)
-    pl.savefig()
+            data = stamp[i]-bkg[i]
+            if data.sum > 0.:
+                if adaptive == False:
+                    M20[i],M22[i],M31[i],M33[i]=complexMoments(data=data,sigma=sigma)               
+                else:
+                    M20[i],M22[i] = AcomplexMoments(img=data,sigma = sigma)
+    return [np.median(M20), np.median(M22), np.median(M31), np.median(M33)]
+
+
+def zernike_rad(m, n, rho):
+    """
+    Calculate the radial component of Zernike polynomial (m, n) 
+    given a grid of radial coordinates rho.
+    """
+    if (n < 0 or m < 0 or abs(m) > n):
+        raise ValueError
+    if ((n-m) % 2):
+        return rho*0.0
+    pre_fac = lambda k: (-1.0)**k * fac(n-k) / ( fac(k) * fac( (n+m)/2.0 - k ) * fac( (n-m)/2.0 - k ) )
+    return sum(pre_fac(k) * rho**(n-2.0*k) for k in xrange((n-m)/2+1))
+
+def zernike(m, n, rho, phi):
+    """
+    Calculate Zernike polynomial (m, n) given a grid of radial
+    coordinates rho and azimuthal coordinates phi.
+    """
+    if (m > 0): return zernike_rad(m, n, rho) * np.cos(m * phi)
+    if (m < 0): return zernike_rad(-m, n, rho) * np.sin(-m * phi)
+    return zernike_rad(0, n, rho)
+
+
+def zernikel(j, rho, phi):
+    """
+    Calculate Zernike polynomial with Noll coordinate j given a grid of radial coordinates rho and azimuthal coordinates phi.
+    """
+    n = 0
+    while (j > n):
+        n += 1
+        j -= n
+    m = -n+2*j
+    return zernike(m, n, rho, phi)
+
+
+def zernikeFit(x, y, z,max_rad=225.,cm=[0,0],max_order=20):
+    """
+    Fit a set of x, y, z data to a zernike polynomial with the least square fitting. Note that here x, y, z are all 1 dim array. Here the max_rad is by default equal to 225 mm, the size of the decam focal plane.
+    It will return the beta and the adjusted R2
+    """
+    x = x - cm[0]
+    y = y - cm[1]
+    n = len(x)
+    p = max_order
+    rho = np.sqrt(x**2+y**2)/max_rad #normalize to unit circle.
+    phi = np.arctan2(y,x)
+    dataX = []
+    ok = rho <= 1.
+    for j in range(max_order):
+        dataX.append(zernikel(j,rho[ok],phi[ok]))
+    dataX=np.array(dataX).T
+    beta,SSE,rank,sing = np.linalg.lstsq(dataX,z[ok])# SSE is the residual sum square
+    sigma = np.sqrt(SSE/(n-p))
+    betaErr = sigma/np.dot(dataX.T,dataX).diagonal()
+    SST = np.var(z[ok])*(len(z[ok])-1)# SST is the sum((z_i - mean(z))^2)
+    R2 = 1 - SSE/SST
+    R2adj = 1-(1-R2)*(len(z[ok])-1)/(len(z[ok])-max_order)# adjusted R2 for quality of fit.             
+    fitted = np.dot(dataX,beta) # fitted value
+    return beta,betaErr, R2adj,fitted
+
+
+
+def measure_stamp_coeff(data = None, zernike_max_order=20):
+    """
+    the convention of data is: x, y, M20, M22, M31, M33
+    """
+    betaAll=[]
+    betaErrAll=[]
+    R2adjAll=[]
+    beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=zernike_max_order)
+    betaAll.append(beta)
+    betaErrAll.append(betaErr)
+    R2adjAll.append(R2_adj)
+    for i in range(3,6):
+        beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,i].real,max_order=zernike_max_order)
+        betaAll.append(beta)
+        betaErrAll.append(betaErr)
+        R2adjAll.append(R2_adj)
+        beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,i].imag,max_order=zernike_max_order)
+        betaAll.append(beta)
+        betaErrAll.append(betaErr)
+        R2adjAll.append(R2_adj)
+    betaAll = np.array(betaAll)
+    betaErrAll = np.array(betaErrAll)
+    R2adjAll = np.array(R2adjAll)
+    return betaAll,betaErrAll, R2adjAll
+
+
+def display_moments(data=None):
+    # remove the mean for all moments
+    data = subMeanAll(data)
+    pl.figure(figsize=(11,11))
+    pl.subplot(2,2,1)
+    phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    phi22[x<0] = phi22+np.deg2rad(180)
+    u = np.abs(data[:,3])*np.cos(phi22)
+    v = np.abs(data[:,3])*np.sin(phi22)
+    qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^2',coordinates='data',color='blue')
+    pl.plot(x,y,'b,')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.grid(color='g')
+    pl.xlabel('X [mm] (WEST)')
+    pl.ylabel('Y [mm] (NORTH)')
+    pl.title('M22')
+    pl.subplot(2,2,2)
+    phi31 = np.arctan2(data[:,4].imag,data[:,4].real)
+    u = np.abs(data[:,4])*np.cos(phi31)
+    v = np.abs(data[:,4])*np.sin(phi31)
+    qvr=pl.quiver(x,y,u,v,width=0.003,color='r',pivot='middle',headwidth=4)
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^3',coordinates='data',color='blue')
+    pl.plot(x,y,'b,')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.grid(color='g')
+    pl.xlabel('X [mm] (WEST)')
+    pl.ylabel('Y [mm] (NORTH)')
+    pl.title('M31')
+    pl.subplot(2,2,3)
+    phi33 = np.arctan2(data[:,5].imag,data[:,5].real)/3.
+    u = np.abs(data[:,5])*np.cos(phi33)
+    v = np.abs(data[:,5])*np.sin(phi33)
+    pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
+    u = np.abs(data[:,5])*np.cos(phi33+np.deg2rad(120))
+    v = np.abs(data[:,5])*np.sin(phi33+np.deg2rad(120))
+    pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
+    u = np.abs(data[:,5])*np.cos(phi33+np.deg2rad(240))
+    v = np.abs(data[:,5])*np.sin(phi33+np.deg2rad(240))
+    qvr=pl.quiver(x,y,u,v,width=0.003,color='r',headwidth=4)
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^3',coordinates='data',color='blue')
+    pl.plot(x,y,'b,')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.grid(color='g')
+    pl.xlabel('X [mm] (WEST)')
+    pl.ylabel('Y [mm] (NORTH)')
+    pl.title('M33')
+    pl.subplot(2,2,4)
+    m20sqr = np.sqrt(data[:,2].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    m20sqr_med = np.median(m20sqr)
+    m20sqr_diff = m20sqr - m20sqr_med
+    m20sqr_diff_absmed = np.median(np.abs(m20sqr_diff))
+    plotScale = 1./m20sqr_diff_absmed*100
+    pos = m20sqr_diff >=0
+    neg = m20sqr_diff < 0
+    pl.scatter(x[pos],y[pos],s=m20sqr_diff[pos]*plotScale,c='r',alpha=0.5)
+    pl.scatter(x[neg],y[neg],s=-m20sqr_diff[neg]*plotScale,c='b',alpha=0.5)
+    pl.scatter(-230,-210,s=m20sqr_diff_absmed*plotScale,c='b',alpha=0.5)
+    pl.text(-200,-215,'-'+str(round(m20sqr_diff_absmed,6))+' pix')
+    pl.scatter(-230,-230,s=m20sqr_diff_absmed*plotScale,c='r',alpha=0.5)
+    pl.text(-200,-235,str(round(m20sqr_diff_absmed,6))+' pix')
+    pl.plot(x,y,'y,')
+    pl.grid(color='g')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.xlabel('X [mm] (WEST)')
+    pl.ylabel('Y [mm] (NORTH)')
+    pl.title('median '+r'$\sqrt{M20}$: '+str(round(scale*m20sqr_med,3))+' [arcsec]')
+    return '---done!--'
+
+def display_2nd_moments(data=None):
+    # remove the mean for all moments
+    data = subMeanAll(data)
+    pl.figure(figsize=(11,5.5))
+    pl.subplot(1,2,1)
+    phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    phi22[x<0] = phi22+np.deg2rad(180)
+    u = np.abs(data[:,3])*np.cos(phi22)
+    v = np.abs(data[:,3])*np.sin(phi22)
+    qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
+    qk = pl.quiverkey(qvr, -150,-240,np.max(np.sqrt(u**2+v**2)),str(round(np.max(np.sqrt(u**2+v**2)),3))+' pix^2',coordinates='data',color='blue')
+    pl.plot(x,y,'b,')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.grid(color='g')
+    pl.xlabel('X [mm] (WEST)')
+    pl.ylabel('Y [mm] (NORTH)')
+    pl.title('M22')
+    pl.subplot(1,2,2)
+    m20sqr = np.sqrt(data[:,2].real)
+    x = data[:,0].real
+    y = data[:,1].real
+    m20sqr_med = np.median(m20sqr)
+    m20sqr_diff = m20sqr - m20sqr_med
+    m20sqr_diff_absmed = np.median(np.abs(m20sqr_diff))
+    plotScale = 1./m20sqr_diff_absmed*100
+    pos = m20sqr_diff >=0
+    neg = m20sqr_diff < 0
+    pl.scatter(x[pos],y[pos],s=m20sqr_diff[pos]*plotScale,c='r',alpha=0.5)
+    pl.scatter(x[neg],y[neg],s=-m20sqr_diff[neg]*plotScale,c='b',alpha=0.5)
+    pl.scatter(-230,-210,s=m20sqr_diff_absmed*plotScale,c='b',alpha=0.5)
+    pl.text(-200,-215,'-'+str(round(m20sqr_diff_absmed,6))+' pix')
+    pl.scatter(-230,-230,s=m20sqr_diff_absmed*plotScale,c='r',alpha=0.5)
+    pl.text(-200,-235,str(round(m20sqr_diff_absmed,6))+' pix')
+    pl.plot(x,y,'y,')
+    pl.grid(color='g')
+    pl.xlim(-250,250)
+    pl.ylim(-250,250)
+    pl.xlabel('X [mm] (WEST)')
+    pl.ylabel('Y [mm] (NORTH)')
+    pl.title('median '+r'$\sqrt{M20}$: '+str(round(scale*m20sqr_med,3))+' [arcsec]')
+    return '---done!--'
+
+
+def showZernike(beta=None,betaErr=None,gridsize = 1, max_rad = 1,significance=False):
+    """
+    significance shows how significant the coefficients are constrained. 
+    """
+    x,y = np.meshgrid(np.arange(-gridsize,gridsize,0.01),np.arange(-gridsize,gridsize,0.01))
+    rho = np.sqrt(x**2+y**2)
+    phi = np.arctan2(y,x)
+    ok = rho < max_rad
+    if significance != False:
+        sigIdx = np.abs(beta)/betaErr >= significance
+        beta = beta[sigIdx]
+    nn = len(beta)
+    znk=0
+    for j in range(nn):
+        znk = znk + beta[j]*zernikel(j,rho,phi)*ok
+    pl.imshow(znk)
+    return znk
+
+
+def display_zernike(data,zernike_max_order=20):
+    
+    colnames = ['x','y','M20','M22','M31','M33']
+    data=np.array(data)
+    pl.figure(figsize=(15,15))
+    betaAll=[]
+    betaErrAll=[]
+    R2adjAll=[]
+    pl.subplot(3,3,1)
+    beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=zernike_max_order)
+    betaAll.append(beta)
+    betaErrAll.append(betaErr)
+    R2adjAll.append(R2_adj)
+    znk=showZernike(beta=beta)
+    pl.colorbar()
+    pl.title(colnames[2])
+    for i in range(3,6):
+        pl.subplot(3,3,2*i-4)
+        beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,i].real,max_order=zernike_max_order)
+        betaAll.append(beta)
+        betaErrAll.append(betaErr)
+        R2adjAll.append(R2_adj)
+        znk=showZernike(beta=beta)
+        pl.colorbar()
+        pl.title(colnames[i]+'_real')
+        print '--- R2_adj of the fit is: '+str(R2_adj) +'---'
+        pl.subplot(3,3,2*i-3)
+        beta,betaErr,R2_adj = zernikeFit(data[:,0].real,data[:,1].real,data[:,i].imag,max_order=zernike_max_order)
+        betaAll.append(beta)
+        betaErrAll.append(betaErr)
+        R2adjAll.append(R2_adj)
+        znk=showZernike(beta=beta)
+        pl.colorbar()
+        pl.title(colnames[i]+'_imag')
+        print '--- R2_adj of the fit is: '+str(R2_adj) +'---'
+    betaAll = np.array(betaAll)
+    betaErrAll = np.array(betaErrAll)
+    R2adjAll = np.array(R2adjAll)
+    return '----done !---'
+
+
+def display_coeff(data=None):
+    betaAll,betaErrAll, R2adjAll = measure_stamp_coeff(data = data, zernike_max_order=20)
+    ind = np.arange(len(betaAll[0]))
+    momname = ('M20','M22.Real','M22.imag','M31.real','M31.imag','M33.real','M33.imag')
+    fmtarr = ['bo-','ro-','go-','co-','mo-','yo-','ko-']
+    pl.figure(figsize=(17,13))
+    for i in range(7):
+        pl.subplot(7,1,i+1)
+        pl.errorbar(ind,betaAll[i],yerr = betaErrAll[i],fmt=fmtarr[i])
+        pl.grid()
+        pl.xlim(-1,21)
+        if i ==0:
+            pl.ylim(-10,65)
+        elif i ==1:
+            pl.ylim(-5,6)
+        elif i ==2:
+            pl.ylim(-5,6)
+        elif i == 3:
+            pl.ylim(-0.1,0.1)
+        elif i == 4:
+            pl.ylim(-0.1,0.1)
+        elif i ==5:
+            pl.ylim(-100,100)
+        elif i == 6:
+            pl.ylim(-100,100)
+        pl.xticks(ind,('','','','','','','','','','','','','','','','','','','',''))
+        pl.ylabel(momname[i])
+    pl.xticks(ind,('0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19'))
+    pl.xlabel('Zernike Coefficients')
+    return '--- done ! ----'
+
+def standardizeData(tdata,vdata):
+    """
+    This code standardize the training data and validation data by the training data.
+    """
+    tmean = tdata.mean(axis=0)
+    tstd = tdata.std(axis=0)
+    tdataNew = (tdata - tmean)/tstd
+    vdataNew = (vdata - tmean)/tstd
+    return tdataNew, vdataNew
+
+def remM3xZernike(tdata):
+    """
+    This code remove the 0th zernike coefficient for the M31, M33 from the training and validation data object. The data has 140 columns, from 0 - 59 are the 2nd moments coefficients. 60, 80, 100, 120 are the 0th coefficients for the 3rd moments. We remove them from the data structure.    
+    """
+    idx = np.concatenate((np.arange(0,60),np.arange(61,80),np.arange(81,100),np.arange(101,120),np.arange(121,140)))
+    datanew = tdata[:,idx]
+    return datanew
+
+
+def subMeanM3x(data=None):
+    """
+    this code subtract the mean of the 3rd moments from the data. This is to remove the tracking errors.
+    """
+    datamean = data.mean(axis = 0)
+    data[:,4:6] = data[:,4:6] - datamean[4:6]
+    return data
+
+def subMeanAll(data=None):
+    """
+    this subtract the mean of all moments except M20 from the data
+    """
+    datamean = data.mean(axis = 0)
+    data[:,3:] = data[:,3:] - datamean[3:]
+    return data
+
+def selectStarFwhm(catname):
+    ext = [1,2,3,4]
+    fwhm_sex=np.zeros(0)
+    mag = np.zeros(0)
+    for i in ext:
+        cat=pf.getdata(catname,i)
+        fwhm_sex=np.concatenate((fwhm_sex,cat.FWHM_IMAGE))
+        mag = np.concatenate((mag,cat.MAG_AUTO))
+    ok = (mag > -15)*(mag<-13)*(fwhm_sex > 0)*(fwhm_sex < 20.)
+    md = np.median(fwhm_sex[ok])
+    return md
+    
+def selectStar(mag,fwhm_sex):
+    ok = (mag > -15)*(mag<-13)*(fwhm_sex > 0)*(fwhm_sex < 20.)
+    md = np.median(fwhm_sex[ok])
+    return md
+   
+
