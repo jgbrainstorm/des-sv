@@ -48,6 +48,27 @@ def hexapodPosition(beta,removeMean=True):
     #zh = z
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
+def CRAYposLinearModel(b=beta):
+    M22realTrefoil2 = b[:,29] # for x decenter
+    M22imagTrefoil1 = b[:,48] 
+    M22TrefoilXshift = 0.5*(M22realTrefoil2+M22imagTrefoil1)
+    M22realTrefoil1 = b[:,26] # for y decenter
+    M22imagTrefoil2 = b[:,49] 
+    M22TrefoilYshift = 0.5*(M22realTrefoil1 - M22imagTrefoil2)
+    M20defocus = b[:,4] # for defocus
+    M22realComa2 = b[:,28] # for x-tilt
+    M22imagComa1 = b[:,47]
+    M22ComaXtilt = 0.5*(M22realComa2+M22imagComa1)
+    M22realComa1 = b[:,27] # for y-tilt
+    M22imagComa2 = b[:,48]
+    M22ComaYtilt = 0.5*(M22realComa1 - M22imagComa2)
+    x = -3.0063 * M22TrefoilXshift -0.0053
+    y = -2.9318 * M22TrefoilYshift - 0.0005
+    z = 0.4046 * M20defocus - 0.0705
+    xtilt = 1075.8892 * M22ComaXtilt - 0.4876
+    ytilt = -1064.6332 * M22ComaYtilt - 0.1234
+    return x,y,z,xtilt,ytilt
+
 
 def runanalysis(img_name=None):
     catname = img_name[0:-5]+'_star_catalog.fits'
@@ -166,6 +187,7 @@ def runanalysis(img_name=None):
     m22idx = np.concatenate((np.arange(21,40),np.arange(41,60)))
     hexHao = hexapodPosition(beta[m22idx])
     hexHaoCRAY = CRAYposition(beta[m22idx])
+    hexaHaoLinear = CRAYposLinearModel(beta)
     betaSex=[]
     betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
     betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
@@ -194,6 +216,7 @@ def runanalysis(img_name=None):
     print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexHao
+    print hexHaoLinear
     print '        ------based on Adaptive moments  --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexA
