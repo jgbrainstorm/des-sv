@@ -48,7 +48,7 @@ def hexapodPosition(beta,removeMean=True):
     #zh = z
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
-def CRAYposLinearModel(b=beta):
+def CRAYposLinearModel(b=None):
     M22realTrefoil2 = b[:,29] # for x decenter
     M22imagTrefoil1 = b[:,48] 
     M22TrefoilXshift = 0.5*(M22realTrefoil2+M22imagTrefoil1)
@@ -230,7 +230,7 @@ def runanalysis(img_name=None):
     print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexHaoCRAY
-    hexaHaoCRAYlinear
+    print hexaHaoCRAYlinear
     print '        ------based on Adaptive moments  --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexACRAY
