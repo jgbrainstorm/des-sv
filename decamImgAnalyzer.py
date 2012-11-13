@@ -77,7 +77,7 @@ def runanalysis(img_name=None):
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
-        ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12)*(mag>-14)
+        ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12.5)*(mag>-14.5)
         nstar = len(mag[ok])
         print '--- Nstars selected: '+str(nstar)+'---'
         magall.append(mag)
@@ -100,7 +100,7 @@ def runanalysis(img_name=None):
             fwhm_sex = fwhm_sex[ok]
             M20 = np.median(M20)
             M22 = np.median(M22)
-            stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
+            stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=35)
             stamplist = stamplist+stamp
             bkglist = bkglist+list(bkg)
             xccd = eval(imghdu[i].header['extname'])[1]
@@ -126,11 +126,6 @@ def runanalysis(img_name=None):
     fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    #pl.plot(magall,radall,'b,')
-    #pl.plot(magall[ok],radall[ok],'r,')
-    #pl.ylim(0,10)
-    #pl.savefig('mag_radius_'+expid+'.png')
-    #pl.close()
     #---check the fitted value of the moments ---
     datafitted = data.copy()
     datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
