@@ -6,7 +6,7 @@
 # psfFocus.py. 
 # created by Jiangang Hao, 11/13/2012
 
-import sys
+import sys,os
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
 sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
