@@ -57,7 +57,6 @@ def runanalysis(img_name=None):
     stamplist=[]
     bkglist=[]
     dataSex=[]
-    dataAmom=[]  # for the adaptive moments, only M20 and M22
     fwhmSex = np.array([])
     whiskerSex = np.array([])
     magall = []
@@ -106,10 +105,8 @@ def runanalysis(img_name=None):
             bkglist = bkglist+list(bkg)
             xccd = eval(imghdu[i].header['extname'])[1]
             yccd = eval(imghdu[i].header['extname'])[2]
-            moms = measure_stamp_moments(stamp,bkg,kernelSigma/scale)
-            momsA = measure_stamp_moments(stamp,bkg,kernelSigma/scale,adaptive=True)
+            moms = measure_stamp_moments(stamp,bkg,2.)
             data.append([xccd,yccd]+ list(moms))
-            dataAmom.append([xccd,yccd]+ list(momsA))
             dataSex.append([xccd,yccd,M20,M22])
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
             whiskerSex = np.concatenate((whiskerSex,whisker_sex))
@@ -117,7 +114,6 @@ def runanalysis(img_name=None):
             continue
     data = np.array(data)
     dataSex = np.array(dataSex)
-    dataAmom = np.array(dataAmom)
     magall = np.array(magall)
     radall = np.array(radall)
     okall = np.array(okall)
