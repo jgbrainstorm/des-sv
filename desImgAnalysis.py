@@ -187,7 +187,7 @@ def runanalysis(img_name=None):
     m22idx = np.concatenate((np.arange(21,40),np.arange(41,60)))
     hexHao = hexapodPosition(beta[m22idx])
     hexHaoCRAY = CRAYposition(beta[m22idx])
-    hexaHaoLinear = CRAYposLinearModel(beta)
+    hexaHaoCRAYlinear = CRAYposLinearModel(beta)
     betaSex=[]
     betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
     betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
@@ -216,7 +216,6 @@ def runanalysis(img_name=None):
     print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexHao
-    print hexHaoLinear
     print '        ------based on Adaptive moments  --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexA
@@ -231,6 +230,7 @@ def runanalysis(img_name=None):
     print '        ------based on weighted moments --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexHaoCRAY
+    hexaHaoCRAYlinear
     print '        ------based on Adaptive moments  --------'
     print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
     print hexACRAY
