@@ -523,7 +523,7 @@ def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
         pl.grid()
         pl.xlim(-1,len(betaAll[i])+1)
         if i==0 and hexinfo != None:
-            pl.title('Hexapod Adj: x'+str(hexinfo[0])+' y:'+str(hexinfo[1]+' z:'+str(hexinfo[2])+' xtilt:'+str(hexinfo[3]+' ytilt:'+str(hexinfo[4])))
+            pl.title('Hexapod Adj: x'+str(hexinfo[0])+' y:'+str(hexinfo[1])+' z:'+str(hexinfo[2])+' xtilt:'+str(hexinfo[3])+' ytilt:'+str(hexinfo[4]))
         #pl.ylim(min(betaAll[i][1:])-0.01,max(betaAll[i][1:])+0.01)
         pl.xticks(ind,('','','','','','','','','','','','','','','','','','','',''))
         pl.ylim(-0.3,0.3)
