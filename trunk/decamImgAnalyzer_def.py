@@ -987,7 +987,7 @@ def selectStarFwhm(catname):
     return md
     
 def selectStar(mag,fwhm_sex):
-    ok = (mag > -15)*(mag<-13)*(fwhm_sex > 0)*(fwhm_sex < 20.)
+    ok = (mag > -15)*(mag<-13)*(fwhm_sex > 0)*(fwhm_sex < 6.)
     md = np.median(fwhm_sex[ok])
     return md
    

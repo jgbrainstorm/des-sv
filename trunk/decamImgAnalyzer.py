@@ -77,7 +77,7 @@ def runanalysis(img_name=None):
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
-        ok = (np.abs(fwhm_sex - starFwhm) < 0.3)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-12.5)*(mag>-14.5)
+        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-11.5)*(mag>-14.5)
         nstar = len(mag[ok])
         print '--- Nstars selected: '+str(nstar)+'---'
         magall.append(mag)
@@ -100,7 +100,7 @@ def runanalysis(img_name=None):
             fwhm_sex = fwhm_sex[ok]
             M20 = np.median(M20)
             M22 = np.median(M22)
-            stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=35)
+            stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=30)
             stamplist = stamplist+stamp
             bkglist = bkglist+list(bkg)
             xccd = eval(imghdu[i].header['extname'])[1]
@@ -117,26 +117,28 @@ def runanalysis(img_name=None):
     magall = np.array(magall)
     radall = np.array(radall)
     okall = np.array(okall)
-    display_2nd_moments(dataSex)
-    pl.savefig('moments_sextractor_'+expid+'.png')
-    pl.close()
-    display_moments(data)
+    #display_2nd_moments(dataSex)
+    #pl.savefig('moments_sextractor_'+expid+'.png')
+    #pl.close()
+    #display_moments(data)
+    display_2nd_moments(data)
     pl.savefig('moments_measurement_'+expid+'.png')
     pl.close()
     fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
     #---check the fitted value of the moments ---
-    datafitted = data.copy()
-    datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
-    datafitted[:,3].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[3]
-    datafitted[:,3].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[3]
-    datafitted[:,4].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].real,max_order=20)[3]
-    datafitted[:,4].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].imag,max_order=20)[3]
-    datafitted[:,5].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].real,max_order=20)[3]
-    datafitted[:,5].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].imag,max_order=20)[3]
-    display_moments(datafitted)
-    pl.savefig('fitted_moments_measurement_'+expid+'.png')
+    #datafitted = data.copy()
+    #datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
+    #datafitted[:,3].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[3]
+    #datafitted[:,3].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[3]
+    #datafitted[:,4].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].real,max_order=20)[3]
+    #datafitted[:,4].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].imag,max_order=20)[3]
+    #datafitted[:,5].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].real,max_order=20)[3]
+    #datafitted[:,5].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].imag,max_order=20)[3]
+    #display_moments(datafitted)
+    #pl.savefig('fitted_moments_measurement_'+expid+'.png')
+    #pl.close()
     #---the hexapod adjustment using M20,M22---
     beta=[]
     beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[0])
@@ -149,40 +151,42 @@ def runanalysis(img_name=None):
     beta=beta.flatten()
     posCRAY = CRAYposLinearModel(beta)
     hexHao = hexapodPosition(beta)
-    betaSex=[]
-    betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
-    betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
-    betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].imag,max_order=20)[0])
-    dispM202Coeff(betaSex)
-    pl.savefig('coeff_Sex_'+expid+'.png')
-    pl.close()
-    betaSex = np.array(betaSex)
-    betaSex=betaSex.flatten()
-    posCRAYsex = CRAYposLinearModel(betaSex)
-    hexSex = hexapodPosition(betaSex)
-    print '----hexpod configuration from header -----'
-    print hexposhdr
-    print '--------the hexapod positions -----'
-    print '        ------based on weighted moments --------'
-    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    print hexHao
-    print '        ------based on moments from sextractor --------'
-    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    print hexSex
-    print ' '
-    print ' '
-    print ' '
-    print ' '
-    print '--------the CRAY positions -----'
-    print '        ------based on weighted moments --------'
-    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    print posCRAY
-    print '        ------based on moments from sextractor --------'
-    print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    print posCRAYsex
+    #betaSex=[]
+    #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
+    #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
+    #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].imag,max_order=20)[0])
+    #dispM202Coeff(betaSex)
+    #pl.savefig('coeff_Sex_'+expid+'.png')
+    #pl.close()
+    #betaSex = np.array(betaSex)
+    #betaSex=betaSex.flatten()
+    #posCRAYsex = CRAYposLinearModel(betaSex)
+    #hexSex = hexapodPosition(betaSex)
+    #print '----hexpod configuration from header -----'
+    #print hexposhdr
+    #print '--------the hexapod positions -----'
+    #print '        ------based on weighted moments --------'
+    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    #print hexHao
+    #print '        ------based on moments from sextractor --------'
+    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    #print hexSex
+    #print ' '
+    #print ' '
+    #print ' '
+    #print ' '
+    #print '--------the CRAY positions -----'
+    #print '        ------based on weighted moments --------'
+    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    #print posCRAY
+    #print '        ------based on moments from sextractor --------'
+    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
+    #print posCRAYsex
     #---save files---
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
-    np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
+    #np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
+    np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao],fmt='%10.5f')
+    
     return '----finished one image ----'
     
 
