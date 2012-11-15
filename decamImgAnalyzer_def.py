@@ -519,7 +519,7 @@ def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
     pl.figure(figsize=(17,7))
     for i in range(3):
         pl.subplot(4,1,i+1)
-        pl.errorbar(ind[1:],betaAll[i][1:],yerr = betaErrAll[i],fmt=fmtarr[i])
+        pl.errorbar(ind[1:],betaAll[i][1:],yerr = betaErrAll[i][1:],fmt=fmtarr[i])
         pl.grid()
         pl.xlim(-1,len(betaAll[i])+1)
         if i==0 and hexinfo != None:
