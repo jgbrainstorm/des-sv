@@ -510,7 +510,7 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
     return '-----done !----'
 
-def dispM202Coeff(betaAll=None,betaErrAll=None):
+def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
     ind = np.arange(len(betaAll[0]))
     momname = ('M20','M22.Real','M22.imag')
     fmtarr = ['bo-','ro-','go-']
@@ -522,6 +522,8 @@ def dispM202Coeff(betaAll=None,betaErrAll=None):
         pl.errorbar(ind[1:],betaAll[i][1:],yerr = betaErrAll[i],fmt=fmtarr[i])
         pl.grid()
         pl.xlim(-1,len(betaAll[i])+1)
+        if i==0 and hexinfo != None:
+            pl.title('Hexapod Adj: x'+str(hexinfo[0])+' y:'+str(hexinfo[1]+' z:'+str(hexinfo[2])+' xtilt:'+str(hexinfo[3]+' ytilt:'+str(hexinfo[4])))
         #pl.ylim(min(betaAll[i][1:])-0.01,max(betaAll[i][1:])+0.01)
         pl.xticks(ind,('','','','','','','','','','','','','','','','','','','',''))
         pl.ylim(-0.3,0.3)

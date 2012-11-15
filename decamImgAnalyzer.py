@@ -122,7 +122,7 @@ def runanalysis(img_name=None):
     #pl.close()
     #display_moments(data)
     display_2nd_moments(data)
-    pl.savefig('moments_measurement_'+expid+'.png')
+    pl.savefig('moments_whisker_'+expid+'.png')
     pl.close()
     fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
@@ -141,16 +141,27 @@ def runanalysis(img_name=None):
     #pl.close()
     #---the hexapod adjustment using M20,M22---
     beta=[]
-    beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[0])
-    beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[0])
-    beta.append(zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[0])
-    dispM202Coeff(beta)
-    pl.savefig('coeff_measurement_'+expid+'.png')
-    pl.close()
+    betaErr=[]
+    betaM20 = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
+    beta.append(betaM20[0])
+    betaErr.append(betaM20[1])
+    betaM22real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
+    beta.append(betaM20real[0])
+    betaErr.append(betaM20real[1])
+
+    betaM22imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)
+    beta.append(betaM20imag[0])
+    betaErr.append(betaM20imag[1])
+
+    betaforplot = beta.copy()
     beta=np.array(beta)
     beta=beta.flatten()
     posCRAY = CRAYposLinearModel(beta)
     hexHao = hexapodPosition(beta)
+    dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErr,hexinfo=hexHao)
+    pl.savefig('zernike_coeff_'+expid+'.png')
+    pl.close()
+ 
     #betaSex=[]
     #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
     #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
