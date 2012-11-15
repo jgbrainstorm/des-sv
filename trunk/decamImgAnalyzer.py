@@ -152,8 +152,7 @@ def runanalysis(img_name=None):
     betaM22imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)
     beta.append(betaM22imag[0])
     betaErr.append(betaM22imag[1])
-
-    betaforplot = beta.copy()
+    betaforplot = beta
     beta=np.array(beta)
     beta=beta.flatten()
     posCRAY = CRAYposLinearModel(beta)
