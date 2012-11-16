@@ -41,7 +41,7 @@ def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     return stampImg
 
 
-def moments(data):
+def momentsold(data):
     """
     Returns (height, x, y, width_x, width_y)
     the gaussian parameters of a 2D distribution by calculating its
@@ -79,6 +79,35 @@ def moments(data):
         width_y=0
     return height,np.sqrt(width_x**2 + width_y**2)
 
+def moments(data,sigma):
+    """
+    Returns (height, and width)
+    the gaussian parameters of a 2D distribution by calculating its
+    moments
+    """
+    nrow,ncol=data.shape
+    Isum = data.sum()
+    Icol = data.sum(axis=0) # sum over all rows
+    Irow = data.sum(axis=1) # sum over all cols
+    colgrid = np.arange(ncol)
+    rowgrid = np.arange(nrow)
+    rowmean=np.sum(rowgrid*Irow)/Isum
+    colmean=np.sum(colgrid*Icol)/Isum
+    ROW,COL=np.indices((nrow,ncol))
+    wrmat = wr(ROW,COL,rowmean,colmean,sigma)
+    IWmat = data*wrmat
+    IWcol = IWmat.sum(axis=0)
+    IWrow = IWmat.sum(axis=1)
+    IWsum = IWmat.sum()
+    rowgrid = rowgrid - rowmean # centered
+    colgrid = colgrid - colmean
+    Mrr = np.sum(rowgrid**2*IWrow)/IWsum
+    Mcc = np.sum(colgrid**2*IWcol)/IWsum
+    width = np.sqrt((Mrr+Mcc)*0.5)
+    datasrt = np.sort(data.flatten())
+    height = np.median(datasrt[-20:-1])
+    return height,width
+
 
 def wr(x=None,y=None,xcen=None,ycen=None,sigma=None):
     """
@@ -113,7 +142,6 @@ def adaptiveCentroid(data=None,sigma=None):
         colmean = colmean+2.*dcolmean
         if drowmean**2+dcolmean**2 <= EP:
             break
-
     return rowmean,colmean
 
  
