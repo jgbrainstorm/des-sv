@@ -460,9 +460,9 @@ def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
     output: [whisker_weighted_moments, whisker_Amoments]
             [fwhm_weighted, fwhm_Amoments,fwhm_moffat, fwhm_gauss,fwhm_sech2]
     """
-    if stampImg.shape[0] == stampImg.shape[1] and stampImg.shape[1] != 0:
-        if bkg != None:
-            stampImg = stampImg - bkg
+    if bkg != None:
+        stampImg = stampImg - bkg
+    if stampImg.shape[0] == stampImg.shape[1] and stampImg.shape[1] != 0 and np.sum(stampImg) > 0:
         npix = stampImg.shape[0]
         mfit = mfwhm(stampImg)
         gfit = gfwhm(stampImg)
