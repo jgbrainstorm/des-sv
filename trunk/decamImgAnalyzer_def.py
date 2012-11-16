@@ -79,12 +79,13 @@ def momentsold(data):
         width_y=0
     return height,np.sqrt(width_x**2 + width_y**2)
 
-def moments(data,sigma):
+def moments(data):
     """
     Returns (height, and width)
     the gaussian parameters of a 2D distribution by calculating its
     moments
     """
+    sigma=2. # 2 pix as weight kernel
     nrow,ncol=data.shape
     Isum = data.sum()
     Icol = data.sum(axis=0) # sum over all rows
