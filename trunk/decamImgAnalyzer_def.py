@@ -37,7 +37,8 @@ def getStamp(data=None,xcoord=None,ycoord=None,Npix = None):
     stampImg=[]
     for i in range(Nstar):
         Img = data[int(rowcen[i]-Npix/2):int(rowcen[i]+Npix/2),int(colcen[i]-Npix/2):int(colcen[i]+Npix/2)]
-        stampImg.append(Img)
+        if np.sum(Img) > 0:
+            stampImg.append(Img)
     return stampImg
 
 
