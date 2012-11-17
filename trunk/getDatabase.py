@@ -137,11 +137,11 @@ if __name__ == "__main__":
         ellipIH[i] = resIH[2]
     fltr = np.array(fltr)
     idx = np.arange(nexposure)
-    idxg = idx[fltr='g']
-    idxr = idx[fltr='r']
-    idxi = idx[fltr='i']
-    idxz = idx[fltr='z']
-    idxY = idx[fltr='Y']
+    idxg = idx[fltr=='g']
+    idxr = idx[fltr=='r']
+    idxi = idx[fltr=='i']
+    idxz = idx[fltr=='z']
+    idxY = idx[fltr=='Y']
     pl.figure(figsize=(10,10))
     pl.plot(fwhmQR[idxg],fwhmIH[idxg],'g.',label='g')
     pl.plot(fwhmQR[idxr],fwhmIH[idxr],'r.',label='r')
