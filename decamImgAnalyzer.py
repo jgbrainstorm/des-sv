@@ -3,10 +3,8 @@
 # This code is the replacement of desImgAnalysis.py
 # J. Hao, 11/13/2012 @ FNAL 
 #------------------------------------------------
-import sys, glob
+import sys
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
-sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi/pyRaytrace')
-sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
 
 from decamImgAnalyzer_def import *
 

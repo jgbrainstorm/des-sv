@@ -2,6 +2,10 @@
 import glob as gl
 import sys,os
 
+if len(sys.argv) == 1:
+    print 'syntax: htmlFig.py date'
+    print 'example: htmlFig.py 11-16-2012'
+    sys.exit()
 htmlName = sys.argv[1]
 htmlName = 'Image_Quality_'+htmlName+'.html'
 Fig_coeff = gl.glob('zernike_coeff*.png')
