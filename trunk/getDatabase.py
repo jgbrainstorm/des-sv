@@ -126,8 +126,8 @@ if __name__ == "__main__":
     ellipIH = np.zeros(nexposure)
     fwhmQR = np.zeros(nexposure)
     ellipQR = np.zeros(nexposure)
-    for i in range(nexposure)
-        print i
+    for i in range(nexposure):
+        print i, nexposure
         resQR = getQRbyExpid(expid[i])
         resIH = getIHbyExpid(expid[i])
         fwhmQR[i]=resQR[1]
