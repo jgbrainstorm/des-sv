@@ -152,6 +152,7 @@ if __name__ == "__main__":
     pl.xlabel('FWHM from QR')
     pl.ylabel('FWHM from IH')
     pl.title(start_date+' -  '+end_date)
+    pl.legend(loc='best')
     pl.savefig('fwhm_QR_IH.png')
     pl.close()
     pl.figure(figsize=(10,10))
@@ -164,6 +165,7 @@ if __name__ == "__main__":
     pl.xlabel('ELLIPTICITY from QR')
     pl.ylabel('ELLIPTICITY from IH')
     pl.title(start_date+' -  '+end_date)
+    pl.legend(loc='best')
     pl.savefig('ellip_QR_IH.png')
     pl.close()
    
