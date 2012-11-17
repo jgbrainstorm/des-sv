@@ -1,3 +1,9 @@
+#! /usr/bin/env python
+#------------------------------------------------
+# This code compare the image quality measurement
+# from IH and QR.
+# J. Hao, 11/16/2012 @ FNAL 
+
 import psycopg2 as psy
 import numpy as np
 import pylab as pl
