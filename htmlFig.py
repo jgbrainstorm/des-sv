@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 import glob as gl
-import sys
+import sys,os
 
 htmlName = sys.argv[1]
-htmlName = htmlName+'html'
+htmlName = 'Image_Quality_'+htmlName+'.html'
 Fig_coeff = gl.glob('zernike_coeff*.png')
 Fig_moments = gl.glob('moments*.png') 
 Fig_fwhm = gl.glob('fwhm*.png') 
@@ -36,3 +36,4 @@ for i in range(nfig):
 htm.write('</BODY> \n')
 htm.write('</HTML> \n')
 htm.close()
+os.system('tar -czf '+htmlName+'.tar.gz *')
