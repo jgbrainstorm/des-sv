@@ -55,6 +55,10 @@ def runanalysis(img_name=None):
     dimmfwhm = pf.getheader(img_name,0)['dimmsee']
     kernelSigma = np.sqrt(dimmfwhm**2+0.55**2)/2.35482
     hexposhdr = pf.getheader(img_name,0)['telfocus']
+    bcamDX = pf.getheader(img_name,0)['BECAMDX']
+    bcamDY = pf.getheader(img_name,0)['BECAMDY']
+    bcamAX = pf.getheader(img_name,0)['BECAMAX']
+    bcamAY = pf.getheader(img_name,0)['BECAMAY']
     data=[]
     stamplist=[]
     bkglist=[]
@@ -197,7 +201,8 @@ def runanalysis(img_name=None):
     #---save files---
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
     #np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
-    np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao],fmt='%10.5f')
+    hexBCAM = np.array([bcamDX,bcamDY,-999,bcamAX,bcamAY])
+    np.savetxt('hexapod_position_'+expid+'.txt',[hexposhdr,hexHao,hexBCAM],fmt='%10.5f')
     
     return '----finished one image ----'
     
