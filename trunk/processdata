@@ -1,0 +1,33 @@
+# this script automatically process the data with my pipeline and generate image based psf diagnostics. 
+# you need to change two places every day and move it to the local direcory of that day to run it. 
+
+echo '------this script automate the process of image quality analysis ---'
+
+# 1. copy the file to a local directory:
+echo '-- step 1: copy files -------'
+cp /home3/data_local/images/fits/2012B-0003/DECam_00152289.fits.fz .
+cp /home3/data_local/images/fits/2012B-0003/DECam_0015230[0-9].fits.fz .
+cp /home3/data_local/images/fits/2012B-0003/DECam_0015231[6,8].fits.fz .
+cp /home3/data_local/images/fits/2012B-0003/DECam_0015232[0,2,6,8].fits.fz .
+cp /home3/data_local/images/fits/2012B-0003/DECam_0015235[7,8,9].fits.fz .
+echo '----copy files done!---'
+
+# 2. unpack files
+echo '---step 2: unpack the files and remove the compressed files after it is done! ---'
+funpack *.fz
+rm *.fz
+echo ' ---- unpack and remove are done!----'
+
+# 3. flat field and bias subtraction 
+echo '--step 3: reduce the images by bias subraction and flat fielding ---'
+desImgReduction.py ../masterBias.fits ../masterFlat.fits all
+rm DECam_????????.fits
+echo '--- reduction is done ! ---'
+
+# 4. extract catalog and analyze the results
+echo '---step 4:  extracting star catalog and generate plots ---'
+decamImgAnalyzer.py all
+htmlFig.py 11-17-2012 56249 
+echo '-- analysis is done ---'
+
+
