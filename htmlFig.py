@@ -42,4 +42,4 @@ for i in range(nfig):
 htm.write('</BODY> \n')
 htm.write('</HTML> \n')
 htm.close()
-os.system('tar -czf '+htmlName+'.tar.gz *')
+os.system('tar -czf '+htmlName+'.tar.gz *.png')
