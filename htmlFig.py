@@ -42,5 +42,5 @@ for i in range(nfig):
 htm.write('</BODY> \n')
 htm.write('</HTML> \n')
 htm.close()
-os.system('tar -czf '+htmlName+'.tar.gz *.png')
+os.system('tar -czf '+htmlName+'.tar.gz *.png *.html')
 os.system('tar -czf hexpod_parameter_'+date+'-MJD-'+mjd+'.tar.gz *.txt')
