@@ -5,6 +5,7 @@
 #------------------------------------------------
 import sys
 import glob as gl
+import cPickle as p
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 
 from decamImgAnalyzer_def import *
@@ -13,11 +14,11 @@ def averageN30(data=None):
     """
     this function use the mean moments of N29,N31 to replace the moments of N30 because of the failure of N30. 
     """
-    idxN29 = 60
-    idxN30 = 61
-    idxN31 = 62
+    idxN29 = 59
+    idxN30 = 60
+    idxN31 = 61
     datanew = data.copy()
-    datanew[61,2:] = 0.5*(datanew[60,2:]+datanew[62,2:])
+    datanew[idxN30,2:] = 0.5*(datanew[idxN29,2:]+datanew[idxN31,2:])
     return datanew
 
 
@@ -194,8 +195,7 @@ def runanalysis(img_name=None):
     fwh,whk = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=2.,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    np.savetxt('fwhm_'+expid+'.txt',np.array(fwh),fmt='%10.5f') # save the fwhm and whisker data.
-    np.savetxt('whisker_'+expid+'.txt',np.array(whk),fmt='%10.5f')
+    p.dump(fwh+whk,open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
     #---check the fitted value of the moments ---
     #datafitted = data.copy()
     #datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
