@@ -172,7 +172,7 @@ def complexMoments(data=None,sigma=None):
         IWmat = data*wrmat
         IWcol = IWmat.sum(axis=0)
         IWrow = IWmat.sum(axis=1)
-        IWsum = IWmat.sum()
+        IWsum = IWmat.sum()          
         drowmean = np.sum((rowgrid-rowmean)*IWrow)/IWsum
         dcolmean = np.sum((colgrid-colmean)*IWcol)/IWsum
         rowmean = rowmean+2.*drowmean
@@ -473,9 +473,11 @@ def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
             fwhm = np.array([wfit[3],g2dfit[3],mfit[4],gfit[3],s2fit[3]])*scale
             whisker = np.array([wfit[2],g2dfit[2]])*scale
         except ValueError:
+            fwhm = np.array([-999,-999,-999,-999,-999])
+            whisker = np.array([-999,-999])
             pass
-        fwhm[np.isnan(fwhm)]=-999
-        whisker[np.isnan(whisker)]=-999
+        #fwhm[np.isnan(fwhm)]=-999
+        #whisker[np.isnan(whisker)]=-999
     else:
         fwhm = np.array([-999,-999,-999,-999,-999])
         whisker = np.array([-999,-999])
