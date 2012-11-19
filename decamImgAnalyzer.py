@@ -50,7 +50,7 @@ def analyze_hex():
     pl.grid()
     pl.subplot(5,1,3)
     pl.plot(expid,data[:,1,2],'bo-',label='Image Analysis')
-    #pl.plot(expid,data[:,2,2],'ro',label='BCAM')
+    #pl.plot(expid,data[:,2,2],'ro',label='BCAM') #no focus for BCAM
     pl.ylabel('z-defocus')
     pl.xticks(expid,np.repeat('',nexp))
     pl.grid()
@@ -144,7 +144,7 @@ def runanalysis(img_name=None):
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
-        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-12)*(mag>-15)
+        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
         nstar = len(mag[ok])
         print '--- Nstars selected: '+str(nstar)+'---'
         magall.append(mag)
