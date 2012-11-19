@@ -35,7 +35,7 @@ htm.write('<p>Hexapod Parameter Summary </p>\n')
 htm.write('<img src="%s" width="1000">\n'%'hexapod_pos_summary.png')
 for i in range(nfig):
     expid=Fig_fwhm[i][-12:-4]
-    htm.write('exposure ID:'+expid+'\n')
+    htm.write('<p> exposure ID:'+expid+'</p>\n')
     htm.write('<p>\n')
     htm.write('<img src="%s" width="1000">\n'%Fig_fwhm[i])
     htm.write('<img src="%s" width="1000">\n'%Fig_moments[i])
