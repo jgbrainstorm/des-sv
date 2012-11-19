@@ -194,8 +194,8 @@ def runanalysis(img_name=None):
     fwh,whk = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=2.,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    np.savetxt('fwhm_'+expid+'.txt',fwh,fmt='%10.5f') # save the fwhm and whisker data.
-    np.savetxt('whisker_'+expid+'.txt',whk,fmt='%10.5f')
+    np.savetxt('fwhm_'+expid+'.txt',np.array(fwh),fmt='%10.5f') # save the fwhm and whisker data.
+    np.savetxt('whisker_'+expid+'.txt',np.array(whk),fmt='%10.5f')
     #---check the fitted value of the moments ---
     #datafitted = data.copy()
     #datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
