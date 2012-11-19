@@ -8,6 +8,53 @@ sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 
 from decamImgAnalyzer_def import *
 
+def analyze_hex():
+    f = gl.glob('*.txt')
+    f.sort()
+    expid=[]
+    data=[]
+    nexp = len(f)
+    for fi in f:
+        expid.append(int(fi[-12:-4]))
+        data.append(np.genfromtxt(fi))
+    expid = np.array(expid)
+    xtick = expid.astype('S10')
+    data = np.array(data)
+    pl.figure(figsize=(16,9))
+    pl.subplot(5,1,1)
+    pl.plot(expid,data[:,1,0],'bo-',label='Image Analysis')
+    pl.plot(expid,data[:,2,0],'ro-',label='BCAM')
+    pl.ylabel('x-decenter')
+    pl.xticks(expid,np.repeat('',nexp))
+    pl.legend(loc='upper center',bbox_to_anchor=(0.5,1.58))
+    pl.grid()
+    pl.subplot(5,1,2)
+    pl.plot(expid,data[:,1,1],'bo-',label='Image Analysis')
+    pl.plot(expid,data[:,2,1],'ro-',label='BCAM')
+    pl.ylabel('y-decenter')
+    pl.xticks(expid,np.repeat('',nexp))
+    pl.grid()
+    pl.subplot(5,1,3)
+    pl.plot(expid,data[:,1,2],'bo-',label='Image Analysis')
+    #pl.plot(expid,data[:,2,2],'ro',label='BCAM')
+    pl.ylabel('z-defocus')
+    pl.xticks(expid,np.repeat('',nexp))
+    pl.grid()
+    pl.subplot(5,1,4)
+    pl.plot(expid,data[:,1,3],'bo-',label='Image Analysis')
+    pl.plot(expid,data[:,2,3],'ro-',label='BCAM')
+    pl.ylabel('x-tilt')
+    pl.xticks(expid,np.repeat('',nexp))
+    pl.grid()
+    pl.subplot(5,1,5)
+    pl.plot(expid,data[:,1,4],'bo-',label='Image Analysis')
+    pl.plot(expid,data[:,2,4],'ro-',label='BCAM')
+    pl.xlabel('exposure_id')
+    pl.ylabel('y-tilt')
+    pl.xticks(expid,xtick,rotation=45)
+    pl.grid()
+ 
+
 def hexapodPosition(beta):
     """
     the CRAY position to the hexapod position parameters. There is a 15 deg rotation between the two coordinate. However, this is accounted in the sispi. So, the hexapod position in the header is acutally rotated to its designed coordiante, which relate to the CRAY coordinate by the last page of des-docdb #6551
@@ -228,5 +275,8 @@ if __name__ == "__main__":
         t=runanalysis(img_name)
     endTime=time.time()
     elapseTime=endTime-startTime
+    tt=analyze_hex()
+    pl.savefig('hexapod_pos_summary.png')
+    pl.close()
     print '---elapsed time: ' + str(elapseTime)
 
