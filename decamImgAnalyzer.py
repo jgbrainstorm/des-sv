@@ -9,6 +9,18 @@ sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 
 from decamImgAnalyzer_def import *
 
+def averageN30(data=None):
+    """
+    this function use the mean moments of N29,N31 to replace the moments of N30 because of the failure of N30. 
+    """
+    idxN29 = 60
+    idxN30 = 61
+    idxN31 = 62
+    datanew = data.copy()
+    datanew[61,2:] = 0.5*(datanew[60,2:]+datanew[62,2:])
+    return datanew
+
+
 def analyze_hex():
     f = gl.glob('*.txt')
     f.sort()
@@ -131,7 +143,7 @@ def runanalysis(img_name=None):
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
-        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<-11.5)*(mag>-15)*(flag ==0)
+        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-12)*(mag>-15)
         nstar = len(mag[ok])
         print '--- Nstars selected: '+str(nstar)+'---'
         magall.append(mag)
@@ -167,6 +179,7 @@ def runanalysis(img_name=None):
         else:
             continue
     data = np.array(data)
+    data = averageN30(data) # use the average of N31 and N29 to replace N30
     dataSex = np.array(dataSex)
     magall = np.array(magall)
     radall = np.array(radall)
@@ -178,9 +191,11 @@ def runanalysis(img_name=None):
     display_2nd_moments(data)
     pl.savefig('moments_whisker_'+expid+'.png')
     pl.close()
-    fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=kernelSigma/scale,dimmfwhm=dimmfwhm)
+    fwh,whk = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=2.,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
+    np.savetxt('fwhm_'+expid+'.txt',fwh,fmt='%10.5f') # save the fwhm and whisker data.
+    np.savetxt('whisker_'+expid+'.txt',whk,fmt='%10.5f')
     #---check the fitted value of the moments ---
     #datafitted = data.copy()
     #datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
