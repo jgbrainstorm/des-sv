@@ -464,13 +464,16 @@ def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
         stampImg = stampImg - bkg
     if stampImg.shape[0] == stampImg.shape[1] and stampImg.shape[1] != 0 and np.sum(stampImg) > 0:
         npix = stampImg.shape[0]
-        mfit = mfwhm(stampImg)
-        gfit = gfwhm(stampImg)
-        s2fit = s2fwhm(stampImg)
-        g2dfit = g2dfwhm(stampImg)
-        wfit = wfwhm(stampImg,sigma=sigma)
-        fwhm = np.array([wfit[3],g2dfit[3],mfit[4],gfit[3],s2fit[3]])*scale
-        whisker = np.array([wfit[2],g2dfit[2]])*scale
+        try:
+            mfit = mfwhm(stampImg)
+            gfit = gfwhm(stampImg)
+            s2fit = s2fwhm(stampImg)
+            g2dfit = g2dfwhm(stampImg)
+            wfit = wfwhm(stampImg,sigma=sigma)
+            fwhm = np.array([wfit[3],g2dfit[3],mfit[4],gfit[3],s2fit[3]])*scale
+            whisker = np.array([wfit[2],g2dfit[2]])*scale
+        except ValueError:
+            pass
         fwhm[np.isnan(fwhm)]=-999
         whisker[np.isnan(whisker)]=-999
     else:
