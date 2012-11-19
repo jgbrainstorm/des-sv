@@ -23,7 +23,7 @@ def averageN30(data=None):
 
 
 def analyze_hex():
-    f = gl.glob('*.txt')
+    f = gl.glob('hexapod_position_*.txt')
     f.sort()
     expid=[]
     data=[]
@@ -150,6 +150,8 @@ def runanalysis(img_name=None):
         magall.append(mag)
         radall.append(rad)
         okall.append(ok)
+        xccd = eval(imghdu[i].header['extname'])[1]
+        yccd = eval(imghdu[i].header['extname'])[2]
         if ok.any():
             bkg = bkg[ok]
             Mrr = Mrr[ok]
@@ -170,14 +172,15 @@ def runanalysis(img_name=None):
             stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=30)
             stamplist = stamplist+stamp
             bkglist = bkglist+list(bkg)
-            xccd = eval(imghdu[i].header['extname'])[1]
-            yccd = eval(imghdu[i].header['extname'])[2]
-            moms = measure_stamp_moments(stamp,bkg,2.)
+           moms = measure_stamp_moments(stamp,bkg,2.)
             data.append([xccd,yccd]+ list(moms))
             dataSex.append([xccd,yccd,M20,M22])
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
             whiskerSex = np.concatenate((whiskerSex,whisker_sex))
         else:
+            M20 = 0.
+            M22 = 0.+0.j
+            data.append([xccd,yccd,M20,M22])
             continue
     data = np.array(data)
     data = averageN30(data) # use the average of N31 and N29 to replace N30
