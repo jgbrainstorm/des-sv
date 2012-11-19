@@ -538,7 +538,7 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.grid()
     pl.hlines(0.9,0,7,linestyle='solid',color='g')
     pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
-    return '-----done !----'
+    return fwh,whk
 
 def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
     ind = np.arange(len(betaAll[0]))
