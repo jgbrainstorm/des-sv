@@ -13,6 +13,7 @@ from decamImgAnalyzer_def import *
 
 
 def star_viewer(img_name=None,ext=None):
+    catname = img_name[0:-5]+'_star_catalog.fits'
     expid = img_name[6:14]
     img = pf.getdata(img_name,ext)
     cat = pf.getdata(catname,ext)
