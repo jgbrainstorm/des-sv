@@ -580,7 +580,7 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.plot(mag[ok],rad[ok],'r.')
     pl.xlabel('mag')
     pl.ylabel('radius')
-    pl.ylim(0,20)
+    pl.ylim(0,13)
     pl.title('Exposure: '+expid+'   CCD: '+detector)
     pl.subplot(2,2,2)
     pl.matshow(stampImg,fignum=False)
@@ -598,10 +598,9 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     print M20, M22, M31, M33
     e1 = M22.real/M20.real
     e2 = M22.imag/M20.real
-    pl.figtext(0.15,0.8, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
-    pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
-    pl.figtext(0.15,0.7, 'PSF whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
-    pl.figtext(0.15,0.65, 'PSF whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.85, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
+    pl.figtext(0.15,0.8, 'whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.75, 'whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
     pl.subplot(2,2,3)
     row,col = np.mgrid[0:npix,0:npix]
     row = row - rowCen
@@ -634,8 +633,8 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.xlabel('Radius [pixels]')
     pl.ylabel('Mean counts [ADU]')
     pl.title('Radial profile')
-    pl.figtext(0.65,0.7,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec',color='r')
-    pl.figtext(0.65,0.6,'FWHM_Gaussian: '+str(round(gfit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.55,0.7,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec',color='r')
+    pl.figtext(0.55,0.6,'FWHM_Gaussian: '+str(round(gfit[3]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.55,'FWHM_Moffat: '+str(round(mfit[4]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.5,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
@@ -643,10 +642,6 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.figtext(0.65,0.35,'M20: '+str(round(M20,5))+ ' pix^2')
     pl.figtext(0.65,0.3,'M22.real: '+str(round(M22.real,5))+ ' pix^2')
     pl.figtext(0.8,0.3,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
-    pl.figtext(0.65,0.25,'M31.real: '+str(round(M31.real,5))+ ' pix^3')
-    pl.figtext(0.8,0.25,'M31.imag: '+str(round(M31.imag,5))+ ' pix^3')
-    pl.figtext(0.65,0.2,'M33.real: '+str(round(M33.real,5))+ ' pix^3')
-    pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix^3')
     return '---- Done! ----'
    
 def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None):
