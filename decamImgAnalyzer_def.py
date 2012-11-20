@@ -644,7 +644,7 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
    
 def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):
     if sigma == None:
-        print 'syntax: dispStampList(stampImgList,sigma)'
+        print 'syntax: dispStampList(stampImgList,bkgList,sigma)'
         sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
