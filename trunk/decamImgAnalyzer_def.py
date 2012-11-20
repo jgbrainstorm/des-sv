@@ -655,7 +655,7 @@ def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=N
         sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
-        t=dispStamp(stampImg=stampImgList[i],bkg=bkgList[i],sigma=sigma,mag,rad,ok,expid,detector)
+        t=dispStamp(stampImgList[i],bkgList[i],sigma,mag,rad,ok,expid,detector)
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
