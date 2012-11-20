@@ -34,7 +34,7 @@ def star_viewer(img_name=None,ext=None):
     pl.plot(mag[ok],rad[ok],'r.')
     pl.xlabel('mag')
     pl.ylabel('radius')
-    pl.title('Exposure: '+str(expid)+'   CCD: '+ext)
+    pl.title('Exposure: '+expid+'   CCD: '+ext)
     print '--- Nstars selected: '+str(nstar)+'---'
     if ok.any():
         bkg = bkg[ok]
