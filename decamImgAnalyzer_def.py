@@ -599,7 +599,7 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     e1 = M22.real/M20.real
     e2 = M22.imag/M20.real
     pl.figtext(0.15,0.85, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
-    pl.figtext(01.5,0.82, 'whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.82, 'whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
     pl.figtext(0.15,0.79, 'whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
     pl.subplot(2,2,3)
     row,col = np.mgrid[0:npix,0:npix]
@@ -634,14 +634,14 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.ylabel('Mean counts [ADU]')
     pl.title('Radial profile')
     pl.figtext(0.55,0.5,'Gaussian Weight '+r'$\sigma$: '+str(round(sigma*scale,3))+ ' arcsec',color='r')
-    pl.figtext(0.55,0.6,'FWHM_Gaussian: '+str(round(gfit[3]*scale,3))+ ' arcsec')
-    pl.figtext(0.65,0.55,'FWHM_Moffat: '+str(round(mfit[4]*scale,3))+ ' arcsec')
-    pl.figtext(0.65,0.5,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
-    pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
-    pl.figtext(0.65,0.4,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
-    pl.figtext(0.65,0.35,'M20: '+str(round(M20,5))+ ' pix^2')
-    pl.figtext(0.65,0.3,'M22.real: '+str(round(M22.real,5))+ ' pix^2')
-    pl.figtext(0.8,0.3,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
+    pl.figtext(0.55,0.47,'FWHM_Gaussian: '+str(round(gfit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.55,0.44,'FWHM_Moffat: '+str(round(mfit[4]*scale,3))+ ' arcsec')
+    pl.figtext(0.55,0.41,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.55,0.38,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
+    pl.figtext(0.55,0.35,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
+    pl.figtext(0.55,0.35,'M20: '+str(round(M20,5))+ ' pix^2')
+    pl.figtext(0.55,0.32,'M22.real: '+str(round(M22.real,5))+ ' pix^2')
+    pl.figtext(0.55,0.29,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
     return '---- Done! ----'
    
 def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None):

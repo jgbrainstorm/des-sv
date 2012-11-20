@@ -32,12 +32,6 @@ def star_viewer(img_name=None,ext=None):
     starFwhm = selectStar(mag,fwhm_sex)
     ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
     nstar = len(mag[ok])
-    pl.plot(mag,rad,'b.')
-    pl.plot(mag[ok],rad[ok],'r.')
-    pl.xlabel('mag')
-    pl.ylabel('radius')
-    pl.ylim(0,20)
-    pl.title('Exposure: '+expid+'   CCD: '+detector)
     print '--- Nstars selected: '+str(nstar)+'---'
     if ok.any():
         bkg = bkg[ok]
