@@ -17,7 +17,6 @@ def star_viewer(img_name=None,ext=None):
     expid = img_name[6:14]
     img = pf.getdata(img_name,ext)
     cat = pf.getdata(catname,ext)
-    cat = cathdu[ext].data
     x = cat.XWIN_IMAGE
     y = cat.YWIN_IMAGE
     rad = cat.FLUX_RADIUS
