@@ -581,6 +581,7 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.xlabel('mag')
     pl.ylabel('radius')
     pl.ylim(0,13)
+    pl.xlim(-20,0)
     pl.title('Exposure: '+expid+'   CCD: '+detector)
     pl.subplot(2,2,2)
     pl.matshow(stampImg,fignum=False)
