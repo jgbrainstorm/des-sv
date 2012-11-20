@@ -172,7 +172,7 @@ def runanalysis(img_name=None):
             stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=30)
             stamplist = stamplist+stamp
             bkglist = bkglist+list(bkg)
-           moms = measure_stamp_moments(stamp,bkg,2.)
+            moms = measure_stamp_moments(stamp,bkg,2.)
             data.append([xccd,yccd]+ list(moms))
             dataSex.append([xccd,yccd,M20,M22])
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
