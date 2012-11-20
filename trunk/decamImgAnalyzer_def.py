@@ -599,8 +599,8 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     e1 = M22.real/M20.real
     e2 = M22.imag/M20.real
     pl.figtext(0.15,0.85, 'e1: '+str(round(e1,3)) + ',  e2: '+str(round(e2,3)), color='r')
-    pl.figtext(0.15,0.8, 'whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
-    pl.figtext(0.15,0.75, 'whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.82, 'whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
+    pl.figtext(0.15,0.79, 'whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
     pl.subplot(2,2,3)
     row,col = np.mgrid[0:npix,0:npix]
     row = row - rowCen
