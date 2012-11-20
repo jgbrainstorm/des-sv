@@ -640,8 +640,8 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.figtext(0.55,0.33,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
     pl.figtext(0.55,0.30,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
     pl.figtext(0.55,0.27,'M20: '+str(round(M20,5))+ ' pix^2')
-    pl.figtext(0.55,0.,'M22.real: '+str(round(M22.real,5))+ ' pix^2')
-    pl.figtext(0.55,0.24,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
+    pl.figtext(0.55,0.24,'M22.real: '+str(round(M22.real,5))+ ' pix^2')
+    pl.figtext(0.55,0.21,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
     return '---- Done! ----'
    
 def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None):
