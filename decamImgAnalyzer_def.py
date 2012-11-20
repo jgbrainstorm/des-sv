@@ -633,13 +633,13 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
     pl.figtext(0.65,0.5,'FWHM_Sech2: '+str(round(s2fit[3]*scale,3))+ ' arcsec')
     pl.figtext(0.65,0.45,'FWHM_Wmoments: '+str(round(wfit[3]*scale,3))+ ' arcsec') 
     pl.figtext(0.65,0.4,'FWHM_Amoments: '+str(round(g2dfit[3]*scale,3))+ ' arcsec')
-    pl.figtext(0.65,0.35,'M20: '+str(round(M20,5))+ ' pix')
-    pl.figtext(0.65,0.3,'M22.real: '+str(round(M22.real,5))+ ' pix')
-    pl.figtext(0.8,0.3,'M22.imag: '+str(round(M22.imag,5))+ ' pix')
-    pl.figtext(0.65,0.25,'M31.real: '+str(round(M31.real,5))+ ' pix')
-    pl.figtext(0.8,0.25,'M31.imag: '+str(round(M31.imag,5))+ ' pix')
-    pl.figtext(0.65,0.2,'M33.real: '+str(round(M33.real,5))+ ' pix')
-    pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix')
+    pl.figtext(0.65,0.35,'M20: '+str(round(M20,5))+ ' pix^2')
+    pl.figtext(0.65,0.3,'M22.real: '+str(round(M22.real,5))+ ' pix^2')
+    pl.figtext(0.8,0.3,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
+    pl.figtext(0.65,0.25,'M31.real: '+str(round(M31.real,5))+ ' pix^3')
+    pl.figtext(0.8,0.25,'M31.imag: '+str(round(M31.imag,5))+ ' pix^3')
+    pl.figtext(0.65,0.2,'M33.real: '+str(round(M33.real,5))+ ' pix^3')
+    pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix^3')
     return '---- Done! ----'
    
 def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):

@@ -13,10 +13,12 @@ from decamImgAnalyzer_def import *
 
 
 def star_viewer(img_name=None,ext=None):
+    pl.ion()
     catname = img_name[0:-5]+'_star_catalog.fits'
     expid = img_name[6:14]
     img = pf.getdata(img_name,ext)
     cat = pf.getdata(catname,ext)
+    detector = pf.getheader(img_name,ext)['detpos']
     x = cat.XWIN_IMAGE
     y = cat.YWIN_IMAGE
     rad = cat.FLUX_RADIUS
@@ -34,7 +36,8 @@ def star_viewer(img_name=None,ext=None):
     pl.plot(mag[ok],rad[ok],'r.')
     pl.xlabel('mag')
     pl.ylabel('radius')
-    pl.title('Exposure: '+expid+'   CCD: '+ext)
+    pl.ylim(0,20)
+    pl.title('Exposure: '+expid+'   CCD: '+detector)
     print '--- Nstars selected: '+str(nstar)+'---'
     if ok.any():
         bkg = bkg[ok]
@@ -59,7 +62,8 @@ if __name__ == "__main__":
         print 'Note: The image need to be reduced (bias subtraction, flat fielding'
     else:
         expid = sys.argv[1]
+        ext = int(sys.argv[2])
         img_name = 'DECam_'+expid+'_reduced.fits'
-        t=star_viewer(img_name)
+        t=star_viewer(img_name,ext)
     print '---elapsed time: ' + str(elapseTime)
 
