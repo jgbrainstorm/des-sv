@@ -59,5 +59,5 @@ if __name__ == "__main__":
         ext = int(sys.argv[2])
         img_name = 'DECam_'+expid+'_reduced.fits'
         t=star_viewer(img_name,ext)
-    print '---elapsed time: ' + str(elapseTime)
+    
 
