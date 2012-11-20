@@ -10,11 +10,14 @@ import pylab as pl
 import sys
 
 
-def getExpidByDate(start_date='2012-11-08',end_date='2012-11-09'):
+def getExpidByDate(start_date='2012-11-08',end_date='2012-11-09',fermi=False):
     """
     get info from the IH database
     """
-    conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    if fermi==False:
+        conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    else:
+        conn_str="host='des10.fnal.gov' port=5443 dbname='decam_prd' user='decam_reader' password='reader'"
     d = psy.connect(conn_str)
     c = d.cursor()
     cmd_str = "SELECT exposure_id FROM telemetry.image_health WHERE time_recorded BETWEEN '%s' AND '%s' GROUP BY exposure_id"%(start_date,end_date)
@@ -22,11 +25,14 @@ def getExpidByDate(start_date='2012-11-08',end_date='2012-11-09'):
     res = np.array(c.fetchall())
     return res[:,0]
 
-def getIHbyDate(start_date='2012-11-08',end_date='2012-11-09'):
+def getIHbyDate(start_date='2012-11-08',end_date='2012-11-09',fermi=False):
     """
     get info from the IH database
     """
-    conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    if fermi==False:
+        conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    else:
+        conn_str="host='des10.fnal.gov' port=5443 dbname='decam_prd' user='decam_reader' password='reader'"
     d = psy.connect(conn_str)
     c = d.cursor()
     cmd_str = "SELECT exposure_id,AVG(harmonic_mean_seeing[1]), AVG(median_ellipticity[1]) FROM telemetry.image_health WHERE time_recorded BETWEEN '%s' AND '%s' GROUP BY exposure_id"%(start_date,end_date)
@@ -37,11 +43,14 @@ def getIHbyDate(start_date='2012-11-08',end_date='2012-11-09'):
     ellip = res[:,2]
     return expid,fwhm,ellip
 
-def getIHbyExpid(expid=None):
+def getIHbyExpid(expid=None,fermi=False):
     """
     get info from the IH database
     """
-    conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    if fermi==False:
+        conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    else:
+        conn_str="host='des10.fnal.gov' port=5443 dbname='decam_prd' user='decam_reader' password='reader'"
     d = psy.connect(conn_str)
     c = d.cursor()
     cmd_str = "SELECT exposure_id,AVG(harmonic_mean_seeing[1]), AVG(median_ellipticity[1]) FROM telemetry.image_health WHERE exposure_id='%s' GROUP BY exposure_id"%str(expid)
@@ -58,11 +67,14 @@ def getIHbyExpid(expid=None):
     return exposure_id,fwhm,ellip
 
 
-def getDIMMbyDate(start_date='2012-11-08',end_date='2012-11-09'):
+def getDIMMbyDate(start_date='2012-11-08',end_date='2012-11-09',fermi=False):
     """
     get info from the IH database
     """
-    conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    if fermi==False:
+        conn_str="host='server2.ctio.noao.edu' port=5442 dbname='decam_prd' user='decam_reader' password='reader'"
+    else:
+        conn_str="host='des10.fnal.gov' port=5443 dbname='decam_prd' user='decam_reader' password='reader'"
     d = psy.connect(conn_str)
     c = d.cursor()
     cmd_str = "SELECT en.time_recorded, en.dimm_seeing FROM telemetry.environmental_data en WHERE en.time_recorded BETWEEN '%s' AND '%s'"%(start_date,end_date)
@@ -71,11 +83,14 @@ def getDIMMbyDate(start_date='2012-11-08',end_date='2012-11-09'):
     return res
 
 
-def getQRbyDate(start_date='2012-11-08',end_date='2012-11-09'):
+def getQRbyDate(start_date='2012-11-08',end_date='2012-11-09',fermi=False):
     """
     get info from the Quick Reduce database
     """
-    conn_str="host='server2.ctio.noao.edu' port=5442 dbname='desbrdev' user='qr_reader' password='QRreader'"
+    if fermi==False:
+        conn_str="host='server2.ctio.noao.edu' port=5442 dbname='desbrdev' user='qr_reader' password='QRreader'"
+    else:
+        conn_str="host='des10.fnal.gov' port=5443 dbname='desbrdev' user='qr_reader' password='QRreader'"
     d = psy.connect(conn_str)
     c = d.cursor()
     cmd_str = "SELECT e.expnum as exposure_id, AVG(c.fwhm), AVG(c.ellipticity) FROM exposure e, ccd c, night n where e.exposure_id = c.exposure_id AND n.date BETWEEN '%s' AND '%s' GROUP BY e.expnum"%(start_date,end_date)
@@ -86,11 +101,14 @@ def getQRbyDate(start_date='2012-11-08',end_date='2012-11-09'):
     ellip = res[:,2]
     return expid,fwhm,ellip
 
-def getQRbyExpid(expid=None):
+def getQRbyExpid(expid=None,fermi=False):
     """
     get info from the Quick Reduce database
     """
-    conn_str="host='server2.ctio.noao.edu' port=5442 dbname='desbrdev' user='qr_reader' password='QRreader'"
+    if fermi==False:
+        conn_str="host='server2.ctio.noao.edu' port=5442 dbname='desbrdev' user='qr_reader' password='QRreader'"
+    else:
+        conn_str="host='des10.fnal.gov' port=5443 dbname='desbrdev' user='qr_reader' password='QRreader'"
     d = psy.connect(conn_str)
     c = d.cursor()
     cmd_str = "SELECT e.expnum as exposure_id, AVG(c.fwhm), AVG(c.ellipticity),MAX(e.filter) FROM exposure e, ccd c WHERE e.exposure_id = c.exposure_id AND e.expnum ='%s' GROUP BY e.expnum"%str(expid)
