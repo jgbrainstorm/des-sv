@@ -568,16 +568,23 @@ def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
     return '---done!---'
 
 
-def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
+def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag,rad,ok,expid,detector):
     if stampImg.shape[0] != stampImg.shape[1]:
         sys.exit('bad stamp image')
     if bkg != None:
         stampImg=stampImg - bkg
     npix = stampImg.shape[0]
-    pl.figure(figsize=(18,6))
-    pl.subplot(1,3,1)
+    pl.figure(figsize=(10,10))
+    pl.subplot(2,2,1)
+    pl.plot(mag,rad,'b.')
+    pl.plot(mag[ok],rad[ok],'r.')
+    pl.xlabel('mag')
+    pl.ylabel('radius')
+    pl.ylim(0,20)
+    pl.title('Exposure: '+expid+'   CCD: '+detector)
+    pl.subplot(2,2,2)
     pl.matshow(stampImg,fignum=False)
-    #pl.contour(stampImg,nlevels=20)
+    pl.colorbar()
     mfit = mfwhm(stampImg)
     gfit = gfwhm(stampImg)
     s2fit = s2fwhm(stampImg)
@@ -595,7 +602,7 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
     pl.figtext(0.15,0.75, 'rowCen: '+str(round(rowCen,4)) + ',  colCen: '+str(round(colCen,4)), color='r')
     pl.figtext(0.15,0.7, 'PSF whisker_Wmoments: '+str(round(wfit[2]*scale,4))+' [arcsec]', color='r')
     pl.figtext(0.15,0.65, 'PSF whisker_Amoments: '+str(round(g2dfit[2]*scale,4))+' [arcsec]', color='r')
-    pl.subplot(1,3,2)
+    pl.subplot(2,2,3)
     row,col = np.mgrid[0:npix,0:npix]
     row = row - rowCen
     col = col - colCen
@@ -642,13 +649,13 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale):
     pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix^3')
     return '---- Done! ----'
    
-def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale):
+def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag,rad,ok,expid,detector):
     if sigma == None:
         print 'syntax: dispStampList(stampImgList,bkgList,sigma)'
         sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
-        t=dispStamp(stampImg=stampImgList[i],bkg=bkgList[i],sigma=sigma)
+        t=dispStamp(stampImg=stampImgList[i],bkg=bkgList[i],sigma=sigma,mag,rad,ok,expid,detector)
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
