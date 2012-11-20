@@ -568,7 +568,7 @@ def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
     return '---done!---'
 
 
-def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag,rad,ok,expid,detector):
+def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None):
     if stampImg.shape[0] != stampImg.shape[1]:
         sys.exit('bad stamp image')
     if bkg != None:
@@ -649,7 +649,7 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag,rad,ok,expid,detector)
     pl.figtext(0.8,0.2,'M33.imag: '+str(round(M33.imag,5))+ ' pix^3')
     return '---- Done! ----'
    
-def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag,rad,ok,expid,detector):
+def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None):
     if sigma == None:
         print 'syntax: dispStampList(stampImgList,bkgList,sigma)'
         sys.exit()

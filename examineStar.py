@@ -48,7 +48,7 @@ def star_viewer(img_name=None,ext=None):
         y=y[ok]
         stamplist = getStamp(data=img,xcoord=x,ycoord=y,Npix=30)
         bkglist = list(bkg)
-        dispStampList(stampImgList=stamplist,bkgList=bkglist,sigma=2.,mag,rad,ok,expid,detector)
+        dispStampList(stamplist,bkglist,2.,mag,rad,ok,expid,detector)
     return '----finished one image ----'
     
 
