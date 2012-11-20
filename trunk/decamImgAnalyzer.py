@@ -178,10 +178,8 @@ def runanalysis(img_name=None):
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
             whiskerSex = np.concatenate((whiskerSex,whisker_sex))
         else:
-            M20 = 0.
-            M22 = 0.+0.j
-            data.append([xccd,yccd,M20,M22])
-            continue
+            momsfake=[0.,(0.+0.j),(0.+0.j),(0.+0.j)]
+            data.append([xccd,yccd]+list(momsfake))
     data = np.array(data)
     data = averageN30(data) # use the average of N31 and N29 to replace N30
     dataSex = np.array(dataSex)
