@@ -28,6 +28,8 @@ def analyze_hex():
     expid=[]
     data=[]
     nexp = len(f)
+    if nexp == 0:
+        sys.exit('-- no image to analyze, exit --')
     for fi in f:
         expid.append(int(fi[-12:-4]))
         data.append(np.genfromtxt(fi))
@@ -141,6 +143,7 @@ def runanalysis(img_name=None):
     magall = []
     radall = []
     okall = []
+    nstarall = 0
     for i in range(1,63):
         print i
         img = imghdu[i].data
@@ -158,6 +161,7 @@ def runanalysis(img_name=None):
         starFwhm = selectStar(mag,fwhm_sex)
         ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
         nstar = len(mag[ok])
+        nstarall = nstarall + nstar
         print '--- Nstars selected: '+str(nstar)+'---'
         magall.append(mag)
         radall.append(rad)
@@ -192,6 +196,8 @@ def runanalysis(img_name=None):
         else:
             momsfake=[0.,(0.+0.j),(0.+0.j),(0.+0.j)]
             data.append([xccd,yccd]+list(momsfake))
+    if nstarall == 0:
+        sys.exit('-- This image is bad, skipped ---')
     data = np.array(data)
     data = averageN30(data) # use the average of N31 and N29 to replace N30
     dataSex = np.array(dataSex)
