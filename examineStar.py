@@ -19,6 +19,7 @@ def star_viewer(img_name=None,ext=None):
     img = pf.getdata(img_name,ext)
     cat = pf.getdata(catname,ext)
     detector = pf.getheader(img_name,ext)['detpos']
+    exptime = pf.getheader(img_name,ext)['exptime']
     x = cat.XWIN_IMAGE
     y = cat.YWIN_IMAGE
     rad = cat.FLUX_RADIUS
@@ -42,7 +43,7 @@ def star_viewer(img_name=None,ext=None):
         y=y[ok]
         stamplist = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
         bkglist = list(bkg)
-        dispStampList(stamplist,bkglist,2.,mag,rad,ok,expid,detector)
+        dispStampList(stamplist,bkglist,2.,mag,rad,ok,expid,detector,exptime)
     return '----finished one image ----'
     
 
