@@ -653,6 +653,7 @@ def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=N
     for i in range(Nstamp):
         t=dispStamp(stampImgList[i],bkgList[i],sigma,mag,rad,ok,expid,detector)
         print 'exptime :'+str(exptime)
+        pl.savefig('examine_star_'+expid+'_'+str(exptime)+'_'+detector+'_'+str(i)+'.png')
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
