@@ -235,13 +235,14 @@ def runanalysis(img_name=None):
     beta.append(betaM22imag[0])
     betaErr.append(betaM22imag[1])
     betaforplot = beta
+    betaErrforplot = betaErr
     beta=np.array(beta)
     betaErr = np.array(betaErr)
     beta=beta.flatten()
     betaErr = betaErr.flatten()
     posCRAY = CRAYposLinearModel(beta,betaErr)
     hexHao = hexapodPosition(beta,betaErr)
-    dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErr,hexinfo=hexHao)
+    dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErrforplot,hexinfo=hexHao)
     pl.savefig('zernike_coeff_'+expid+'.png')
     pl.close()
  
