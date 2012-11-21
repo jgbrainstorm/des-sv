@@ -645,13 +645,14 @@ def dispStamp(stampImg=None,bkg=None,sigma=1.08/scale,mag=None,rad=None,ok=None,
     pl.figtext(0.55,0.21,'M22.imag: '+str(round(M22.imag,5))+ ' pix^2')
     return '---- Done! ----'
    
-def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None):
+def dispStampList(stampImgList=None,bkgList=None,sigma=1.08/scale,mag=None,rad=None,ok=None,expid=None,detector=None,exptime=None):
     if sigma == None:
         print 'syntax: dispStampList(stampImgList,bkgList,sigma)'
         sys.exit()
     Nstamp = len(stampImgList)
     for i in range(Nstamp):
         t=dispStamp(stampImgList[i],bkgList[i],sigma,mag,rad,ok,expid,detector)
+        print 'exptime :'+exptime
         raw_input('--- hit the enter key to proceed ---')
         pl.close()
     return ' ---- Done ! ----'
