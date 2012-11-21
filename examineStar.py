@@ -19,7 +19,7 @@ def star_viewer(img_name=None,ext=None):
     img = pf.getdata(img_name,ext)
     cat = pf.getdata(catname,ext)
     detector = pf.getheader(img_name,ext)['detpos']
-    exptime = pf.getheader(img_name,ext)['exptime']
+    exptime = pf.getheader(img_name,0)['exptime']
     x = cat.XWIN_IMAGE
     y = cat.YWIN_IMAGE
     rad = cat.FLUX_RADIUS
