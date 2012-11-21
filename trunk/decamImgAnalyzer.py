@@ -233,7 +233,7 @@ def runanalysis(img_name=None):
     betaM20 = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
     beta.append(betaM20[0])
     betaErr.append(betaM20[1])
-    betaM22real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
+    betaM22real = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)
     beta.append(betaM22real[0])
     betaErr.append(betaM22real[1])
 
