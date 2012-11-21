@@ -29,7 +29,7 @@ def analyze_hex():
     data=[]
     nexp = len(f)
     if nexp == 0:
-        sys.exit('-- no image to analyze, exit --')
+        return '-- no image to analyze, exit --'
     for fi in f:
         expid.append(int(fi[-12:-4]))
         data.append(np.genfromtxt(fi))
@@ -69,7 +69,7 @@ def analyze_hex():
     pl.ylabel('y-tilt')
     pl.xticks(expid,xtick,rotation=45)
     pl.grid()
- 
+    return '---done!----'
 
 def hexapodPosition(beta,betaErr):
     """
@@ -196,8 +196,8 @@ def runanalysis(img_name=None):
         else:
             momsfake=[0.,(0.+0.j),(0.+0.j),(0.+0.j)]
             data.append([xccd,yccd]+list(momsfake))
-    if nstarall == 0:
-        sys.exit('-- This image is bad, skipped ---')
+    if nstarall <=200:
+        return '-- This image is bad, skipped ---'
     data = np.array(data)
     data = averageN30(data) # use the average of N31 and N29 to replace N30
     dataSex = np.array(dataSex)
@@ -288,7 +288,6 @@ def runanalysis(img_name=None):
     #np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
     hexBCAM = np.array([bcamDX,bcamDY,-999,bcamAX,bcamAY])
     np.savetxt('hexapod_position_'+expid+'.txt',[hexposhdr,hexHao,hexBCAM],fmt='%10.5f')
-    
     return '----finished one image ----'
     
 
