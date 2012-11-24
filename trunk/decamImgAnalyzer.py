@@ -71,11 +71,11 @@ def analyze_hex():
     pl.grid()
     return '---done!----'
 
-def hexapodPosition(beta,betaErr):
+def hexapodPosition(beta,betaErr,weighted=True):
     """
     the CRAY position to the hexapod position parameters. There is a 15 deg rotation between the two coordinate. However, this is accounted in the sispi. So, the hexapod position in the header is acutally rotated to its designed coordiante, which relate to the CRAY coordinate by the last page of des-docdb #6551
     """
-    x,y,z,thetax,thetay = CRAYposLinearModel(beta,betaErr)
+    x,y,z,thetax,thetay = CRAYposLinearModel(beta,betaErr,weighted)
     xh = x
     yh = -y
     zh = -z
@@ -83,7 +83,7 @@ def hexapodPosition(beta,betaErr):
     thetayh = -thetax
     return np.array([xh,yh,zh,thetaxh,thetayh])
 
-def CRAYposLinearModel(b=None,bErr=None):
+def CRAYposLinearModel(b=None,bErr=None,weighted=True):
     """
     here, the convention for b is: M20 (0-19), M22real(20 - 39),M22imag (40-59) 
     """
@@ -91,27 +91,35 @@ def CRAYposLinearModel(b=None,bErr=None):
     M22imagTrefoil1 = b[48] 
     M22realTrefoil2Err = bErr[29] 
     M22imagTrefoil1Err = bErr[48] 
-    #M22TrefoilXshift = 0.5*(M22realTrefoil2+M22imagTrefoil1) # for x decenter
-    M22TrefoilXshift = (M22realTrefoil2*M22imagTrefoil1Err**2+M22imagTrefoil1*M22realTrefoil2Err**2)/(M22imagTrefoil1Err**2+M22realTrefoil2Err**2) # for x decenter
+    if weighted == False:
+        M22TrefoilXshift = 0.5*(M22realTrefoil2+M22imagTrefoil1) # for x decenter
+    else:
+        M22TrefoilXshift = (M22realTrefoil2*M22imagTrefoil1Err**2+M22imagTrefoil1*M22realTrefoil2Err**2)/(M22imagTrefoil1Err**2+M22realTrefoil2Err**2) # for x decenter
     M22realTrefoil1 = b[26] 
     M22imagTrefoil2 = b[49] 
     M22realTrefoil1Err = bErr[26] 
     M22imagTrefoil2Err = bErr[49] 
-    #M22TrefoilYshift = 0.5*(M22realTrefoil1 - M22imagTrefoil2) # for y decenter
-    M22TrefoilYshift = (M22realTrefoil1*M22imagTrefoil2Err**2 - M22imagTrefoil2*M22realTrefoil1Err**2)/(M22imagTrefoil2Err**2+M22realTrefoil1Err**2) # for y decenter
+    if weighted == False:
+        M22TrefoilYshift = 0.5*(M22realTrefoil1 - M22imagTrefoil2) # for y decenter
+    else:
+        M22TrefoilYshift = (M22realTrefoil1*M22imagTrefoil2Err**2 - M22imagTrefoil2*M22realTrefoil1Err**2)/(M22imagTrefoil2Err**2+M22realTrefoil1Err**2) # for y decenter
     M20defocus = b[4]    # for defocus
     M22realComa2 = b[28] 
     M22imagComa1 = b[47]
     M22realComa2Err = bErr[28] 
     M22imagComa1Err = bErr[47]
-    #M22ComaXtilt = 0.5*(M22realComa2+M22imagComa1) # for x-tilt
-    M22ComaXtilt = (M22realComa2*M22imagComa1Err**2+M22imagComa1*M22realComa2Err**2)/(M22imagComa1Err**2+M22realComa2Err**2) # for x-tilt
+    if weighted == False:
+        M22ComaXtilt = 0.5*(M22realComa2+M22imagComa1) # for x-tilt
+    else:
+        M22ComaXtilt = (M22realComa2*M22imagComa1Err**2+M22imagComa1*M22realComa2Err**2)/(M22imagComa1Err**2+M22realComa2Err**2) # for x-tilt
     M22realComa1 = b[27] 
     M22imagComa2 = b[48]
     M22realComa1Err = bErr[27] 
     M22imagComa2Err = bErr[48]
-    #M22ComaYtilt = 0.5*(M22realComa1 - M22imagComa2) # for y-tilt
-    M22ComaYtilt = (M22realComa1*M22imagComa2Err**2 - M22imagComa2*M22realComa1Err**2)/(M22imagComa2Err**2+M22realComa1Err**2) # for y-tilt
+    if weighted == False:
+        M22ComaYtilt = 0.5*(M22realComa1 - M22imagComa2) # for y-tilt
+    else:
+        M22ComaYtilt = (M22realComa1*M22imagComa2Err**2 - M22imagComa2*M22realComa1Err**2)/(M22imagComa2Err**2+M22realComa1Err**2) # for y-tilt
     x = -3.0063 * M22TrefoilXshift -0.0053
     y = -2.9318 * M22TrefoilYshift - 0.0005
     z = 0.4046 * M20defocus - 0.0705
@@ -246,8 +254,8 @@ def runanalysis(img_name=None):
     betaErr = np.array(betaErr)
     beta=beta.flatten()
     betaErr = betaErr.flatten()
-    posCRAY = CRAYposLinearModel(beta,betaErr)
-    hexHao = hexapodPosition(beta,betaErr)
+    posCRAY = CRAYposLinearModel(beta,betaErr,weighted=False)
+    hexHao = hexapodPosition(beta,betaErr,weighted=False)
     dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErrforplot,hexinfo=hexHao)
     pl.savefig('zernike_coeff_'+expid+'.png')
     pl.close()
