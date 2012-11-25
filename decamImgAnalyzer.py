@@ -244,7 +244,6 @@ def runanalysis(img_name=None):
     betaM22real = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)
     beta.append(betaM22real[0])
     betaErr.append(betaM22real[1])
-
     betaM22imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)
     beta.append(betaM22imag[0])
     betaErr.append(betaM22imag[1])
@@ -295,7 +294,7 @@ def runanalysis(img_name=None):
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
     #np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
     hexBCAM = np.array([bcamDX,bcamDY,-999,bcamAX,bcamAY])
-    np.savetxt('hexapod_position_'+expid+'.txt',[hexposhdr,hexHao,hexBCAM],fmt='%10.5f')
+    np.savetxt('hexapod_position_'+expid+'.txt',[hexposhdr,hexHao,hexBCAM,posCRAY],fmt='%10.5f')
     return '----finished one image ----'
     
 
