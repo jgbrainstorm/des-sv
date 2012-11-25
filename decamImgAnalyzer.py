@@ -125,7 +125,7 @@ def CRAYposLinearModel(b=None,bErr=None,weighted=True):
     z = 0.4046 * M20defocus - 0.0705
     xtilt = 1075.8892 * M22ComaXtilt - 0.4876
     ytilt = -1064.6332 * M22ComaYtilt - 0.1234
-    return x*1000,y*1000,z*1000,xtilt,ytilt
+    return np.array([x*1000,y*1000,z*1000,xtilt,ytilt])
 
 
 def runanalysis(img_name=None):
