@@ -30,6 +30,7 @@ echo '--- reduction is done ! ---'
 echo '---step 4:  extracting star catalog and generate plots ---'
 decamImgAnalyzer.py all
 htmlFig.py 11-18-2012 56250 
+tar czf fwhm_whisker_11-18-2012_MJD56250.tar.gz *.p
 echo '-- analysis is done ---'
 
 
