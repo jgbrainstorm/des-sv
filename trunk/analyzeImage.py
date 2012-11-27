@@ -36,9 +36,9 @@ def getfwhm_ellip(expid):
 
 
 
-rdir = '/home/jghao/research/desSV/11242012/rband/'
-idir = '/home/jghao/research/desSV/11242012/iband/'
-zdir = '/home/jghao/research/desSV/11242012/zband/'
+rdir = 'rband/'
+idir = 'iband/'
+zdir = 'zband/'
 
 
 hexfile_r = gl.glob(rdir+'*.txt')
@@ -209,8 +209,8 @@ pl.subplot(3,1,1)
 pl.plot(expidr,fw_r[:,6],'bo',label='weighted')
 pl.plot(expidr,fw_r[:,7],'ro',label='Adapt')
 pl.plot(expidr,fw_r[:,8],'go',label='Sextractor')
-#pl.plot(expidr,whkQR_r],'r*',label='QR')
-#pl.plot(expidr,whkIH_r],'b*',label='IH')
+pl.plot(expidr,whkQR_r],'r*',label='QR')
+pl.plot(expidr,whkIH_r],'b*',label='IH')
 pl.legend(loc='best')
 pl.xticks(expidr,expidr.astype('S10'),rotation=40)
 pl.grid()
@@ -223,8 +223,8 @@ pl.subplot(3,1,2)
 pl.plot(expidi,fw_i[:,6],'bo',label='weighted')
 pl.plot(expidi,fw_i[:,7],'ro',label='Adapt')
 pl.plot(expidi,fw_i[:,8],'go',label='Sextractor')
-#pl.plot(expidi,whkQR_i],'r*',label='QR')
-#pl.plot(expidi,whkIH_i],'b*',label='IH')
+pl.plot(expidi,whkQR_i],'r*',label='QR')
+pl.plot(expidi,whkIH_i],'b*',label='IH')
 pl.legend(loc='best')
 pl.xticks(expidi,expidi.astype('S10'),rotation=40)
 pl.grid()
