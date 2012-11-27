@@ -40,18 +40,21 @@ def analyze_hex():
     pl.subplot(5,1,1)
     pl.plot(expid,data[:,1,0],'bo-',label='Image Analysis')
     pl.plot(expid,data[:,2,0],'ro-',label='BCAM')
+    pl.plot(expid,data[:,0,0],'go-',label='Hexapod ')
     pl.ylabel('x-decenter')
     pl.xticks(expid,np.repeat('',nexp))
-    pl.legend(loc='upper center',bbox_to_anchor=(0.5,1.58))
+    pl.legend(loc='upper center',bbox_to_anchor=(0.5,1.68))
     pl.grid()
     pl.subplot(5,1,2)
     pl.plot(expid,data[:,1,1],'bo-',label='Image Analysis')
     pl.plot(expid,data[:,2,1],'ro-',label='BCAM')
+    pl.plot(expid,data[:,0,1],'go-',label='Hexapod ')
     pl.ylabel('y-decenter')
     pl.xticks(expid,np.repeat('',nexp))
     pl.grid()
     pl.subplot(5,1,3)
     pl.plot(expid,data[:,1,2],'bo-',label='Image Analysis')
+    pl.plot(expid,data[:,0,2],'go-',label='Hexapod ')
     #pl.plot(expid,data[:,2,2],'ro',label='BCAM') #no focus for BCAM
     pl.ylabel('z-defocus')
     pl.xticks(expid,np.repeat('',nexp))
@@ -59,12 +62,14 @@ def analyze_hex():
     pl.subplot(5,1,4)
     pl.plot(expid,data[:,1,3],'bo-',label='Image Analysis')
     pl.plot(expid,data[:,2,3],'ro-',label='BCAM')
+    pl.plot(expid,data[:,0,3],'go-',label='Hexapod ')
     pl.ylabel('x-tilt')
     pl.xticks(expid,np.repeat('',nexp))
     pl.grid()
     pl.subplot(5,1,5)
     pl.plot(expid,data[:,1,4],'bo-',label='Image Analysis')
     pl.plot(expid,data[:,2,4],'ro-',label='BCAM')
+    pl.plot(expid,data[:,0,4],'go-',label='Hexapod ')
     pl.xlabel('exposure_id')
     pl.ylabel('y-tilt')
     pl.xticks(expid,xtick,rotation=45)
@@ -258,38 +263,6 @@ def runanalysis(img_name=None):
     dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErrforplot,hexinfo=hexHao)
     pl.savefig('zernike_coeff_'+expid+'.png')
     pl.close()
- 
-    #betaSex=[]
-    #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,2].real,max_order=20)[0])
-    #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].real,max_order=20)[0])
-    #betaSex.append(zernikeFit(dataSex[:,0].real,dataSex[:,1].real,dataSex[:,3].imag,max_order=20)[0])
-    #dispM202Coeff(betaSex)
-    #pl.savefig('coeff_Sex_'+expid+'.png')
-    #pl.close()
-    #betaSex = np.array(betaSex)
-    #betaSex=betaSex.flatten()
-    #posCRAYsex = CRAYposLinearModel(betaSex)
-    #hexSex = hexapodPosition(betaSex)
-    #print '----hexpod configuration from header -----'
-    #print hexposhdr
-    #print '--------the hexapod positions -----'
-    #print '        ------based on weighted moments --------'
-    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    #print hexHao
-    #print '        ------based on moments from sextractor --------'
-    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    #print hexSex
-    #print ' '
-    #print ' '
-    #print ' '
-    #print ' '
-    #print '--------the CRAY positions -----'
-    #print '        ------based on weighted moments --------'
-    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    #print posCRAY
-    #print '        ------based on moments from sextractor --------'
-    #print ' -- xShift[micron], yShift[micron], zShift[micron], xTilt[arcsec], yTilt[arcsec] --'
-    #print posCRAYsex
     #---save files---
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
     #np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
