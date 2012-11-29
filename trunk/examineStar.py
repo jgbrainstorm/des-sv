@@ -47,6 +47,7 @@ def star_viewer(img_name=None,ext=None):
     else:
         print '--- No Nstars selected ---'
         pl.ion()
+        pl.figure()
         pl.plot(mag,rad,'b.')
         pl.xlabel('mag')
         pl.ylabel('radius')
