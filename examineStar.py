@@ -33,8 +33,8 @@ def star_viewer(img_name=None,ext=None):
     starFwhm = selectStar(mag,fwhm_sex)
     ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
     nstar = len(mag[ok])
-    print '--- Nstars selected: '+str(nstar)+'---'
     if ok.any():
+        print '--- Nstars selected: '+str(nstar)+'---'
         bkg = bkg[ok]
         Mrr = Mrr[ok]
         Mcc = Mcc[ok]
@@ -45,6 +45,7 @@ def star_viewer(img_name=None,ext=None):
         bkglist = list(bkg)
         dispStampList(stamplist,bkglist,2.,mag,rad,ok,expid,detector,exptime)
     else:
+        print '--- No Nstars selected ---'
         pl.plot(mag,rad,'b.')
         pl.xlabel('mag')
         pl.ylabel('radius')
