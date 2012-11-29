@@ -44,6 +44,13 @@ def star_viewer(img_name=None,ext=None):
         stamplist = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
         bkglist = list(bkg)
         dispStampList(stamplist,bkglist,2.,mag,rad,ok,expid,detector,exptime)
+    else:
+        pl.plot(mag,rad,'b.')
+        pl.xlabel('mag')
+        pl.ylabel('radius')
+        pl.ylim(0,13)
+        pl.xlim(-20,0)
+        pl.title('Exposure: '+expid+'   CCD: '+detector)
     return '----finished one image ----'
     
 

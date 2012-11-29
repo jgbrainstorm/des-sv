@@ -776,7 +776,7 @@ def display_moments(data=None):
     phi22 = 0.5*np.arctan2(data[:,3].imag,data[:,3].real)
     x = data[:,0].real
     y = data[:,1].real
-    phi22[x<0] = phi22+np.deg2rad(180)
+    #phi22[x<0] = phi22+np.deg2rad(180)
     u = np.abs(data[:,3])*np.cos(phi22)
     v = np.abs(data[:,3])*np.sin(phi22)
     qvr = pl.quiver(x,y,u,v,width = 0.004, color='r',pivot='middle',headwidth=0.,headlength=0.,headaxislength=0.,scale_units='width')
