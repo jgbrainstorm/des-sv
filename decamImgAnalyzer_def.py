@@ -863,14 +863,14 @@ def display_2nd_moments(data=None):
     pl.xlim(-250,250)
     pl.ylim(-250,250)
     pl.grid(color='g')
-    pl.xlabel('X [mm] (WEST)')
-    pl.ylabel('Y [mm] (NORTH)')
+    pl.xlabel('Camera WEST [mm]')
+    pl.ylabel('Camera NORTH [mm]')
     pl.title('M22')
     pl.subplot(1,2,2)
     m20sqr = np.sqrt(data[:,2].real)
     x = data[:,0].real
     y = data[:,1].real
-    m20sqr_med = np.median(m20sqr)
+    m20sqr_med = np.median(m20sqr) 
     m20sqr_diff = m20sqr - m20sqr_med
     m20sqr_diff_absmed = np.median(np.abs(m20sqr_diff))
     plotScale = 1./m20sqr_diff_absmed*100
@@ -878,10 +878,6 @@ def display_2nd_moments(data=None):
     neg = m20sqr_diff < 0
     pl.scatter(x[pos],y[pos],s=m20sqr_diff[pos]*plotScale,c='r',alpha=0.5)
     pl.scatter(x[neg],y[neg],s=-m20sqr_diff[neg]*plotScale,c='b',alpha=0.5)
-    #pl.scatter(-230,-210,s=m20sqr_diff_absmed*plotScale,c='b',alpha=0.5)
-    #pl.text(-200,-215,'-'+str(round(m20sqr_diff_absmed,6))+' pix')
-    #pl.scatter(-230,-230,s=m20sqr_diff_absmed*plotScale,c='r',alpha=0.5)
-    #pl.text(-200,-235,str(round(m20sqr_diff_absmed,6))+' pix')
     pl.scatter(-230,-210,s=0.01*plotScale,c='b',alpha=0.5)
     pl.text(-200,-215,'-'+str(0.01)+' pix')
     pl.scatter(-230,-230,s=0.01*plotScale,c='r',alpha=0.5)
@@ -890,8 +886,8 @@ def display_2nd_moments(data=None):
     pl.grid(color='g')
     pl.xlim(-250,250)
     pl.ylim(-250,250)
-    pl.xlabel('X [mm] (WEST)')
-    pl.ylabel('Y [mm] (NORTH)')
+    pl.xlabel('Camera WEST [mm]')
+    pl.ylabel('Camera NORTH [mm]')
     pl.title('median '+r'$\sqrt{M20}$: '+str(round(scale*m20sqr_med,3))+' [arcsec]')
     return '---done!--'
 

@@ -29,7 +29,7 @@ def star_viewer(img_name=None,ext=None):
     Mcc = cat.X2WIN_IMAGE
     Mrr = cat.Y2WIN_IMAGE
     Mrc = cat.XYWIN_IMAGE
-    fwhm_sex = cat.FWHM_IMAGE
+    fwhm_sex = cat.FWHM_IMAGE   
     starFwhm = selectStar(mag,fwhm_sex)
     ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
     nstar = len(mag[ok])
@@ -47,7 +47,7 @@ def star_viewer(img_name=None,ext=None):
     else:
         print '--- No Nstars selected ---'
         pl.ion()
-        pl.figure()
+        pl.figure(figsize=(5,5))
         pl.plot(mag,rad,'b.')
         pl.xlabel('mag')
         pl.ylabel('radius')
