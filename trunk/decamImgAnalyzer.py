@@ -81,8 +81,10 @@ def hexapodPosition(beta,betaErr,weighted=True):
     the CRAY position to the hexapod position parameters. There is a 15 deg rotation between the two coordinate. However, this is accounted in the sispi. So, the hexapod position in the header is acutally rotated to its designed coordiante, which relate to the CRAY coordinate by the last page of des-docdb #6551
     """
     x,y,z,thetax,thetay = CRAYposLinearModel(beta,betaErr,weighted)
-    xh = x
-    yh = -y
+    #xh = x                
+    #yh = -y
+    yh = x       # change on 11/30/12 after comparing with BCAM and hexapod data on 11/22/12
+    xh = -y   
     zh = -z
     thetaxh = -thetay
     thetayh = -thetax
