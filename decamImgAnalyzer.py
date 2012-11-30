@@ -72,7 +72,7 @@ def analyze_hex():
     pl.plot(expid,data[:,0,4],'go-',label='Hexapod ')
     pl.xlabel('exposure_id')
     pl.ylabel('y-tilt')
-    pl.xticks(expid,xtick,rotation=45)
+    pl.xticks(expid,xtick,rotation=90)
     pl.grid()
     return '---done!----'
 
