@@ -20,11 +20,11 @@ funpack *.fz
 rm *.fz
 echo ' ---- unpack and remove are done!----'
 
-# 3. flat field and bias subtraction 
-echo '--step 3: reduce the images by bias subraction and flat fielding ---'
-desImgReduction.py ../masterBias.fits ../masterFlat.fits all
+# 3. subtract the overscan 
+echo '--step 3: reduce the images by subtracting the overscan ---'
+desImgQuickReduction.py all
 rm DECam_????????.fits
-echo '--- reduction is done ! ---'
+#echo '--- reduction is done ! ---'
 
 # 4. extract catalog and analyze the results
 echo '---step 4:  extracting star catalog and generate plots ---'
