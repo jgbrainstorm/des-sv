@@ -223,7 +223,6 @@ def runanalysis(img_name=None):
     display_2nd_moments(data)
     pl.savefig('moments_whisker_'+expid+'.png')
     pl.close()
-    p.dump(data.flatten(),open('zernike_coeff_'+expid+'.p','w')) # save zernike coefficient.
     beta=[]
     betaErr=[]
     betaM20 = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)
@@ -240,6 +239,7 @@ def runanalysis(img_name=None):
     beta=np.array(beta)
     betaErr = np.array(betaErr)
     beta=beta.flatten()
+    p.dump(beta,open('zernike_coeff_'+expid+'.p','w')) # save zernike coefficient.
     betaErr = betaErr.flatten()
     posCRAY = CRAYposLinearModel(beta,betaErr,weighted=False)
     hexHao = hexapodPosition(beta,betaErr,weighted=False)
@@ -254,7 +254,7 @@ def runanalysis(img_name=None):
     
 
 if __name__ == "__main__":
-    from decamImgAnalyzer import *
+    from decamImgAnalyzer_light import *
     import sys,time,glob
     startTime=time.time()
     if len(sys.argv) == 1:
