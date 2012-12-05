@@ -306,7 +306,7 @@ def gfwhm(img):
     p = leastsq(residualg,p0,args=(radius,img))[0]
     sig,A,B = p
     fwhm_gauss= 2. * sig * np.sqrt(2. * np.log(2.))
-    r50_gauss = 1.3865*sig
+    r50_gauss = sig * np.sqrt(2. * np.log(2.))
     return sig,A,B,fwhm_gauss,r50_gauss
 
 def s2fwhm(img):
