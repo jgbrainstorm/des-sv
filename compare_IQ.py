@@ -65,7 +65,7 @@ def measureIQ(img_name=None):
     pl.subplot(2,1,2)
     pl.boxplot(list(r50.T))
     pl.ylabel('R50')
-    pl.xticks(np.arange(1,5),['sech2','moffat','gauss1d','sextractor']
+    pl.xticks(np.arange(1,5),['sech2','moffat','gauss1d','sextractor'])
     pl.grid()
     pl.ylim(0,1.5)
     pl.savefig('fwhm_r50_'+expid+'.png')
