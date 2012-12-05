@@ -19,7 +19,7 @@ def measureIQ(img_name=None):
     dataSex=[]
     fwhm = []
     whk = []
-    radall = []
+    r50 = []
     for i in range(1,63):
         print i
         img = imghdu[i].data
@@ -44,20 +44,22 @@ def measureIQ(img_name=None):
             res = get_fwhm_whisker(stampImg=stamp[k],bkg =bkg[k],sigma=2.)
             fwhm.append(np.append(res[0],fwhm_sex[k]))
             whk.append(np.append(res[1],whisker_sex)) 
-        radall = radall+list(rad)
-    radall = np.array(radall)
-    p.dump([fwhm,whk,radall],open('compare_fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
+            r50.append(np.append(res[2],rad[k]))
+    r50 = np.array(r50)
+    fwhm = np.array(fwhm)
+    whk = np.array(whk)
+    p.dump([fwhm,whk,r50],open('compare_fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
 
 
 if __name__ == "__main__":
-    from decamImgAnalyzer import *
+    from compare_IQ import *
     import sys,time,glob
     startTime=time.time()
     if len(sys.argv) == 1:
         print 'syntax: '
-        print 'desImgAnalysis expid'
+        print 'compare_IQ expid'
         print 'or'
-        print 'desImgAnalysis all'
+        print 'compare_IQ all'
         print 'Note: The image need to be reduced (bias subtraction, flat fielding'
     elif sys.argv[1] == 'all':
         img_nameList = glob.glob('*_reduced.fits')
