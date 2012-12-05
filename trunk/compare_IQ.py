@@ -48,8 +48,11 @@ def measureIQ(img_name=None):
     r50 = np.array(r50)
     fwhm = np.array(fwhm)
     whk = np.array(whk)
+    #r50: sech2, moffat,gauss1d,sex
+    #fwhm: wmoment,amoment,moffat,gauss1d,sech2,sex
+    #whk: wmoments,amoments,sex
     p.dump([fwhm,whk,r50],open('compare_fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
-
+    return '---done!---'
 
 if __name__ == "__main__":
     from compare_IQ import *
