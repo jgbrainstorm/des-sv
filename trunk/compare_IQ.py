@@ -54,7 +54,7 @@ def measureIQ(img_name=None):
     #fwhm: wmoment,amoment,moffat,gauss1d,sech2,sex
     #whk: wmoments,amoments,sex
     p.dump([fwhm,whk,r50],open('compare_fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
-    pl.figure(figsize=(15,8))
+    pl.figure(figsize=(12,8))
     pl.subplot(2,1,1)
     pl.boxplot(list(fwhm.T))
     pl.ylabel('fwhm')
