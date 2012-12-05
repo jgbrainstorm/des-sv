@@ -306,7 +306,8 @@ def gfwhm(img):
     p = leastsq(residualg,p0,args=(radius,img))[0]
     sig,A,B = p
     fwhm_gauss= 2. * sig * np.sqrt(2. * np.log(2.))
-    return sig,A,B,fwhm_gauss
+    r50_gauss = 1.3865*sig
+    return sig,A,B,fwhm_gauss,r50_gauss
 
 def s2fwhm(img):
     """
@@ -334,7 +335,8 @@ def s2fwhm(img):
     p = leastsq(residuals2,p0,args=(radius,img))[0]
     r0,A,B = p
     fwhm_sech2= 1.7627471*r0 # obtained by solving the equation
-    return r0,A,B,fwhm_sech2
+    r50_sech2 = 1.0452*r0
+    return r0,A,B,fwhm_sech2,r50_sech2
 
 
 def g2dfwhm(img):
@@ -450,7 +452,8 @@ def mfwhm(img=None):
     p = leastsq(residualm,p0,args=(radius,img))[0]
     alpha,beta,A,B = p
     fwhm_moffat= 2. * abs(alpha) * np.sqrt(2.**(1./beta)-1)
-    return alpha,beta,A,B,fwhm_moffat
+    r50_moffat = abs(alpha)*np.sqrt(1-np.log(2.)/(beta - 1))
+    return alpha,beta,A,B,fwhm_moffat,r50_moffat
 
     
 def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
@@ -472,16 +475,17 @@ def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
             wfit = wfwhm(stampImg,sigma=sigma)
             fwhm = np.array([wfit[3],g2dfit[3],mfit[4],gfit[3],s2fit[3]])*scale
             whisker = np.array([wfit[2],g2dfit[2]])*scale
+            r50 = np.array([s2fit[4],mfit[5],gfit[4]])*scale
         except ValueError:
             fwhm = np.array([-999,-999,-999,-999,-999])
             whisker = np.array([-999,-999])
+            r50 = np.array([-999,-999,-999])
             pass
-        #fwhm[np.isnan(fwhm)]=-999
-        #whisker[np.isnan(whisker)]=-999
     else:
         fwhm = np.array([-999,-999,-999,-999,-999])
         whisker = np.array([-999,-999])
-    return whisker, fwhm
+        r50 = np.array([-999,-999,-999])
+    return whisker, fwhm, r50
 
 def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     """
@@ -495,7 +499,7 @@ def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     fwhm=[]
     for i in range(n):
         print i
-        whker,fw = get_fwhm_whisker(stampImgList[i],bkgList[i],sigma=sigma)
+        whker,fw,r50 = get_fwhm_whisker(stampImgList[i],bkgList[i],sigma=sigma)
         if len(whker[whker>1])>0 or len(fw[fw==-999])>0:
             continue
         else:
