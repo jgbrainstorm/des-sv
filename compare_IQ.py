@@ -58,7 +58,7 @@ def measureIQ(img_name=None):
     pl.subplot(2,1,1)
     pl.boxplot(list(fwhm.T))
     pl.ylabel('fwhm')
-    pl.ylim(0.5,2.)
+    pl.ylim(0.5,3.5)
     pl.grid()
     pl.xticks(np.arange(1,7),['wmoments','amoments','moffat','gauss','sech2','sextractor'])
     pl.title('exposure id: '+expid)
