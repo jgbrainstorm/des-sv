@@ -452,7 +452,7 @@ def mfwhm(img=None):
     p = leastsq(residualm,p0,args=(radius,img))[0]
     alpha,beta,A,B = p
     fwhm_moffat= 2. * abs(alpha) * np.sqrt(2.**(1./beta)-1)
-    r50_moffat = abs(alpha)*np.sqrt(1-np.log(2.)/(beta - 1))
+    r50_moffat = abs(alpha)*np.sqrt(2.**(1./(beta-1))-1)
     return alpha,beta,A,B,fwhm_moffat,r50_moffat
 
     
