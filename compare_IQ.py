@@ -8,6 +8,7 @@ sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
 sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
 from decamImgAnalyzer_def import *
+import cPickle as p
 
 def measureIQ(img_name=None):
     catname = img_name[0:-5]+'_star_catalog_selected.fits'
