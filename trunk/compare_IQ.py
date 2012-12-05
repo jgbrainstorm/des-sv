@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 #----------------------------------------------
 # this code compare the various IQ measurement
 # J. Hao, 12/4/2012
@@ -42,9 +43,9 @@ def measureIQ(img_name=None):
             M22[k] = np.complex(Mcc[k] - Mrr[k],2*Mrc[k])
             whisker_sex = np.sqrt(np.abs(M22[k]))
             res = get_fwhm_whisker(stampImg=stamp[k],bkg =bkg[k],sigma=2.)
-            fwhm.append(np.append(res[0],fwhm_sex[k]))
-            whk.append(np.append(res[1],whisker_sex)) 
-            r50.append(np.append(res[2],rad[k]))
+            fwhm.append(np.append(res[1],fwhm_sex[k]*0.27))
+            whk.append(np.append(res[0],whisker_sex*0.27)) 
+            r50.append(np.append(res[2],rad[k]*0.27))
     r50 = np.array(r50)
     fwhm = np.array(fwhm)
     whk = np.array(whk)
