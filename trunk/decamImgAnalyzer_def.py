@@ -559,7 +559,7 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
     pl.subplot(3,1,3)
     pl.boxplot(r50)
-    pl.ylim(0,np.median(r50[5])+0.5)
+    pl.ylim(0,np.median(r50[1])+0.5)
     pl.grid()
     pl.hlines(0.5,0,5,linestyle='solid',color='g')
     pl.xticks(np.arange(1,5),['R50_Sech2', 'R50_Moffat','R50_Gaussian', 'R50_Sx'])
