@@ -155,9 +155,7 @@ def runanalysis(img_name=None):
     dataSex=[]
     fwhmSex = np.array([])
     whiskerSex = np.array([])
-    magall = []
-    radall = []
-    okall = []
+    r50Sex = np.array([])
     nstarall = 0
     for i in range(1,63):
         print i
@@ -174,14 +172,10 @@ def runanalysis(img_name=None):
         Mrc = cat.XYWIN_IMAGE
         fwhm_sex = cat.FWHM_IMAGE
         starFwhm = selectStar(mag,fwhm_sex)
-        #ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
-        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-10.5)*(mag>-15.5)
+        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
         nstar = len(mag[ok])
         nstarall = nstarall + nstar
         print '--- Nstars selected: '+str(nstar)+'---'
-        magall.append(mag)
-        radall.append(rad)
-        okall.append(ok)
         xccd = eval(imghdu[i].header['extname'])[1]
         yccd = eval(imghdu[i].header['extname'])[2]
         if ok.any():
@@ -199,6 +193,7 @@ def runanalysis(img_name=None):
                 M22[k] = np.complex(Mcc[k] - Mrr[k],2*Mrc[k])
             whisker_sex = np.sqrt(np.abs(M22))
             fwhm_sex = fwhm_sex[ok]
+            rad = rad[ok]
             M20 = np.median(M20)
             M22 = np.median(M22)
             stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
@@ -209,6 +204,7 @@ def runanalysis(img_name=None):
             dataSex.append([xccd,yccd,M20,M22])
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
             whiskerSex = np.concatenate((whiskerSex,whisker_sex))
+            r50Sex = np.concatenate((r50Sex,rad))
         else:
             momsfake=[0.,(0.+0.j),(0.+0.j),(0.+0.j)]
             data.append([xccd,yccd]+list(momsfake))
@@ -217,32 +213,13 @@ def runanalysis(img_name=None):
     data = np.array(data)
     data = averageN30(data) # use the average of N31 and N29 to replace N30
     dataSex = np.array(dataSex)
-    magall = np.array(magall)
-    radall = np.array(radall)
-    okall = np.array(okall)
-    #display_2nd_moments(dataSex)
-    #pl.savefig('moments_sextractor_'+expid+'.png')
-    #pl.close()
-    #display_moments(data)
     display_2nd_moments(data)
     pl.savefig('moments_whisker_'+expid+'.png')
     pl.close()
-    fwh,whk = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,sigma=4.,dimmfwhm=dimmfwhm)
+    fwh,whk,r50 = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,r50Sex=r50Sex*0.27,sigma=2.,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    p.dump(fwh+whk,open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
-    #---check the fitted value of the moments ---
-    #datafitted = data.copy()
-    #datafitted[:,2].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,2].real,max_order=20)[3]
-    #datafitted[:,3].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].real,max_order=20)[3]
-    #datafitted[:,3].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,3].imag,max_order=20)[3]
-    #datafitted[:,4].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].real,max_order=20)[3]
-    #datafitted[:,4].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,4].imag,max_order=20)[3]
-    #datafitted[:,5].real = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].real,max_order=20)[3]
-    #datafitted[:,5].imag = zernikeFit(data[:,0].real,data[:,1].real,data[:,5].imag,max_order=20)[3]
-    #display_moments(datafitted)
-    #pl.savefig('fitted_moments_measurement_'+expid+'.png')
-    #pl.close()
+    p.dump(fwh+whk+r50,open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
     #---the hexapod adjustment using M20,M22---
     beta=[]
     betaErr=[]
@@ -268,7 +245,6 @@ def runanalysis(img_name=None):
     pl.close()
     #---save files---
     hexposhdr = np.array(hexposhdr.split(',')).astype(float)[0:5]
-    #np.savetxt('hexapod_cray_position_'+expid+'.txt',[hexposhdr,hexHao,hexSex,posCRAY,posCRAYsex],fmt='%10.5f')
     hexBCAM = np.array([bcamDX,bcamDY,-999,bcamAX,bcamAY])
     np.savetxt('hexapod_position_'+expid+'.txt',[hexposhdr,hexHao,hexBCAM,posCRAY],fmt='%10.5f')
     return '----finished one image ----'
