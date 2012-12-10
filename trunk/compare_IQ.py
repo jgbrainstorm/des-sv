@@ -22,6 +22,7 @@ def measureIQ(img_name=None):
     fwhm = []
     whk = []
     r50 = []
+    nstartotal = 0.
     for i in range(1,63):
         print i
         img = imghdu[i].data
@@ -36,6 +37,7 @@ def measureIQ(img_name=None):
         fwhm_sex = cat.FWHM_IMAGE
         radall.append(rad)
         Nobj = len(Mrr)
+        nstartotal=nstartotal+Nobj
         M20=np.zeros(Nobj)
         M22=np.zeros(Nobj).astype(complex)
         stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
@@ -50,26 +52,27 @@ def measureIQ(img_name=None):
     r50 = np.array(r50)
     fwhm = np.array(fwhm)
     whk = np.array(whk)
-    #r50: sech2, moffat,gauss1d,sex
     #fwhm: wmoment,amoment,moffat,gauss1d,sech2,sex
     #whk: wmoments,amoments,sex
-    p.dump([fwhm,whk,r50],open('compare_fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
-    pl.figure(figsize=(12,8))
-    pl.subplot(2,1,1)
-    pl.boxplot(list(fwhm.T))
-    pl.ylabel('fwhm')
-    pl.ylim(0.5,3.5)
-    pl.grid()
-    pl.xticks(np.arange(1,7),['wmoments','amoments','moffat','gauss','sech2','sextractor'])
-    pl.title('exposure id: '+expid)
-    pl.subplot(2,1,2)
-    pl.boxplot(list(r50.T))
-    pl.ylabel('R50')
-    pl.xticks(np.arange(1,5),['sech2','moffat','gauss1d','sextractor'])
-    pl.grid()
-    pl.ylim(0,1.5)
-    pl.savefig('fwhm_r50_'+expid+'.png')
-    pl.close()
+    #r50: sech2, moffat,gauss1d,sex
+    if nstartotal > 100:
+        p.dump([fwhm,whk,r50],open('compare_fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
+        pl.figure(figsize=(12,8))
+        pl.subplot(2,1,1)
+        pl.boxplot(list(fwhm.T))
+        pl.ylabel('fwhm')
+        pl.ylim(0.5,3.5)
+        pl.grid()
+        pl.xticks(np.arange(1,7),['wmoments','amoments','moffat','gauss','sech2','sextractor'])
+        pl.title('exposure id: '+expid)
+        pl.subplot(2,1,2)
+        pl.boxplot(list(r50.T))
+        pl.ylabel('R50')
+        pl.xticks(np.arange(1,5),['sech2','moffat','gauss1d','sextractor'])
+        pl.grid()
+        pl.ylim(0,1.5)
+        pl.savefig('fwhm_r50_'+expid+'.png')
+        pl.close()
     return '---done!---'
 
 if __name__ == "__main__":

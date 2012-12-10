@@ -430,7 +430,7 @@ def mfwhm(img=None):
     output: 
     """
     npix = img.shape[0]
-    rowCen,colCen = adaptiveCentroid(img,1.1/scale)
+    rowCen,colCen = adaptiveCentroid(img,2.)
     row,col = np.mgrid[0:npix,0:npix]
     row = row - rowCen
     col = col - colCen
@@ -561,7 +561,7 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.boxplot(r50)
     pl.ylim(0,np.median(r50[1])+0.5)
     pl.grid()
-    pl.hlines(0.5,0,5,linestyle='solid',color='g')
+    pl.hlines(0.522,0,5,linestyle='solid',color='g')
     pl.xticks(np.arange(1,5),['R50_Sech2', 'R50_Moffat','R50_Gaussian', 'R50_Sx'])
     return fwh,whk,r50
 
