@@ -76,6 +76,45 @@ def analyze_hex():
     pl.grid()
     return '---done!----'
 
+
+def analyze_r50_whisker():
+    """
+    make a summary plot for the R50 and whisker length for each exposure
+    """
+    f = gl.glob('fwhm_whisker_*.p')
+    f.sort()
+    expid=[]
+    r50=[]
+    whk=[]
+    nexp = len(f)
+    if nexp == 0:
+        return '-- no image to analyze, exit --'
+    for fi in f:
+        expid.append(int(fi[-10:-2]))
+        t = p.load(open(fi,'r'))
+        r50.append(np.median(t[12]))
+        whk.append(robust_mean_std(t[6])[0])
+    expid = np.array(expid)
+    xtick = expid.astype('S10')
+    r50 = np.array(r50)
+    whk = np.array(whk)
+    pl.figure(figsize=(16,8))
+    pl.subplot(2,1,1)
+    pl.plot(expid,whk,'bo')
+    pl.hlines(0.2,expid[0]-100,expid[-1]+100,color='green')
+    pl.grid()
+    pl.ylabel('whisker length (weighted momts.)')
+    pl.subplot(2,1,2)
+    pl.plot(expid,r50,'bo')
+    pl.grid()
+    pl.ylabel('R50 (sextractor)')
+    pl.hlines(0.522,expid[0]-100,expid[-1]+100,color='green')
+    pl.xticks(expid,xtick,rotation=90)
+    pl.grid()
+    pl.savefig()
+    return '---done!----'
+
+
 def hexapodPosition(beta,betaErr,weighted=True):
     """
     the CRAY position to the hexapod position parameters. There is a 15 deg rotation between the two coordinate. However, this is accounted in the sispi. So, the hexapod position in the header is acutally rotated to its designed coordiante, which relate to the CRAY coordinate by the last page of des-docdb #6551
@@ -273,6 +312,9 @@ if __name__ == "__main__":
     elapseTime=endTime-startTime
     tt=analyze_hex()
     pl.savefig('hexapod_pos_summary.png')
+    pl.close()
+    tt = analyze_r50_whisker()
+    pl.savefig('exposure_iq_summary.png')
     pl.close()
     print '---elapsed time: ' + str(elapseTime)
 
