@@ -105,13 +105,14 @@ def analyze_r50_whisker():
     pl.grid()
     pl.ylabel('whisker length (weighted momts.)')
     pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.ylim(0,0.5)
     pl.subplot(2,1,2)
     pl.plot(np.arange(len(expid)),r50,'bo')
     pl.grid()
     pl.ylabel('R50 (sextractor)')
     pl.hlines(0.522,-1,len(expid),color='green')
     pl.xticks(np.arange(len(expid)),xtick,rotation=90)
-    pl.grid()
+    pl.ylim(0,1.2)
     return '---done!----'
 
 
