@@ -44,7 +44,7 @@ def robust_mean_std(x):
             ok = (y>lowFense)*(y<highFense)
             yy=y[ok]
             meany=yy.mean(dtype='double')
-            stdy = yy.std(dtyple='double')
+            stdy = yy.std(dtype='double')
     return meany,stdy
 
 scale=0.27
