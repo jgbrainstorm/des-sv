@@ -22,7 +22,7 @@ def averageN30(data=None):
     return datanew
 
 def hexapod_multilinear(beta):
-    coeff = p.load(open('multiLinearCoeff.p','r'))
+    coeff = p.load(open('/usr/remote/user/sispi/jiangang/des-sv/multiLinearCoeff.p','r'))
     res = np.dot(beta,coeff.T)
     return res
 
