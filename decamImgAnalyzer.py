@@ -21,6 +21,12 @@ def averageN30(data=None):
     datanew[idxN30,2:] = 0.5*(datanew[idxN29,2:]+datanew[idxN31,2:])
     return datanew
 
+def hexapod_multilinear(beta):
+    coeff = p.load(open('multiLinearCoeff.p','r'))
+    res = np.dot(beta,coeff.T)
+    return res
+
+
 
 def analyze_hex():
     f = gl.glob('hexapod_position_*.txt')
@@ -279,7 +285,8 @@ def runanalysis(img_name=None):
     beta=beta.flatten()
     betaErr = betaErr.flatten()
     posCRAY = CRAYposLinearModel(beta,betaErr,weighted=False)
-    hexHao = hexapodPosition(beta,betaErr,weighted=False)
+    #hexHao = hexapodPosition(beta,betaErr,weighted=False)
+    hexHao = hexapod_multilinear(beta)
     dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErrforplot,hexinfo=hexHao)
     pl.savefig('zernike_coeff_'+expid+'.png')
     pl.close()
