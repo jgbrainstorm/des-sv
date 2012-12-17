@@ -245,7 +245,7 @@ def runanalysis(img_name=None):
             stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
             stamplist = stamplist+stamp
             bkglist = bkglist+list(bkg)
-            moms = measure_stamp_moments(stamp,bkg,4.)
+            moms = measure_stamp_moments(stamp,bkg,2.)
             data.append([xccd,yccd]+ list(moms))
             dataSex.append([xccd,yccd,M20,M22])
             fwhmSex = np.concatenate((fwhmSex,fwhm_sex))
@@ -262,10 +262,10 @@ def runanalysis(img_name=None):
     display_2nd_moments(data)
     pl.savefig('moments_whisker_'+expid+'.png')
     pl.close()
-    fwh,whk,r50 = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,r50Sex=r50Sex*0.27,sigma=4.,dimmfwhm=dimmfwhm)
+    fwh,whk,r50,e1,e2 = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,r50Sex=r50Sex*0.27,sigma=2.,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    p.dump(fwh+whk+r50,open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
+    p.dump(fwh+whk+r50+e1+e2,open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
     #---the hexapod adjustment using M20,M22---
     beta=[]
     betaErr=[]
@@ -285,8 +285,8 @@ def runanalysis(img_name=None):
     beta=beta.flatten()
     betaErr = betaErr.flatten()
     posCRAY = CRAYposLinearModel(beta,betaErr,weighted=False)
-    #hexHao = hexapodPosition(beta,betaErr,weighted=False)
-    hexHao = hexapod_multilinear(beta)
+    hexHao = hexapodPosition(beta,betaErr,weighted=False)
+    #hexHao = hexapod_multilinear(beta)
     dispM202Coeff(betaAll = betaforplot, betaErrAll = betaErrforplot,hexinfo=hexHao)
     pl.savefig('zernike_coeff_'+expid+'.png')
     pl.close()

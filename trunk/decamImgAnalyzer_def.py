@@ -508,7 +508,7 @@ def get_fwhm_whisker(stampImg=None,bkg = None,sigma=1.1/scale):
         fwhm = np.array([-999,-999,-999,-999,-999])
         whisker = np.array([-999,-999])
         r50 = np.array([-999,-999,-999])
-    return whisker, fwhm, r50
+    return whisker, fwhm, r50,wfit[0],wfit[1]
 
 def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     """
@@ -521,19 +521,25 @@ def get_fwhm_whisker_list(stampImgList=None,bkgList=None,sigma=1.1/scale):
     whisker=[]
     fwhm=[]
     r50=[]
+    e1=[]
+    e2=[]
     for i in range(n):
         print i
-        whker,fw,r5 = get_fwhm_whisker(stampImgList[i],bkgList[i],sigma=sigma)
+        whker,fw,r5,ee1,ee2 = get_fwhm_whisker(stampImgList[i],bkgList[i],sigma=sigma)
         if len(whker[whker>1])>0 or len(fw[fw==-999])>0:
             continue
         else:
             whisker.append(whker)
             fwhm.append(fw)
             r50.append(r5)
+            e1.append(ee1)
+            e2.append(ee2)
     whisker = np.array(whisker)
     fwhm = np.array(fwhm)
     r50 = np.array(r50)
-    return whisker, fwhm, r50
+    e1 = np.array(e1)
+    e2 = np.array(e2)
+    return whisker, fwhm, r50,e1,e2
 
 def fwhm_whisker_plot(stampImgList=None,bkgList=None,sigma=1.1/scale):
     whk,fwhm,r50 = get_fwhm_whisker_list(stampImgList,bkgList,sigma=sigma)
@@ -558,15 +564,15 @@ def fwhm_whisker_plot(stampImgList=None,bkgList=None,sigma=1.1/scale):
 
 
 def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=None,r50Sex=None,sigma=1.1/scale,dimmfwhm=None):
-    whk,fwhm,r50 = get_fwhm_whisker_list(stampImgList,bkgList,sigma=sigma)
+    whk,fwhm,r50,e1,e2 = get_fwhm_whisker_list(stampImgList,bkgList,sigma=sigma)
     whk=list(whk.T)
     fwh=list(fwhm.T)
     r50=list(r50.T)
     fwh.append(fwhmSex)
     whk.append(whkSex)
     r50.append(r50Sex)
-    pl.figure(figsize=(15,15))
-    pl.subplot(3,1,1)
+    pl.figure(figsize=(15,20))
+    pl.subplot(4,1,1)
     pl.boxplot(whk)
     pl.hlines(0.2,0,4,linestyle='solid',color='g')
     pl.ylim(np.median(whk[2])-0.3,np.median(whk[2])+0.6)
@@ -574,19 +580,24 @@ def fwhm_whisker_des_plot(stampImgList=None,bkgList=None,whkSex=None,fwhmSex=Non
     pl.xticks(np.arange(1,4),['whisker_Wmoments','whisker_Amoments','whisker_sx'])
     if dimmfwhm != None:
         pl.title('DIMM Seeing FWHM: '+str(round(dimmfwhm,3)) +'(arcsec)    sqrt(DIMM fwhm^2 + 0.55^2): '+str(round(np.sqrt(dimmfwhm**2 + 0.55**2),3)))
-    pl.subplot(3,1,2)
+    pl.subplot(4,1,2)
     pl.boxplot(fwh)
     pl.ylim(0,np.median(fwh[5])+2)
     pl.grid()
     pl.hlines(0.9,0,7,linestyle='solid',color='g')
     pl.xticks(np.arange(1,7),['fwhm_weighted', 'fwhm_Amoments','fwhm_moffat', 'fwhm_gauss','fwhm_sech2','fwhm_sx'])
-    pl.subplot(3,1,3)
+    pl.subplot(4,1,3)
     pl.boxplot(r50)
     pl.ylim(0,np.median(r50[1])+0.5)
     pl.grid()
     pl.hlines(0.522,0,5,linestyle='solid',color='g')
     pl.xticks(np.arange(1,5),['R50_Sech2', 'R50_Moffat','R50_Gaussian', 'R50_Sx'])
-    return fwh,whk,r50
+    pl.subplot(4,1,4)
+    pl.boxplot([e1,e2])
+    pl.ylim(-0.2,0.2)
+    pl.xticks(np.arange(1,3),['e1', 'e2'])
+    pl.grid()
+    return fwh,whk,r50,list(e1),list(e2)
 
 def dispM202Coeff(betaAll=None,betaErrAll=None,hexinfo=None):
     ind = np.arange(len(betaAll[0]))
