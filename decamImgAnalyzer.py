@@ -80,6 +80,8 @@ def analyze_hex():
     pl.ylabel('y-tilt')
     pl.xticks(expid,xtick,rotation=90)
     pl.grid()
+    pl.savefig('hexapod_pos_summary.png')
+    pl.close()
     return '---done!----'
 
 
@@ -142,6 +144,27 @@ def analyze_r50_whisker():
     pl.ylabel('e2 (weighted momts.')
     pl.ylim(-0.3,0.3)
     pl.xticks(np.arange(len(expid)),xtick,rotation=90)
+    pl.savefig('exposure_iq_summary.png')
+    pl.close()
+    pl.figure(figsize=(14,14))
+    pl.subplot(2,2,1)
+    pl.hist(r50,bins=10)
+    pl.grid()
+    pl.xlabel('R50 (sextractor)')
+    pl.subplot(2,2,2)
+    pl.hist(whk,bins=10)
+    pl.xlabel('Whisker (weighted momts.)')
+    pl.grid()
+    pl.subplot(2,2,3)
+    pl.hist(e1,bins=10)
+    pl.xlabel('e1 (weighted momts.)')
+    pl.grid()
+    pl.subplot(2,2,4)
+    pl.hist(e2,bins=10)
+    pl.xlabel('e2 (weighted momts.)')
+    pl.grid()
+    pl.savefig('iq_distribution.png')
+    pl.close()
     return '---done!----'
 
 
@@ -342,10 +365,6 @@ if __name__ == "__main__":
     endTime=time.time()
     elapseTime=endTime-startTime
     tt=analyze_hex()
-    pl.savefig('hexapod_pos_summary.png')
-    pl.close()
     tt = analyze_r50_whisker()
-    pl.savefig('exposure_iq_summary.png')
-    pl.close()
     print '---elapsed time: ' + str(elapseTime)
 

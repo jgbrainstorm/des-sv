@@ -35,6 +35,8 @@ htm.write('<p>Hexapod Parameter Summary </p>\n')
 htm.write('<img src="%s" width="1000">\n'%'hexapod_pos_summary.png')
 htm.write('<p>Exposure Summary </p>\n')
 htm.write('<img src="%s" width="1000">\n'%'exposure_iq_summary.png')
+htm.write('<p>Image Quality Measures Distribution </p>\n')
+htm.write('<img src="%s" width="1000">\n'%'iq_distribution.png')
 
 for i in range(nfig):
     expid=Fig_fwhm[i][-12:-4]
