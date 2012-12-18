@@ -91,7 +91,13 @@ def analyze_r50_whisker():
     f.sort()
     expid=[]
     r50=[]
+    r50err=[]
+    whkerr=[]
     whk=[]
+    e1 = []
+    e1err = []
+    e2 = []
+    e2err=[]
     nexp = len(f)
     if nexp == 0:
         return '-- no image to analyze, exit --'
@@ -99,26 +105,43 @@ def analyze_r50_whisker():
         expid.append(int(fi[-10:-2]))
         t = p.load(open(fi,'r'))
         r50.append(np.median(t[12]))
+        r50err.append(robust_mean_std(t[12])[1])
         whk.append(robust_mean_std(t[6])[0])
+        whkerr.append(robust_mean_std(t[6])[1])
+        e1.append(robust_mean_std(t[13])[0])
+        e1err.append(robust_mean_std(t[13])[1])
+        e2.append(robust_mean_std(t[14])[0])
+        e2err.append(robust_mean_std(t[14])[1])
     expid = np.array(expid)
     xtick = expid.astype('S10')
     r50 = np.array(r50)
     whk = np.array(whk)
-    pl.figure(figsize=(16,8))
-    pl.subplot(2,1,1)
-    pl.plot(np.arange(len(expid)),whk,'bo')
+    pl.figure(figsize=(16,16))
+    pl.subplot(4,1,1)
+    pl.errorbar(np.arange(len(expid)),whk,yerr=whkerr,'bo')
     pl.hlines(0.2,-1,len(expid),color='green')
     pl.grid()
     pl.ylabel('whisker length (weighted momts.)')
     pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
     pl.ylim(0,0.5)
-    pl.subplot(2,1,2)
-    pl.plot(np.arange(len(expid)),r50,'bo')
+    pl.subplot(4,1,2)
+    pl.errorbar(np.arange(len(expid)),r50,yerr=r50err,'bo')
     pl.grid()
     pl.ylabel('R50 (sextractor)')
     pl.hlines(0.522,-1,len(expid),color='green')
+    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.subplot(4,1,3)
+    pl.errorbar(np.arange(len(expid)),e1,yerr=e1err,'bo')
+    pl.grid()
+    pl.ylabel('e1 (weighted momts.')
+    pl.ylim(-0.3,0.3)
+    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.subplot(4,1,4)
+    pl.errorbar(np.arange(len(expid)),e2,yerr=e2err,'bo')
+    pl.grid()
+    pl.ylabel('e2 (weighted momts.')
+    pl.ylim(-0.3,0.3)
     pl.xticks(np.arange(len(expid)),xtick,rotation=90)
-    pl.ylim(0,1.2)
     return '---done!----'
 
 
@@ -265,7 +288,7 @@ def runanalysis(img_name=None):
     fwh,whk,r50,e1,e2 = fwhm_whisker_des_plot(stampImgList=stamplist,bkgList=bkglist,whkSex=whiskerSex*0.27,fwhmSex=fwhmSex*0.27,r50Sex=r50Sex*0.27,sigma=2.,dimmfwhm=dimmfwhm)
     pl.savefig('fwhm_whisker_'+expid+'.png')
     pl.close()
-    p.dump(fwh+whk+r50+e1+e2,open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
+    p.dump(fwh+whk+r50+[e1,e2],open('fwhm_whisker_data_'+expid+'.p','w')) # save the fwhm and whisker data.
     #---the hexapod adjustment using M20,M22---
     beta=[]
     betaErr=[]
