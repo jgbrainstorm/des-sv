@@ -131,7 +131,7 @@ def analyze_r50_whisker():
     pl.subplot(4,1,1)
     for k in range(len(unqfltr)):
         ok = flter == unqfltr[k]
-        pl.errorbar(xidx[ok],whkp[ok],whkerr[ok],fmt=fmtarray[k],label=unqfltr[k])
+        pl.errorbar(xidx[ok],whk[ok],whkerr[ok],fmt=fmtarray[k],label=unqfltr[k])
     pl.hlines(0.2,-1,len(expid),color='green')
     pl.legend(loc='best')
     pl.grid()
