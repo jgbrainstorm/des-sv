@@ -90,7 +90,9 @@ def analyze_r50_whisker():
     make a summary plot for the R50 and whisker length for each exposure
     """
     f = gl.glob('fwhm_whisker_*.p')
+    ff = gl.glob('*reduced.fits')
     f.sort()
+    ff.sort()
     expid=[]
     r50=[]
     r50err=[]
@@ -100,6 +102,7 @@ def analyze_r50_whisker():
     e1err = []
     e2 = []
     e2err=[]
+    flter = []
     nexp = len(f)
     if nexp == 0:
         return '-- no image to analyze, exit --'
@@ -114,33 +117,48 @@ def analyze_r50_whisker():
         e1err.append(robust_mean_std(np.array(t[13]))[1])
         e2.append(robust_mean_std(np.array(t[14]))[0])
         e2err.append(robust_mean_std(np.array(t[14]))[1])
+    for ffi in ff:
+        flter.append(pf.getheader(ffi)['filter'][0])
+    flter = np.array(flter)
+    unqfltr = np.unique(flter)
     expid = np.array(expid)
     xtick = expid.astype('S10')
     r50 = np.array(r50)
     whk = np.array(whk)
+    xidx = np.arange(len(expid))
     pl.figure(figsize=(16,16))
+    fmtarray = ['go','ro','bo','ko','co']
     pl.subplot(4,1,1)
-    pl.errorbar(np.arange(len(expid)),whk,whkerr,fmt='bo')
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],whkpok],whkerr[ok],fmt=fmtarray[k],label=unqfltr[k])
     pl.hlines(0.2,-1,len(expid),color='green')
+    pl.legend(loc='best')
     pl.grid()
     pl.ylabel('whisker length (weighted momts.)')
-    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.xticks(xidx,np.repeat('',len(expid)))
     pl.ylim(0,0.5)
     pl.subplot(4,1,2)
-    pl.errorbar(np.arange(len(expid)),r50,r50err,fmt='bo')
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],r50[ok],r50err[ok],fmt=fmtarray[k])
     pl.grid()
     pl.ylabel('R50 (sextractor)')
     pl.hlines(0.522,-1,len(expid),color='green')
     pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
     pl.subplot(4,1,3)
-    pl.errorbar(np.arange(len(expid)),e1,e1err,fmt='bo')
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],e1[ok],e1err[ok],fmt=fmtarray[k])
     pl.hlines(0.,-1,len(expid),color='green')
     pl.grid()
     pl.ylabel('e1 (weighted momts.')
     pl.ylim(-0.3,0.3)
     pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
     pl.subplot(4,1,4)
-    pl.errorbar(np.arange(len(expid)),e2,e2err,fmt='bo')
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],e2[ok],e2err[ok],fmt=fmtarray[k])
     pl.hlines(0.,-1,len(expid),color='green')
     pl.grid()
     pl.ylabel('e2 (weighted momts.')
@@ -148,25 +166,28 @@ def analyze_r50_whisker():
     pl.xticks(np.arange(len(expid)),xtick,rotation=90)
     pl.savefig('exposure_iq_summary.png')
     pl.close()
-    pl.figure(figsize=(14,14))
-    pl.subplot(2,2,1)
-    pl.hist(r50,bins=10)
-    pl.grid()
-    pl.xlabel('R50 (sextractor)')
-    pl.subplot(2,2,2)
-    pl.hist(whk,bins=10)
-    pl.xlabel('Whisker (weighted momts.)')
-    pl.grid()
-    pl.subplot(2,2,3)
-    pl.hist(e1,bins=10)
-    pl.xlabel('e1 (weighted momts.)')
-    pl.grid()
-    pl.subplot(2,2,4)
-    pl.hist(e2,bins=10)
-    pl.xlabel('e2 (weighted momts.)')
-    pl.grid()
-    pl.savefig('iq_distribution.png')
-    pl.close()
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.figure(figsize=(14,14))
+        pl.subplot(2,2,1)
+        pl.hist(r50[ok],bins=10,normed=True)
+        pl.grid()
+        pl.xlabel('R50 (sextractor)')
+        pl.subplot(2,2,2)
+        pl.hist(whk[ok],bins=10,normed=True)
+        pl.xlabel('Whisker (weighted momts.)')
+        pl.grid()
+        pl.subplot(2,2,3)
+        pl.hist(e1[ok],bins=10,normed=True)
+        pl.xlabel('e1 (weighted momts.)')
+        pl.grid()
+        pl.subplot(2,2,4)
+        pl.hist(e2[ok],bins=10,normed=True)
+        pl.xlabel('e2 (weighted momts.)')
+        pl.grid()
+        pl.figtext(0.4,0.95,'filter: '+unqfltr[k],fontsize=19,color='blue')
+        pl.savefig('iq_distribution_'+unqfltr[k]+'_.png')
+        pl.close()
     return '---done!----'
 
 
