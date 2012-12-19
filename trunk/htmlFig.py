@@ -12,11 +12,12 @@ htmlName = 'Image_Quality_'+date+'-MJD-'+mjd+'.html'
 Fig_coeff = gl.glob('zernike_coeff*.png')
 Fig_moments = gl.glob('moments*.png') 
 Fig_fwhm = gl.glob('fwhm*.png') 
+Fig_iqdist = gl.glob('iq_distribution*.png')
 
 Fig_coeff.sort()
 Fig_moments.sort()
 Fig_fwhm.sort()
-
+Fig_iqdist.sort()
 
 nfig = len(Fig_coeff)
 
@@ -36,7 +37,9 @@ htm.write('<img src="%s" width="1000">\n'%'hexapod_pos_summary.png')
 htm.write('<p>Exposure Summary </p>\n')
 htm.write('<img src="%s" width="1000">\n'%'exposure_iq_summary.png')
 htm.write('<p>Image Quality Measures Distribution </p>\n')
-htm.write('<img src="%s" width="1000">\n'%'iq_distribution.png')
+for fg in Fig_iqdist:
+    htm.write('<img src="%s" width="1000">\n'%fg)
+
 
 for i in range(nfig):
     expid=Fig_fwhm[i][-12:-4]
