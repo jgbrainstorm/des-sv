@@ -124,7 +124,13 @@ def analyze_r50_whisker():
     expid = np.array(expid)
     xtick = expid.astype('S10')
     r50 = np.array(r50)
+    r50err = np.array(r50err)
     whk = np.array(whk)
+    whkerr = np.array(whkerr)
+    e1 = np.array(e1)
+    e1err = np.array(e1err)
+    e2 = np.array(e2)
+    e2err = np.array(e2err)
     xidx = np.arange(len(expid))
     pl.figure(figsize=(16,16))
     fmtarray = ['go','ro','bo','ko','co']
