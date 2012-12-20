@@ -33,7 +33,9 @@ htm.write('<p>MJD: '+mjd+'</p>\n')
 htm.write('<p>J. Hao @ FNAL</p>\n')
 
 htm.write('<p>Hexapod Parameter Summary </p>\n')
-htm.write('<img src="%s" width="1000">\n'%'hexapod_pos_summary.png')
+htm.write('<img src="%s" width="1000">\n'%'hexapod_pos_summary_all.png')
+htm.write('<img src="%s" width="1000">\n'%'hexapod_pos_summary_image.png')
+
 htm.write('<p>Exposure Summary </p>\n')
 htm.write('<img src="%s" width="1000">\n'%'exposure_iq_summary.png')
 htm.write('<p>Image Quality Measures Distribution </p>\n')
