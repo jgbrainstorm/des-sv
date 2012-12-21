@@ -92,14 +92,14 @@ def runanalysis(img_name=None):
     
 
 if __name__ == "__main__":
-    from decamImgAnalyzer import *
+    from desImgQ import *
     import sys,time,glob
     startTime=time.time()
     if len(sys.argv) == 1:
         print 'syntax: '
-        print 'desImgAnalysis expid'
+        print 'desImgQ.py expid'
         print 'or'
-        print 'desImgAnalysis all'
+        print 'desImgQ.py all'
         print 'Note: The image need to be reduced (bias subtraction, flat fielding'
     elif sys.argv[1] == 'all':
         img_nameList = glob.glob('*_reduced.fits')
@@ -112,7 +112,5 @@ if __name__ == "__main__":
         t=runanalysis(img_name)
     endTime=time.time()
     elapseTime=endTime-startTime
-    tt=analyze_hex()
-    tt = analyze_r50_whisker()
     print '---elapsed time: ' + str(elapseTime)
 
