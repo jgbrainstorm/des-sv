@@ -83,11 +83,12 @@ def runanalysis(img_name=None):
     whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
     phi = np.rad2deg(0.5*np.arctan2(2.*datamean[2],(datamean[0]-datamean[1])))
     whkrms = (robust_mean((datasubmean[:,0] - datasubmean[:,1])**2 + 4.*datasubmean[:,2]**2))**(0.25)*0.27
+    r50=0.5*2.35482*np.sqrt((datamean[0]+datamean[1])/2.)*0.27
     whkSex = ((dataSexmean[0]-dataSexmean[1])**2 + (2.*dataSexmean[2])**2)**(0.25)*0.27
     phiSex = np.rad2deg(0.5*np.arctan2(2.*dataSexmean[2],(dataSexmean[0]-dataSexmean[1])))
     whkrmsSex = (robust_mean((dataSexsubmean[:,0] - dataSexsubmean[:,1])**2 + 4.*dataSexsubmean[:,2]**2))**(0.25)*0.27
     r50Sex = dataSexmean[3]*0.27
-    p.dump([int(expid),whk,phi,whkrms,whkSex,phiSex,whkrmsSex,r50Sex],open('desIQ_measures_'+expid+'.p','w'))
+    p.dump([int(expid),whk,phi,whkrms,r50,whkSex,phiSex,whkrmsSex,r50Sex],open('desIQ_measures_'+expid+'.p','w'))
     return '----finished one image ----'
     
 
