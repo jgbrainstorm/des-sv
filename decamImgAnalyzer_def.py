@@ -25,6 +25,29 @@ except ImportError:
     sys.exit()
 
 
+def robust_mean(x):
+    y = x.flatten()
+    if len(y) < 6:
+        return -999.
+    if len(np.unique(y))==1:
+        meany=y[0]
+    else:
+        n = len(y)
+        y.sort()
+        ind_qt1 = round((n+1)/4.)
+        ind_qt3 = round((n+1)*3/4.)
+        IQR = y[ind_qt3]- y[ind_qt1]
+        lowFense = y[ind_qt1] - 1.5*IQR
+        highFense = y[ind_qt3] + 1.5*IQR
+        if lowFense == highFense:
+            meany=lowFense
+        else:
+            ok = (y>lowFense)*(y<highFense)
+            yy=y[ok]
+            meany=yy.mean(dtype='double')
+    return meany
+
+
 
 def robust_mean_std(x):
     y = x.flatten()
@@ -219,6 +242,84 @@ def complexMoments(data=None,sigma=None):
     M31 = complex(3*Mc - (Mccc+Mrrc)/sigma**2, 3*Mr - (Mrcc + Mrrr)/sigma**2)
     M33 = complex(Mccc-3*Mrrc, 3.*Mrcc - Mrrr)
     return M20, M22, M31, M33
+
+def complex2ndMoments(data=None,sigma=None):
+    """
+    This one calcualte the 2nd moments with the Gaussian weights and then subract the weight contribution away
+    col : x direction
+    row : y direction
+    the centroid is using the adpative centroid.
+    sigma is the stand deviation of the measurement kernel in pixel
+    The output is in pixel coordinate
+    """
+    nrow,ncol=data.shape
+    Isum = data.sum()
+    Icol = data.sum(axis=0) # sum over all rows
+    Irow = data.sum(axis=1) # sum over all cols
+    colgrid = np.arange(ncol)
+    rowgrid = np.arange(nrow)
+    rowmean=np.sum(rowgrid*Irow)/Isum
+    colmean=np.sum(colgrid*Icol)/Isum
+    ROW,COL=np.indices((nrow,ncol))
+    maxItr = 50
+    EP = 0.0001
+    for i in range(maxItr):
+        wrmat = wr(ROW,COL,rowmean,colmean,sigma)
+        IWmat = data*wrmat
+        IWcol = IWmat.sum(axis=0)
+        IWrow = IWmat.sum(axis=1)
+        IWsum = IWmat.sum()
+        drowmean = np.sum((rowgrid-rowmean)*IWrow)/IWsum
+        dcolmean = np.sum((colgrid-colmean)*IWcol)/IWsum
+        rowmean = rowmean+2.*drowmean
+        colmean = colmean+2.*dcolmean
+        if drowmean**2+dcolmean**2 <= EP:
+            break
+    rowgrid = rowgrid - rowmean # centered
+    colgrid = colgrid - colmean
+    Mr = np.sum(rowgrid*IWrow)/IWsum
+    Mc = np.sum(colgrid*IWcol)/IWsum
+    Mrr = np.sum(rowgrid**2*IWrow)/IWsum
+    Mcc = np.sum(colgrid**2*IWcol)/IWsum
+    Mrc = np.sum(np.outer(rowgrid,colgrid)*IWmat)/IWsum
+    Cm = np.matrix([[Mcc,Mrc],[Mrc,Mrr]])
+    Cw = np.matrix([[sigma**2,0.],[0.,sigma**2]])
+    Cimg = (Cm.I - Cw.I).I
+    Mcc = Cimg[0,0]
+    Mrr = Cimg[1,1]
+    Mrc = Cimg[0,1]
+    #M20 = Mrr + Mcc
+    #M22 = complex(Mcc - Mrr,2*Mrc)
+    return Mcc, Mrr, Mrc
+
+def whiskerStat_firstcut(expid):
+    """
+    Note that here, the sigma is not fwhm. Sigma is given in arcsec
+    """
+    ff = gl.glob('/home/jghao/research/data/firstcutcat/DECam_00'+expid+'_??_cat.fits')
+    data=[]
+    if len(ff) == 62:
+        for f in ff:
+            b = pf.getdata(f,2)
+            ok = (b.FLAGS == 0)*(b.CLASS_STAR >= 0.95)*(b.MAG_AUTO > 12)*(b.MAG_AUTO < 16)*(b.MAG_AUTO/b.MAGERR_AUTO>100)
+            Mcc = robust_mean(b[ok].X2_IMAGE)
+            Mrr = robust_mean(b[ok].Y2_IMAGE)
+            Mrc = robust_mean(b[ok].XY_IMAGE)
+            fluxrad = robust_mean(b[ok].FLUX_RADIUS)
+        data.append([Mcc,Mrr,Mrc,fluxrad])
+    else:
+        data.append([-999.,-999.,-999.,-999.])
+    data = np.array(data)
+    datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2]),robust_mean(data[:,3])])
+    whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
+    phi = np.rad2deg(0.5*np.arctan2(2.*datamean[2],(datamean[0]-datamean[1])))
+    r50 = datamean[3]*0.27
+    datasubmean = data - datamean
+    whkrms = (robust_mean((datasubmean[:,0] - datasubmean[:,1])**2 + 4.*datasubmean[:,2]**2))**(0.25)*0.27
+    #np.savetxt(filename[0:-6]+'txt',[r50,whk,phi,whkrms],fmt='%10.5f')
+    return r50,whk,whkrms,phi
+
+
 
 def AcomplexMoments(img,sigma=1.1/scale):
     """
