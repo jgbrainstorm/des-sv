@@ -13,7 +13,7 @@ sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
 
 
 try:
-    import numpy as np
+    import numpy as np,glob as gl
     import pyfits as pf
     import scipy.ndimage as nd
     import pylab as pl
@@ -292,6 +292,17 @@ def complex2ndMoments(data=None,sigma=None):
     #M22 = complex(Mcc - Mrr,2*Mrc)
     return Mcc, Mrr, Mrc
 
+def firstcutStar(b):
+    rad = b.FLUX_RADIUS
+    mag = b.MAG_AUTO
+    flag = b.FLAGS
+    ok = (mag>=11)*(mag<=14)*(flag ==0)
+    radmedian = np.median(rad[ok])
+    idx = (mag>=11)*(mag<=14)*(flag ==0)*(abs(rad-radmedian)<=0.5)
+    return b[idx]
+
+
+
 def whiskerStat_firstcut(expid):
     """
     Note that here, the sigma is not fwhm. Sigma is given in arcsec
@@ -300,15 +311,16 @@ def whiskerStat_firstcut(expid):
     data=[]
     if len(ff) == 62:
         for f in ff:
-            b = pf.getdata(f,2)
-            ok = (b.FLAGS == 0)*(b.CLASS_STAR >= 0.95)*(b.MAG_AUTO > 12)*(b.MAG_AUTO < 16)*(b.MAG_AUTO/b.MAGERR_AUTO>100)
-            Mcc = robust_mean(b[ok].X2_IMAGE)
-            Mrr = robust_mean(b[ok].Y2_IMAGE)
-            Mrc = robust_mean(b[ok].XY_IMAGE)
-            fluxrad = robust_mean(b[ok].FLUX_RADIUS)
-        data.append([Mcc,Mrr,Mrc,fluxrad])
+            b = firstcutStar(pf.getdata(f,2))
+            #ok = (b.FLAGS == 0)*(b.CLASS_STAR >= 0.95)*(b.MAG_AUTO > 12)*(b.MAG_AUTO < 16)*(b.MAG_AUTO/b.MAGERR_AUTO>100)
+            #ok = (b.CLASS_STAR >= 0.95)
+            Mcc = robust_mean(b.X2_IMAGE)
+            Mrr = robust_mean(b.Y2_IMAGE)
+            Mrc = robust_mean(b.XY_IMAGE)
+            fluxrad = robust_mean(b.FLUX_RADIUS)
+            data.append([Mcc,Mrr,Mrc,fluxrad])
     else:
-        data.append([-999.,-999.,-999.,-999.])
+        return -999., -999., -999., -999.
     data = np.array(data)
     datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2]),robust_mean(data[:,3])])
     whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
