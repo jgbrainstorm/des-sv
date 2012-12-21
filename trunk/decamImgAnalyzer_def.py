@@ -296,11 +296,25 @@ def firstcutStar(b):
     rad = b.FLUX_RADIUS
     mag = b.MAG_AUTO
     flag = b.FLAGS
-    ok = (mag>=11)*(mag<=14)*(flag ==0)
+    ok = (mag>=11)*(mag<=13)*(flag ==0)
     radmedian = np.median(rad[ok])
     idx = (mag>=11)*(mag<=14)*(flag ==0)*(abs(rad-radmedian)<=0.5)
     return b[idx]
 
+
+def measureIQstamp(stamp=None,bkg=None,sigma=None):
+    Nobj = len(stamp)
+    Mrr = np.zeros(Nobj)
+    Mcc = np.zeros(Nobj)
+    Mrc = np.zeros(Nobj)
+    for i in range(Nobj):
+        if bkg == None:
+            Mcc[i],Mrr[i],Mrc[i]=complex2ndMoments(data=stamp[i],sigma=sigma)
+        else:
+            data = stamp[i]-bkg[i]
+            if data.sum > 0.:
+                Mcc[i],Mrr[i],Mrc[i]=complex2ndMoments(data=data,sigma=sigma)               
+    return robust_mean(Mcc), robust_mean(Mrr), robust_mean(Mrc)
 
 
 def whiskerStat_firstcut(expid):
@@ -320,7 +334,7 @@ def whiskerStat_firstcut(expid):
             fluxrad = robust_mean(b.FLUX_RADIUS)
             data.append([Mcc,Mrr,Mrc,fluxrad])
     else:
-        return -999., -999., -999., -999.
+        return -999., -999., -999., -999., 
     data = np.array(data)
     datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2]),robust_mean(data[:,3])])
     whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
