@@ -70,12 +70,13 @@ def runanalysis(img_name=None):
             Mcc = robust_mean(Mcc[ok])
             Mrc = robust_mean(Mrc[ok])
             r50Sex = robust_mean(rad[ok])
+            fwhmSex = robust_mean(fwhm_sex[ok])
             x=x[ok]
             y=y[ok]
             stamp = getStamp(data=img,xcoord=x,ycoord=y,Npix=25)
             moms = measureIQstamp(stamp,bkg,2.)
             data.append(moms)
-            dataSex.append([Mcc,Mrr,Mrc,r50Sex])
+            dataSex.append([Mcc,Mrr,Mrc,r50Sex,fwhmSex])
     data = np.array(data)
     dataSex = np.array(dataSex)
     datamean = np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2])])
@@ -90,7 +91,8 @@ def runanalysis(img_name=None):
     phiSex = np.rad2deg(0.5*np.arctan2(2.*dataSexmean[2],(dataSexmean[0]-dataSexmean[1])))
     whkrmsSex = (robust_mean((dataSexsubmean[:,0] - dataSexsubmean[:,1])**2 + 4.*dataSexsubmean[:,2]**2))**(0.25)*0.27
     r50Sex = dataSexmean[3]*0.27
-    p.dump([int(expid),whk,phi,whkrms,r50,whkSex,phiSex,whkrmsSex,r50Sex],open('desIQ_measures_'+expid+'.p','w'))
+    fwhmSex = dataSexmean[4]*0.27
+    p.dump([int(expid),whk,phi,whkrms,r50,whkSex,phiSex,whkrmsSex,r50Sex,fwhmSex],open('desIQ_measures_'+expid+'.p','w'))
     return '----finished one image ----'
     
 
