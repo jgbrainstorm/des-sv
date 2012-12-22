@@ -273,6 +273,8 @@ def complex2ndMoments(data=None,sigma=None):
         dcolmean = np.sum((colgrid-colmean)*IWcol)/IWsum
         rowmean = rowmean+2.*drowmean
         colmean = colmean+2.*dcolmean
+        if IWsum == 0:
+            return -999., -999., -999.
         if drowmean**2+dcolmean**2 <= EP:
             break
     rowgrid = rowgrid - rowmean # centered
@@ -332,18 +334,20 @@ def whiskerStat_firstcut(expid):
             Mrr = robust_mean(b.Y2_IMAGE)
             Mrc = robust_mean(b.XY_IMAGE)
             fluxrad = robust_mean(b.FLUX_RADIUS)
-            data.append([Mcc,Mrr,Mrc,fluxrad])
+            fwhmworld =  robust_mean(b.FWHM_WORLD)
+            data.append([Mcc,Mrr,Mrc,fluxrad,fwhmworld])
     else:
-        return -999., -999., -999., -999., 
+        return -999., -999., -999., -999.,-999. 
     data = np.array(data)
-    datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2]),robust_mean(data[:,3])])
+    datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2]),robust_mean(data[:,3]),robust_mean(data[:,4])])
     whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
     phi = np.rad2deg(0.5*np.arctan2(2.*datamean[2],(datamean[0]-datamean[1])))
     r50 = datamean[3]*0.27
+    fwhm = datamean[4]
     datasubmean = data - datamean
     whkrms = (robust_mean((datasubmean[:,0] - datasubmean[:,1])**2 + 4.*datasubmean[:,2]**2))**(0.25)*0.27
     #np.savetxt(filename[0:-6]+'txt',[r50,whk,phi,whkrms],fmt='%10.5f')
-    return r50,whk,whkrms,phi
+    return r50,whk,whkrms,phi,fwhm
 
 
 

@@ -1,10 +1,11 @@
 import os, numpy as np
 from decamImgAnalyzer_def import *
 
+
+"""
 expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
 expid.sort()
 
-"""
 #runid = ['20121210144218_20121207','20121211104015_20121208','20121212123519_20121209','20121217091522_20121215','20121219150303_20121216']
 
 runid=['20121219090047_20121217','20121219150555_20121218','20120720091430_20121219','20120720174936_20121220']
@@ -20,9 +21,12 @@ for i in range(len(runid)):
 
 """
 
+expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/iq.cat',dtype='S10')
+expid.sort()
+
 res = []
 for eid in expid:
     print eid
     res.append(whiskerStat_firstcut(eid))
 
-np.savetxt('r50_whk_whkrms_phi_nonwindowed.txt',np.array(res),fmt='%10.5f')
+np.savetxt('r50_whk_whkrms_phi_nonwindowed_new.txt',np.array(res),fmt='%10.5f')
