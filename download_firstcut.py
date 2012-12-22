@@ -29,4 +29,4 @@ for eid in expid:
     print eid
     res.append(whiskerStat_firstcut(eid))
 
-np.savetxt('r50_whk_whkrms_phi_nonwindowed_new.txt',np.array(res),fmt='%10.5f')
+np.savetxt('r50_whk_whkrms_phi_fwhm_nonwindowed.txt',np.array(res),fmt='%10.5f')
