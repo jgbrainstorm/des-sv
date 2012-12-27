@@ -3,8 +3,8 @@
 import os, sys,numpy as np
 from decamImgAnalyzer_def import *
 
-#expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
-expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/downiq.cat',dtype='S10')
+expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
+#expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/downiq.cat',dtype='S10')
 
 expid.sort()
 
@@ -19,10 +19,10 @@ for j in range(len(expid)):
     print i, j
     for k in range(1,10):
         catname = 'https://desar.cosmology.illinois.edu:7443/DESFiles/desardata/OPS/red/'+runid[i]+'/red/DECam_00'+expid[j]+'/DECam_00'+expid[j]+'_0'+str(k)+'_cat.fits'
-        os.system('wget --no-check-certificate --user=jghao --password="jgh70chips" --directory-prefix=/data/des08.b/data/jiangang/firstcut/'+catname)
+        os.system('wget --no-check-certificate --user=jghao --password="jgh70chips" --directory-prefix=/data/des08.b/data/jiangang/firstcut/ '+catname)
     for k in range(10,63):
         catname = 'https://desar.cosmology.illinois.edu:7443/DESFiles/desardata/OPS/red/'+runid[i]+'/red/DECam_00'+expid[j]+'/DECam_00'+expid[j]+'_'+str(k)+'_cat.fits'
-        os.system('wget --no-check-certificate --user=jghao --password="jgh70chips" --directory-prefix=/data/des08.b/data/jiangang/firstcut/'+catname)
+        os.system('wget --no-check-certificate --user=jghao --password="jgh70chips" --directory-prefix=/data/des08.b/data/jiangang/firstcut/ '+catname)
 
 
 
