@@ -323,7 +323,8 @@ def whiskerStat_firstcut(expid):
     """
     Note that here, the sigma is not fwhm. Sigma is given in arcsec
     """
-    ff = gl.glob('/home/jghao/research/data/firstcutcat/DECam_00'+expid+'_??_cat.fits')
+    #ff = gl.glob('/home/jghao/research/data/firstcutcat/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
     data=[]
     if len(ff) == 62:
         for f in ff:
