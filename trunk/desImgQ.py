@@ -80,9 +80,9 @@ def analyze_whisker_whiskerrms():
     for k in range(len(unqfltr)):
         ok = flter == unqfltr[k]
         pl.errorbar(xidx[ok],whkrms[ok],0,fmt=fmtarray[k])
-    pl.hlines(0.,-1,len(expid),color='green')
+    pl.hlines(0.2,-1,len(expid),color='green')
     pl.grid()
-    pl.ylabel('whisker rms (weighted momts.')
+    pl.ylabel('whisker rms (weighted momts.)')
     pl.ylim(0,0.6)
     pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
     pl.subplot(6,1,3)
@@ -90,8 +90,9 @@ def analyze_whisker_whiskerrms():
         ok = flter == unqfltr[k]
         pl.errorbar(xidx[ok],r50[ok],0,fmt=fmtarray[k])
     pl.grid()
-    pl.ylabel('R50 (sextractor)')
+    pl.ylabel('R50 (weighted momts.)')
     pl.hlines(0.522,-1,len(expid),color='green')
+    pl.ylim(0,1.)
     pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
     pl.subplot(6,1,4)
     for k in range(len(unqfltr)):
@@ -115,11 +116,11 @@ def analyze_whisker_whiskerrms():
     for k in range(len(unqfltr)):
         ok = flter == unqfltr[k]
         pl.errorbar(xidx[ok],r50Sex[ok],0,fmt=fmtarray[k])
-    pl.hlines(0.1,-1,len(expid),color='green')
+    pl.hlines(0.552,-1,len(expid),color='green')
     pl.grid()
     pl.ylabel('R50 (sextractor)')
     pl.ylim(0,1)
-    pl.xticks(np.arange(len(expid)),xtick,rotation=90)
+    pl.xticks(np.arange(len(expid)),xtick,rotation=90,fontsize=12)
     pl.savefig('desIQ_summary.png')
     pl.close()
   
