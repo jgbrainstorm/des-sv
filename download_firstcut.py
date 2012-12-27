@@ -3,8 +3,8 @@
 import os, sys,numpy as np
 from decamImgAnalyzer_def import *
 
-expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
-#expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/downiq.cat',dtype='S10')
+#expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
+expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/downiq.cat',dtype='S10')
 
 expid.sort()
 
