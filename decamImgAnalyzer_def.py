@@ -298,9 +298,9 @@ def firstcutStar(b):
     rad = b.FLUX_RADIUS
     mag = b.MAG_AUTO
     flag = b.FLAGS
-    ok = (mag>=11)*(mag<=13)*(flag ==0)
+    ok = (mag>=10.5)*(mag<=12)*(flag ==0)*(rad<5.)
     radmedian = np.median(rad[ok])
-    idx = (mag>=11)*(mag<=14)*(flag ==0)*(abs(rad-radmedian)<=0.5)
+    idx = (mag>=10.5)*(mag<=13)*(flag ==0)*(abs(rad-radmedian)<=0.2)
     return b[idx]
 
 
