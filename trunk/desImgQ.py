@@ -21,6 +21,109 @@ def averageN30(data=None):
     datanew[idxN30,2:] = 0.5*(datanew[idxN29,2:]+datanew[idxN31,2:])
     return datanew
 
+
+
+def analyze_whisker_whiskerrms():
+    """
+    make a summary plot for the r50, whk, whkrms
+    """
+    f = gl.glob('desIQ*.p')
+    ff = gl.glob('*reduced.fits')
+    f.sort()
+    ff.sort()
+    expid=[]
+    r50=[]
+    r50Sex=[]
+    whk=[]
+    whkSex=[]
+    whkrms=[]
+    whkrmsSex=[]
+    flter = []
+    nexp = len(f)
+    if nexp == 0:
+        return '-- no image to analyze, exit --'
+    for fi in f:
+        t = p.load(open(fi,'r'))
+        expid.append(t[0])
+        r50.append(t[4])
+        r50Sex.append(t[8])
+        whk.append(t[1])
+        whkrms.append(t[3])
+        whkSex.append(t[5])
+        whkrmsSex.append(t[7])
+    for ffi in ff:
+        flter.append(pf.getheader(ffi)['filter'][0])
+    flter = np.array(flter)
+    unqfltr = np.unique(flter)
+    expid = np.array(expid)
+    xtick = expid.astype('S10')
+    r50 = np.array(r50)
+    r50Sex = np.array(r50Sex)
+    whk = np.array(whk)
+    whkrms = np.array(whkrms)
+    whkSex = np.array(whkSex)
+    whkrmsSex = np.array(whkrmsSex)
+    xidx = np.arange(len(expid))
+    pl.figure(figsize=(16,24))
+    fmtarray = ['go','ro','bo','ko','co']
+    pl.subplot(6,1,1)
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],whk[ok],0,fmt=fmtarray[k],label=unqfltr[k])
+    pl.hlines(0.2,-1,len(expid),color='green')
+    pl.legend(loc='best')
+    pl.grid()
+    pl.ylabel('whisker (weighted momts.)')
+    pl.xticks(xidx,np.repeat('',len(expid)))
+    pl.ylim(0,0.5)
+    pl.subplot(6,1,2)
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],whkrms[ok],0,fmt=fmtarray[k])
+    pl.hlines(0.,-1,len(expid),color='green')
+    pl.grid()
+    pl.ylabel('whisker rms (weighted momts.')
+    pl.ylim(0,0.6)
+    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.subplot(6,1,3)
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],r50[ok],0,fmt=fmtarray[k])
+    pl.grid()
+    pl.ylabel('R50 (sextractor)')
+    pl.hlines(0.522,-1,len(expid),color='green')
+    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.subplot(6,1,4)
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],whkSex[ok],0,fmt=fmtarray[k])
+    pl.hlines(0.2,-1,len(expid),color='green')
+    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.grid()
+    pl.ylabel('whisker (sextractor)')
+    pl.ylim(0,0.5)
+    pl.subplot(6,1,5)
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],whkrmsSex[ok],0,fmt=fmtarray[k])
+    pl.hlines(0.2,-1,len(expid),color='green')
+    pl.xticks(np.arange(len(expid)),np.repeat('',len(expid)))
+    pl.grid()
+    pl.ylabel('whisker RMS(sextractor)')
+    pl.ylim(0,0.6)
+    pl.subplot(6,1,6)
+    for k in range(len(unqfltr)):
+        ok = flter == unqfltr[k]
+        pl.errorbar(xidx[ok],r50Sex[ok],0,fmt=fmtarray[k])
+    pl.hlines(0.1,-1,len(expid),color='green')
+    pl.grid()
+    pl.ylabel('R50 (sextractor)')
+    pl.ylim(0,1)
+    pl.xticks(np.arange(len(expid)),xtick,rotation=90)
+    pl.savefig('desIQ_summary.png')
+    pl.close()
+  
+
 def runanalysis(img_name=None):
     catname = img_name[0:-5]+'_star_catalog.fits'
     if not os.path.isfile(catname):
