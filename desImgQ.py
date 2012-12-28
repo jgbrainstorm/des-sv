@@ -120,7 +120,7 @@ def analyze_whisker_whiskerrms():
     pl.grid()
     pl.ylabel('R50 (sextractor)')
     pl.ylim(0,1)
-    pl.xticks(np.arange(len(expid)),xtick,rotation=90,fontsize=12)
+    pl.xticks(np.arange(len(expid)),xtick,rotation=90,fontsize=5)
     pl.savefig('desIQ_summary.png')
     pl.close()
   
