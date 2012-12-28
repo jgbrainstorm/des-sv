@@ -3,6 +3,7 @@
 import os, sys,numpy as np
 from decamImgAnalyzer_def import *
 
+"""
 #expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
 expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/downiq.cat',dtype='S10')
 
@@ -29,7 +30,7 @@ for j in range(len(expid)):
 
 """
 
-expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/iq.cat',dtype='S10')
+expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq.cat',dtype='S10')
 expid.sort()
 
 res = []
@@ -37,5 +38,4 @@ for eid in expid:
     print eid
     res.append(whiskerStat_firstcut(eid))
 
-np.savetxt('r50_whk_whkrms_phi_fwhm_nonwindowed.txt',np.array(res),fmt='%10.5f')
-"""
+np.savetxt('r50_whk_whkrms_phi_fwhm_12272012.txt',np.array(res),fmt='%10.5f')
