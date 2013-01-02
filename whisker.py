@@ -164,11 +164,11 @@ def get_stars(cat, logger):
     # Star selection for first cut recommended by Jiangang
     mag = numpy.array(data.field(mag_col))
     flags = numpy.array(data.field(flags_col))
-    ok = (mag>=mag_minval)*(mag<=mag_maxval)*(flags==0)
-
+    #ok = (mag>=mag_minval)*(mag<=mag_maxval)*(flags==0)
+    ok = (mag>=10.5)*(mag<=12)*(flags ==0)*(rad<5.)
     r50 = numpy.array(data.field(r50_col))
     r50median = numpy.median(r50[ok])
-    idx = (mag>=11)*(mag<=14)*(flags==0)*(abs(r50-r50median)<=0.5)
+    idx = (mag>=10.5)*(mag<=13)*(flags==0)*(abs(r50-r50median)<=0.2)
 
     # Input ra,dec values are in degrees.  Convert to radians.
     ra = numpy.array(data.field(ra_col))[idx] * numpy.pi/180.
