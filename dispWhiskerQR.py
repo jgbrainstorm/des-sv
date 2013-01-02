@@ -36,7 +36,7 @@ def whisker4QReduce(X2WIN_IMAGE=None,Y2WIN_IMAGE=None,XYWIN_IMAGE=None):
     temp.real = X2WIN_IMAGE - Y2WIN_IMAGE
     temp.imag = 2*XYWIN_IMAGE
     data=np.array([xpos, ypos,X2WIN_IMAGE + Y2WIN_IMAGE,temp]).T
-    data = averageN30(data)
+    data = averageN30new(data)
     data = subMeanAll(data)
     pl.figure(figsize=(11,5.5))
     pl.subplot(1,2,1)
