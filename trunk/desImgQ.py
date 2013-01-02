@@ -6,21 +6,10 @@
 import sys
 import glob as gl
 import cPickle as p
+
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 
 from decamImgAnalyzer_def import *
-
-def averageN30(data=None):
-    """
-    this function use the mean moments of N29,N31 to replace the moments of N30 because of the failure of N30. 
-    """
-    idxN29 = 59
-    idxN30 = 60
-    idxN31 = 61
-    datanew = data.copy()
-    datanew[idxN30,2:] = 0.5*(datanew[idxN29,2:]+datanew[idxN31,2:])
-    return datanew
-
 
 
 def analyze_whisker_whiskerrms():
@@ -65,7 +54,7 @@ def analyze_whisker_whiskerrms():
     whkrmsSex = np.array(whkrmsSex)
     xidx = np.arange(len(expid))
     pl.figure(figsize=(16,24))
-    fmtarray = ['go','ro','bo','ko','co']
+    fmtarray = ['go','ro','bo','ko','co','mo']
     pl.subplot(6,1,1)
     for k in range(len(unqfltr)):
         ok = flter == unqfltr[k]
@@ -124,6 +113,44 @@ def analyze_whisker_whiskerrms():
     pl.savefig('desIQ_summary.png')
     pl.close()
   
+def imageCatAnalysis(catname):
+    cathdu = pf.open(catname)
+    expid = catname[6:14]
+    fwhmSex = np.array([])
+    whiskerSex = np.array([])
+    r50Sex = np.array([])
+    dataSex=[]
+    nstarall = 0
+    for i in range(1,63):
+        print i
+        cat = cathdu[i].data
+        x = cat.XWIN_IMAGE
+        y = cat.YWIN_IMAGE
+        rad = cat.FLUX_RADIUS
+        mag = cat.MAG_AUTO
+        flag = cat.FLAGS
+        bkg = cat.BACKGROUND
+        Mcc = cat.X2_IMAGE
+        Mrr = cat.Y2_IMAGE
+        Mrc = cat.XY_IMAGE
+        fwhm_sex = cat.FWHM_IMAGE
+        starFwhm = selectStar(mag,fwhm_sex)
+        ok = (np.abs(fwhm_sex - starFwhm) < 0.4)*(x>100)*(x<2050)*(y>100)*(y<4100)*(flag == 0)*(mag<=-11.5)*(mag>-14.5)
+        nstar = len(mag[ok])
+        nstarall = nstarall + nstar
+        print '--- Nstars selected: '+str(nstar)+'---'
+        if ok.any():
+            bkg = bkg[ok]
+            Mrr = robust_mean(Mrr[ok])
+            Mcc = robust_mean(Mcc[ok])
+            Mrc = robust_mean(Mrc[ok])
+            r50Sex = robust_mean(rad[ok])
+            fwhmSex = robust_mean(fwhm_sex[ok])
+            dataSex.append([Mcc,Mrr,Mrc,r50Sex,fwhmSex])
+    dataSex=np.array(dataSex)
+    tt=whisker4QReduce(dataSex[:,0],dataSex[:,1],dataSex[:,2])
+    return dataSex
+
 
 def runanalysis(img_name=None):
     catname = img_name[0:-5]+'_star_catalog.fits'

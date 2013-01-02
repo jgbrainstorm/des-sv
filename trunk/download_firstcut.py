@@ -33,9 +33,12 @@ for j in range(len(expid)):
 expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq.cat',dtype='S10')
 expid.sort()
 
-res = []
+reshao = []
+resmike = []
 for eid in expid:
     print eid
-    res.append(whiskerStat_firstcut(eid))
+    reshao.append(whiskerStat_firstcut(eid))
+    resmike.append(whiskerStat_firstcut_mike(eid))
 
-np.savetxt('r50_whk_whkrms_phi_fwhm_12272012.txt',np.array(res),fmt='%10.5f')
+np.savetxt('r50_whk_whkrms_phi_fwhm_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
+np.savetxt('r50_whk_whkrms_phi_fwhm_12272012.txt',np.array(resmike),fmt='%10.5f')

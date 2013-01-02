@@ -147,8 +147,7 @@ def analyze_r50_whisker():
         e1err.append(robust_mean_std(np.array(t[13]))[1])
         e2.append(robust_mean_std(np.array(t[14]))[0])
         e2err.append(robust_mean_std(np.array(t[14]))[1])
-    for ffi in ff:
-        flter.append(pf.getheader(ffi)['filter'][0])
+        flter.append(pf.getheader('DECam_'+fi[-10:-2]+'_reduced.fits')['filter'][0])
     flter = np.array(flter)
     unqfltr = np.unique(flter)
     expid = np.array(expid)
@@ -163,7 +162,7 @@ def analyze_r50_whisker():
     e2err = np.array(e2err)
     xidx = np.arange(len(expid))
     pl.figure(figsize=(16,16))
-    fmtarray = ['go','ro','bo','ko','co']
+    fmtarray = ['go','ro','bo','ko','co','mo']
     pl.subplot(4,1,1)
     for k in range(len(unqfltr)):
         ok = flter == unqfltr[k]
