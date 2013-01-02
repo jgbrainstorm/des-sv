@@ -385,7 +385,7 @@ def AcomplexMoments(img,sigma=1.1/scale):
 def whiskerStat_firstcut_mike(expid):
     ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
     if len(ff) == 62:
-        os.system('whisker.py /data/des08.b/data/jiangang/firstcut '+expid+' tempMike.cat')
+        os.system('python whisker.py /data/des08.b/data/jiangang/firstcut '+expid+' tempMike.cat')
         b = np.genfromtxt('tempMike.cat')
         res = np.concatenate((b[62,6:9],b[63,6:9]))
     else:
