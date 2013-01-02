@@ -41,5 +41,5 @@ for eid in expid:
     resmike.append(whiskerStat_firstcut_mike(eid))
     os.system('rm tempMike.cat')
 
-np.savetxt('firstcut_stat_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
+#np.savetxt('firstcut_stat_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
 np.savetxt('firstcut_stat_mike_12272012.txt',np.array(resmike),fmt='%10.5f')
