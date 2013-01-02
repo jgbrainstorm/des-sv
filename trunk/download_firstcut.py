@@ -40,5 +40,5 @@ for eid in expid:
     reshao.append(whiskerStat_firstcut(eid))
     resmike.append(whiskerStat_firstcut_mike(eid))
 
-np.savetxt('r50_whk_whkrms_phi_fwhm_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
-np.savetxt('r50_whk_whkrms_phi_fwhm_12272012.txt',np.array(resmike),fmt='%10.5f')
+np.savetxt('firstcut_stat_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
+np.savetxt('firstcut_stat_mike_12272012.txt',np.array(resmike),fmt='%10.5f')
