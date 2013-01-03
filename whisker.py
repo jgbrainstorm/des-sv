@@ -103,6 +103,9 @@ You can turn this off by running with '-v 0'.
     parser.add_option(
             '-a', '--append', action='store_true', default=False,
             help='append values to out_file [default is overwrite any existing file]')
+    parser.add_option(
+            '-p', '--make_plots', action='store_true', default=False,
+            help='make plots of the whisker values')
     (args, posargs) = parser.parse_args()
 
     # Parse the positional arguments by hand
@@ -148,7 +151,7 @@ You can turn this off by running with '-v 0'.
         out.write('# chip -1 = Use mean moments for each chip as 62 "stars"\n')
         out.write('# chip -2 = Full exposure after subtracting chip-wise bilinear fits\n')
 
-    return root_dir, exp_num, out, logger
+    return root_dir, exp_num, out, args.make_plots, logger
     
 def get_stars(cat, logger):
 
@@ -277,48 +280,48 @@ def project(ra, dec, logger):
     return u, v
 
 
-def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger):
+def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger):
 
     wl = ((ixx-iyy)**2 + (2.*ixy)**2 )**0.25
     theta = numpy.arctan2( 2.*ixy, ixx-iyy )
-    wlx = wl * numpy.cos(theta)
-    wly = wl * numpy.sin(theta)
-    wl = (wlx**2 + wly**2)**0.5
+    wl1 = wl * numpy.cos(theta)
+    wl2 = wl * numpy.sin(theta)
+    wl = (wl1**2 + wl2**2)**0.5
 
     mean_ixx = ixx.mean()
     mean_ixy = ixy.mean()
     mean_iyy = iyy.mean()
     wl_meanmom = ((mean_ixx-mean_iyy)**2 + (2.*mean_ixy)**2 )**0.25
     theta_meanmom = numpy.arctan2( 2.*mean_ixy, mean_ixx-mean_iyy )
-    wlx_meanmom = wl_meanmom * numpy.cos(theta_meanmom)
-    wly_meanmom = wl_meanmom * numpy.sin(theta_meanmom)
+    wl1_meanmom = wl_meanmom * numpy.cos(theta_meanmom)
+    wl2_meanmom = wl_meanmom * numpy.sin(theta_meanmom)
     rms_wl_meanmom = ( ( (ixx-mean_ixx-iyy+mean_iyy)**2 + 4.*(ixy-mean_ixy)**2 ).mean() )**0.25
-    mean_wlx = wlx.mean()
-    mean_wly = wly.mean()
+    mean_wl1 = wl1.mean()
+    mean_wl2 = wl2.mean()
     mean_wl = wl.mean()
-    rms_wl = numpy.sqrt( ((wlx-mean_wlx)**2 + (wly-mean_wly)**2).mean() )
+    rms_wl = numpy.sqrt( ((wl1-mean_wl1)**2 + (wl2-mean_wl2)**2).mean() )
     logger.warn('    Number of stars = %d',len(ixx))
     logger.warn('    Mean moments: <ixx> = %f, <ixy> = %f, <iyy> = %f',
                 mean_ixx,mean_ixy,mean_iyy)
     logger.warn('    WL from mean moments = %f, theta = %f rad',wl_meanmom,theta_meanmom)
-    logger.warn('    In cartesian coordinates: (%f,%f)',wlx_meanmom,wly_meanmom)
+    logger.warn('    In cartesian coordinates: (%f,%f)',wl1_meanmom,wl2_meanmom)
     logger.warn('    RMS WL from mean moments = %f',rms_wl_meanmom)
               
-    logger.warn('    Mean WL = (%f,%f)',mean_wlx,mean_wly)
-    logger.warn('    |Mean WL| = %f',(mean_wlx**2+mean_wly**2)**0.5)
+    logger.warn('    Mean WL = (%f,%f)',mean_wl1,mean_wl2)
+    logger.warn('    |Mean WL| = %f',(mean_wl1**2+mean_wl2**2)**0.5)
     logger.warn('    Mean |WL| = %f',mean_wl)
     logger.warn('    RMS WL = %f',rms_wl)
 
     # Remove a bilinear fit:
-    # wlx = a + bx + cy
-    # wly = d + ex + fy
+    # wl1 = a + bx + cy
+    # wl2 = d + ex + fy
     # This can be expressed as a matrix:
     #
-    # ( 1  x  y ) ( a  d ) = ( wlx wly )
+    # ( 1  x  y ) ( a  d ) = ( wl1 wl2 )
     #             ( b  e )  
     #             ( c  f )
     # 
-    # For the maximum likelihood fit, we just make many rows of (1 x y) and (wlx wly)
+    # For the maximum likelihood fit, we just make many rows of (1 x y) and (wl1 wl2)
     # and solve for the fit matrix using QR decomposition.
     # We calculate the fit values using numpy for the matrix calculations.
     # We use A = ( 1  x_0  y_0 )
@@ -327,8 +330,8 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger):
     #        M = ( a  d )
     #            ( b  e )
     #            ( c  f )
-    #        W = ( wlx_0  wly_0 )
-    #            ( wlx_1  wly_1 )
+    #        W = ( wl1_0  wl2_0 )
+    #            ( wl1_1  wl2_1 )
     #            ( ...          )
     x, y = project(ra, dec, logger)
     n = len(x)
@@ -336,8 +339,8 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger):
     A[:,1] = x
     A[:,2] = y
     W = numpy.ones( shape=(n,5) )
-    W[:,0] = wlx
-    W[:,1] = wly
+    W[:,0] = wl1
+    W[:,1] = wl2
     W[:,2] = ixx
     W[:,3] = ixy
     W[:,4] = iyy
@@ -367,8 +370,8 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger):
                     M[0,4],M[1,4]*numpy.pi/180.,M[2,4]*numpy.pi/180.)
         dW = W - numpy.dot(A,M)
         
-        dwlx = dW[:,0]
-        dwly = dW[:,1]
+        dwl1 = dW[:,0]
+        dwl2 = dW[:,1]
         dixx = dW[:,2]
         dixy = dW[:,3]
         diyy = dW[:,4]
@@ -394,22 +397,22 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger):
         A = A[ok]
 
         # Update the number of objects
-        nclip = n-len(dwlx)
-        n = len(dwlx)
+        nclip = n-len(dwl1)
+        n = len(dwl1)
         logger.info('clipped %d objects with large residuals.  Now n = %d',nclip,n)
 
-    dwl = (dwlx**2 + dwly**2)**0.5
+    dwl = (dwl1**2 + dwl2**2)**0.5
 
-    mean_dwlx = dwlx.mean()
-    mean_dwly = dwly.mean()
+    mean_dwl1 = dwl1.mean()
+    mean_dwl2 = dwl2.mean()
     mean_dwl = dwl.mean()
     mean_dixx = dixx.mean()
     mean_dixy = dixy.mean()
     mean_diyy = diyy.mean()
-    rms_dwl = numpy.sqrt(((dwlx-mean_dwlx)**2 + (dwly-mean_dwly)**2).mean())
+    rms_dwl = numpy.sqrt(((dwl1-mean_dwl1)**2 + (dwl2-mean_dwl2)**2).mean())
     rms_wl_dmeanmom = (((dixx-mean_dixx-diyy+mean_diyy)**2 + 4.*(dixy-mean_dixy)**2).mean())**0.25
-    logger.debug('mean_dwlx = %f  (should = 0)',mean_dwlx)
-    logger.debug('mean_dwly = %f  (should = 0)',mean_dwly)
+    logger.debug('mean_dwl1 = %f  (should = 0)',mean_dwl1)
+    logger.debug('mean_dwl2 = %f  (should = 0)',mean_dwl2)
     logger.debug('mean_dixx = %f  (should = 0)',mean_dixx)
     logger.debug('mean_dixy = %f  (should = 0)',mean_dixy)
     logger.debug('mean_diyy = %f  (should = 0)',mean_diyy)
@@ -423,19 +426,63 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger):
         mean_ixx, mean_ixy, mean_iyy,
         wl_meanmom, rms_wl_meanmom, rms_wl_dmeanmom))
 
+    if plt_name:
+        import matplotlib.pyplot as plt
+        plt.clf()
+        if chip_num == 0:
+            tag = 'Full Exposure'
+        elif chip_num == -1:
+            tag = 'Using Chip Averages'
+        elif chip_num == -2:
+            tag = 'Residuals From Chip-wise Bilinear Fits'
+        else:
+            tag = 'Chip %02d'%chip_num
+        plt.title('Whisker Plots for Exposure %d\n%s'%(exp_num,tag))
+
+        # Plot whiskers
+        plt.subplot(2,1,1)
+        # The existing whiskers, wl1, wl2 are |w| exp(2it), but for quiver, we want to 
+        # plot them as |w| exp(it)
+        theta = numpy.arctan2(wl2,wl1)/2.
+        r = numpy.sqrt(wl1**2 + wl2**2)
+        u = r*numpy.cos(theta)
+        v = r*numpy.sin(theta)
+        qv = plt.quiver(x,y,u,v, width=0.004, color='red', pivot='middle', 
+                        headwidth=0., headlength=0., headaxislength=0.,
+                        scale_units='width')
+        plt.quiverkey(qv, -150, -240, 0.1, str(0.1), coordinates='data', color='blue')
+        plt.axes().set_aspect(1)
+        plt.title('Whisker length')
+
+        # Plot residual whiskers
+        plt.subplot(2,1,2)
+        theta = numpy.arctan2(dwl2,dwl1)/2.
+        r = numpy.sqrt(dwl1**2 + dwl2**2)
+        u = r*numpy.cos(theta)
+        v = r*numpy.sin(theta)
+        qv = plt.quiver(x,y,u,v, width=0.004, color='red', pivot='middle', 
+                        headwidth=0., headlength=0., headaxislength=0.,
+                        scale_units='width')
+        plt.quiverkey(qv, -150, -240, 0.1, str(0.1), coordinates='data', color='blue')
+        plt.axes().set_aspect(1)
+        plt.title('Residual whisker length')
+
+        plt.savefig(plt_name)
+ 
+
     dW = Wfull - numpy.dot(Afull,M)
         
-    dwlx = dW[:,0]
-    dwly = dW[:,1]
+    dwl1 = dW[:,0]
+    dwl2 = dW[:,1]
     dixx = dW[:,2]
     dixy = dW[:,3]
     diyy = dW[:,4]
 
-    return (dwlx, dwly, dixx, dixy, diyy)
+    return (dwl1, dwl2, dixx, dixy, diyy)
 
 def main(argv):
 
-    (root_dir, exp_num, out, logger) = parse_command_line(argv)
+    (root_dir, exp_num, out, make_plots, logger) = parse_command_line(argv)
 
     all_ra = numpy.array([], dtype=float)
     all_dec = numpy.array([], dtype=float)
@@ -451,12 +498,14 @@ def main(argv):
     chip_iyy = []
 
     # These are the values after removing a bilinear fit
-    all_dwlx = numpy.array([], dtype=float)
-    all_dwly = numpy.array([], dtype=float)
+    all_dwl1 = numpy.array([], dtype=float)
+    all_dwl2 = numpy.array([], dtype=float)
     all_dixx = numpy.array([], dtype=float)
     all_dixy = numpy.array([], dtype=float)
     all_diyy = numpy.array([], dtype=float)
 
+    root_name = None
+    plt_name = None
     for chip_num in range(1,nchips+1):
         if chip_num in skip: 
             logger.info('Skipping chip_num %d because in skip list',chip_num)
@@ -475,6 +524,9 @@ def main(argv):
             raise RuntimeError('Ambiguous input filename')
         filename = filename[0]
         logger.info('filename = %s',filename)
+        if root_name is None:
+            root_name = filename[0:filename.rindex('%08d'%exp_num)]
+            logger.info('root_name = %s',root_name)
         hdulist = pyfits.open(filename)
         if not hdulist:
             logger.warn('Error opening input file %s',filename)
@@ -503,16 +555,18 @@ def main(argv):
         chip_iyy += [ iyy ]
 
         logger.warn('Whisker stats for chip %d:',chip_num)
-        dwlx, dwly, dixx, dixy, diyy = print_stats(
-                ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, logger)
-        all_dwlx = numpy.append(all_dwlx,dwlx)
-        all_dwly = numpy.append(all_dwly,dwly)
+        if make_plots: plt_name = '%s_%02d.png'%(root_name,chip_num)
+        dwl1, dwl2, dixx, dixy, diyy = print_stats(
+                ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger)
+        all_dwl1 = numpy.append(all_dwl1,dwl1)
+        all_dwl2 = numpy.append(all_dwl2,dwl2)
         all_dixx = numpy.append(all_dixx,dixx)
         all_dixy = numpy.append(all_dixy,dixy)
         all_diyy = numpy.append(all_diyy,diyy)
 
     logger.warn('Overall whisker stats:')
-    print_stats(all_ra, all_dec, all_ixx, all_ixy, all_iyy, exp_num, 0, out, logger)
+    if make_plots: plt_name = '%s_all.png'%(root_name)
+    print_stats(all_ra, all_dec, all_ixx, all_ixy, all_iyy, exp_num, 0, out, plt_name, logger)
 
     logger.warn('Exposure whisker stats using chip-wise averages:')
     chipmean_ra = numpy.array([ c.mean() for c in chip_ra ])
@@ -520,11 +574,13 @@ def main(argv):
     chipmean_ixx = numpy.array([ c.mean() for c in chip_ixx ])
     chipmean_ixy = numpy.array([ c.mean() for c in chip_ixy ])
     chipmean_iyy = numpy.array([ c.mean() for c in chip_iyy ])
+    if make_plots: plt_name = '%s_chip.png'%(root_name)
     print_stats(chipmean_ra, chipmean_dec, chipmean_ixx, chipmean_ixy, chipmean_iyy, 
-                exp_num, -1, out, logger)
+                exp_num, -1, out, plt_name, logger)
 
     logger.warn('Overall whisker stats after chip-wise bilinear moment fits:')
-    print_stats(all_ra, all_dec, all_dixx, all_dixy, all_diyy, exp_num, -2, out, logger)
+    if make_plots: plt_name = '%s_resid.png'%(root_name)
+    print_stats(all_ra, all_dec, all_dixx, all_dixy, all_diyy, exp_num, -2, out, plt_name, logger)
 
 if __name__ == "__main__":
     main(sys.argv)
