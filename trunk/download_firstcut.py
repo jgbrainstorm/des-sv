@@ -38,8 +38,8 @@ resmike = []
 for eid in expid:
     print eid
     #reshao.append(whiskerStat_firstcut(eid))
-    resmike.append(whiskerStat_firstcut_mike(eid))
+    resmike.append(whiskerStat_firstcut_mike_new(eid))
     os.system('rm tempMike.cat')
 
 #np.savetxt('firstcut_stat_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
-np.savetxt('firstcut_stat_mike_12272012.txt',np.array(resmike),fmt='%10.5f')
+np.savetxt('firstcut_stat_mike_fast_12272012.txt',np.array(resmike),fmt='%10.5f')

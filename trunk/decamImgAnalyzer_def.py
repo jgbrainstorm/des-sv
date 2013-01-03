@@ -393,6 +393,15 @@ def whiskerStat_firstcut_mike(expid):
     # res are: whk, whkRMS,whkRMSfit,whk_bfit, whkRMS_bfit,whkRMSfit_bfit
     return res
 
+def whiskerStat_firstcut_mike_new(expid):
+    os.system('python whisker.py /data/des08.b/data/jiangang/firstcut '+expid+' tempMike.cat')
+    b = np.genfromtxt('tempMike.cat')
+    res = np.concatenate((b[62,6:9],b[63,6:9]))
+    # res are: whk, whkRMS,whkRMSfit,whk_bfit, whkRMS_bfit,whkRMSfit_bfit
+    return res
+
+
+
 def rowcol2XY(row,col,CCD):
     """
     convert the row/col [in pixels] of a given CCD to the x, y
