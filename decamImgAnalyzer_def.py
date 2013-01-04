@@ -6,7 +6,7 @@
 # psfFocus.py. 
 # created by Jiangang Hao, 11/13/2012
 
-import sys,os
+import sys,os,whisker
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
 sys.path.append('/usr/remote/user/sispi/jiangang/lib/python')
@@ -400,9 +400,9 @@ def whiskerStat_firstcut_mike(expid):
     ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
     if len(ff) == 62:
         try:
-            os.system('python whisker.py /data/des08.b/data/jiangang/firstcut '+expid+' tempMike.cat')
-            b = np.genfromtxt('tempMike.cat')
-            res = np.concatenate((b[62,6:9],b[63,6:9]))
+            kwargs = {'root_dir' : '/data/des08.b/data/jiangang/firstcut','exp_num' : int(expid)}
+            b = nwhisker.process_all(**kwargs)
+            res = np.concatenate((b[-2,6:9],b[-1,6:9]))
         except:
             res=np.array([-999,-999,-999,-999,-999,-999])
     else:
