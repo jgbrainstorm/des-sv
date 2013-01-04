@@ -401,7 +401,7 @@ def whiskerStat_firstcut_mike(expid):
     if len(ff) == 62:
         try:
             kwargs = {'root_dir' : '/data/des08.b/data/jiangang/firstcut','exp_num' : int(expid)}
-            b = nwhisker.process_all(**kwargs)
+            b = whisker.process_all(**kwargs)
             res = np.concatenate((b[-2,6:9],b[-1,6:9]))
         except:
             res=np.array([-999,-999,-999,-999,-999,-999])
