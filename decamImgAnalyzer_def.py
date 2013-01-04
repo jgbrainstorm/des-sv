@@ -319,7 +319,7 @@ def measureIQstamp(stamp=None,bkg=None,sigma=None):
     return robust_mean(Mcc), robust_mean(Mrr), robust_mean(Mrc)
 
 
-def whiskerStat_firstcut(expid):
+def whiskerStat_firstcut(expid,plot=False):
     """
     Note that here, the sigma is not fwhm. Sigma is given in arcsec
     """
@@ -348,6 +348,20 @@ def whiskerStat_firstcut(expid):
     datasubmean = data - datamean
     whkrms = (robust_mean((datasubmean[:,0] - datasubmean[:,1])**2 + 4.*datasubmean[:,2]**2))**(0.25)*0.27
     #np.savetxt(filename[0:-6]+'txt',[r50,whk,phi,whkrms],fmt='%10.5f')
+    if plot == True:
+        pl.figure(figsize=(15,6))
+        pl.subplot(3,1,1)
+        pl.hist(data[:,0],bins=10,normed=True)
+        pl.xlabel('Mcc')
+        pl.title('Mean: '+str(round(datamean[0],5)))
+        pl.subplot(3,1,2)
+        pl.hist(data[:,1],bins=10,normed=True)
+        pl.xlabel('Mrr')
+        pl.title('Mean: '+str(round(datamean[1],5)))
+        pl.subplot(3,1,3)
+        pl.hist(data[:,2],bins=10,normed=True)
+        pl.xlabel('Mrc')
+        pl.title('Mean: '+str(round(datamean[2],5)))
     return r50,whk,whkrms,phi,fwhm
 
 
