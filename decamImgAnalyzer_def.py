@@ -351,7 +351,7 @@ def whiskerStat_firstcut(expid,plot=False):
     if plot == True:
         pl.figure(figsize=(15,6))
         pl.subplot(1,3,1)
-        pl.hist(data[:,0],bins=50,normed=True,range=-10,10)
+        pl.hist(data[:,0],bins=50,normed=True,range=[-10,10])
         pl.xlabel('Mcc [pix^2]')
         pl.title('Mean: '+str(round(datamean[0],5)))
         pl.subplot(1,3,2)
