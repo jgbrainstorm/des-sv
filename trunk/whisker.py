@@ -68,7 +68,7 @@ sigma_maxval = 0.01
 # and also the whisker length for the star selection.  We also do outlier rejection after
 # the bilinear fit step based on the residual ixx,ixy,iyy values.
 # This parameter specifies how many quartiles from the median is declared an outlier.
-nquart = 3
+nquart = 4
 
 # Skip the following chip_num's
 skip = [ 61 ]
@@ -77,6 +77,7 @@ skip = [ 61 ]
 min_nstars = 80
 
 def parse_command_line(argv):
+    print 'argv = \n',argv
 
     # Build the parser and add arguments
     description = """
@@ -106,7 +107,7 @@ You can turn this off by running with '-v 0'.
     parser.add_option(
             '-p', '--make_plots', action='store_true', default=False,
             help='make plots of the whisker values')
-    (args, posargs) = parser.parse_args()
+    (args, posargs) = parser.parse_args(argv)
 
     # Parse the positional arguments by hand
     nposargs = 3
@@ -116,6 +117,9 @@ You can turn this off by running with '-v 0'.
         out_file = posargs[2]
     else:
         parser.print_help()
+        print 'posargs = ',posargs
+        print 'len(posargs) = ',len(posargs)
+        print 'nposargs = ',nposargs
         if len(posargs) < nposargs:
             sys.exit('\n%s: error: too few arguments\n'%(script_name))
         else:
@@ -142,16 +146,7 @@ You can turn this off by running with '-v 0'.
     logger.info('exp_num = %s',exp_num)
     logger.info('out_file = %s',out_file)
 
-    if args.append:
-        out = open(out_file,'a')
-    else:
-        out = open(out_file,'w')
-        out.write('# expnum  chip    nstar     <ixx>       <ixy>       <iyy>        WL        RMS WL  RMS WL after fit\n')
-        out.write('# chip 0 = Full exposure\n')
-        out.write('# chip -1 = Use mean moments for each chip as 62 "stars"\n')
-        out.write('# chip -2 = Full exposure after subtracting chip-wise bilinear fits\n')
-
-    return root_dir, exp_num, out, args.make_plots, logger
+    return root_dir, exp_num, out_file, args.append, args.make_plots, logger
     
 def get_stars(cat, logger):
 
@@ -277,10 +272,185 @@ def project(ra, dec, logger):
     u = k * (y*xcen - x*ycen) / cosdec0
     v = k * (z - zcen*dot) / cosdec0
 
+    # convert to arcmin
+    u *= 180. / numpy.pi * 60.
+    v *= 180. / numpy.pi * 60.
+
     return u, v
 
+def draw_plots(plt_name, exp_num, chip_num, A, W, dW, ok, logger):
+    import matplotlib.pyplot as plt
+    plt.clf()
+    if chip_num == 0:
+        tag = 'Full Exposure'
+        scale = 0.2 
+        whisker_width = 0.001
+        dpi = 600
+        full_height=12
+        key_pos = 0.06
+        size_scale = 2
+        size_key_height = 0.04
+    elif chip_num == -1:
+        tag = 'Using Chip Averages'
+        scale = 0.02 
+        whisker_width = 0.003
+        dpi = 300
+        full_height=12
+        key_pos = 0.06
+        size_scale = 10
+        size_key_height = 0.04
+    elif chip_num == -2:
+        tag = 'After Remove Chip-wise Bilinear Fits to Moments'
+        scale = 0.2 
+        whisker_width = 0.001
+        dpi = 600
+        full_height=12
+        key_pos = 0.06
+        size_scale = 2
+        size_key_height = 0.04
+    else:
+        tag = 'Chip %02d'%chip_num
+        scale = 0.3
+        whisker_width = 0.003
+        dpi = 300
+        full_height=7
+        key_pos = 0.03
+        size_scale = 30
+        size_key_height = 0.06
 
-def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger):
+    x = A[ok,1]
+    y = A[ok,2]
+    wl1 = W[ok,0]
+    wl2 = W[ok,1]
+    ixx = W[ok,2]
+    ixy = W[ok,3]
+    iyy = W[ok,4]
+    e1 = W[ok,5]
+    e2 = W[ok,6]
+    dwl1 = dW[ok,0]
+    dwl2 = dW[ok,1]
+    dixx = dW[ok,2]
+    dixy = dW[ok,3]
+    diyy = dW[ok,4]
+    de1 = dW[ok,5]
+    de2 = dW[ok,6]
+
+    logger.debug('lengths x,y,wl1,wl2 = %d,%d,  %d,%d',len(x),len(y), len(wl1), len(wl2))
+
+    logger.info('Making plot for %d, %s',exp_num,tag)
+    xmin = numpy.min(x)
+    xmax = numpy.max(x)
+    ymin = numpy.min(y)
+    ymax = numpy.max(y)
+    logger.debug('x,y min,max = %f,%f,%f,%f',xmin,xmax,ymin,ymax)
+
+    (f, ax) = plt.subplots(nrows=3, ncols=2, figsize=(8,full_height), dpi=dpi,
+                            subplot_kw={ 'xlim' : (xmin,xmax),
+                                        'ylim' : (ymin,ymax),
+                                        'aspect' : 1,
+                                        'xticks' : [], 'yticks' : [],
+                                        })
+    f.suptitle('Whisker Plots for Exposure %d\n%s'%(exp_num,tag))
+
+    # Plot whiskers
+    # The existing whiskers, wl1, wl2 are |w| exp(2it), but for quiver, we want to 
+    # plot them as |w| exp(it)
+    theta = numpy.arctan2(wl2,wl1)/2.
+    r = numpy.sqrt(wl1**2 + wl2**2)
+    u = r*numpy.cos(theta)
+    v = r*numpy.sin(theta)
+    logger.debug('lengths x,y,u,v = %d,%d, %d,%d',len(x),len(y), len(u), len(v))
+    qv = ax[0,0].quiver(x,y,u,v,
+                        color='blue', pivot='middle', scale_units='xy',
+                        headwidth=0., headlength=0., headaxislength=0.,
+                        width=whisker_width, scale=scale)
+    ax[0,0].quiverkey(qv, key_pos, 0.04, 0.1, str(0.1) + " arcsec",
+                        coordinates='axes', color='darkred', labelcolor='darkred',
+                        labelpos='E', fontproperties={'size':'x-small'})
+    ax[0,0].set_title('Whisker length')
+
+    # Plot residual whiskers
+    theta = numpy.arctan2(dwl2,dwl1)/2.
+    r = numpy.sqrt(dwl1**2 + dwl2**2)
+    u = r*numpy.cos(theta)
+    v = r*numpy.sin(theta)
+    logger.debug('lengths x,y,u,v = %d,%d, %d,%d',len(x),len(y), len(u), len(v))
+    qv = ax[0,1].quiver(x,y,u,v, 
+                        color='blue', pivot='middle', scale_units='xy',
+                        headwidth=0., headlength=0., headaxislength=0.,
+                        width=whisker_width, scale=scale)
+    ax[0,1].quiverkey(qv, key_pos, 0.04, 0.1, str(0.1) + " arcsec",
+                        coordinates='axes', color='darkred', labelcolor='darkred',
+                        labelpos='E', fontproperties={'size':'x-small'})
+    ax[0,1].set_title('Residuals')
+
+    # Plot e1,e2
+    theta = numpy.arctan2(e2,e1)/2.
+    r = numpy.sqrt(e1**2 + e2**2)
+    u = r*numpy.cos(theta)
+    v = r*numpy.sin(theta)
+    logger.debug('lengths x,y,u,v = %d,%d, %d,%d',len(x),len(y), len(u), len(v))
+    qv = ax[1,0].quiver(x,y,u,v,
+                        color='blue', pivot='middle', scale_units='xy',
+                        headwidth=0., headlength=0., headaxislength=0.,
+                        width=whisker_width, scale=scale/2)
+    ax[1,0].quiverkey(qv, key_pos*1.8, 0.04, 0.1, str(0.1),
+                      coordinates='axes', color='darkred', labelcolor='darkred',
+                      labelpos='E', fontproperties={'size':'x-small'})
+    ax[1,0].set_title('E1,E2')
+
+    # Plot residuals
+    theta = numpy.arctan2(de2,de1)/2.
+    r = numpy.sqrt(de1**2 + de2**2)
+    theta = numpy.arctan2(de2,de1)/2.
+    r = numpy.sqrt(de1**2 + de2**2)
+    u = r*numpy.cos(theta)
+    v = r*numpy.sin(theta)
+    logger.debug('lengths x,y,u,v = %d,%d, %d,%d',len(x),len(y), len(u), len(v))
+    qv = ax[1,1].quiver(x,y,u,v, 
+                        color='blue', pivot='middle', scale_units='xy',
+                        headwidth=0., headlength=0., headaxislength=0.,
+                        width=whisker_width, scale=scale/2)
+    ax[1,1].quiverkey(qv, key_pos*1.8, 0.04, 0.1, str(0.1),
+                      coordinates='axes', color='darkred', labelcolor='darkred',
+                      labelpos='E', fontproperties={'size':'x-small'})
+    ax[1,1].set_title('Residuals')
+
+    # Plot size
+    sizesq = ixx+iyy
+    logger.debug('lengths sizesq = %d',len(sizesq))
+    ax[2,0].scatter(x,y,s=sizesq*size_scale,
+                    c='blue',alpha=0.5,edgecolors='none')
+    ax[2,0].scatter(key_pos*(xmax-xmin)+xmin,size_key_height*(ymax-ymin)+ymin,
+                    s=2*0.62**2*size_scale,
+                    c='darkred',edgecolors='none')
+    ax[2,0].text((key_pos+0.03)*(xmax-xmin)+xmin,0.03*(ymax-ymin)+ymin,
+                 '0.62 arcsec (sigma)', color='darkred', size='x-small')
+    ax[2,0].set_title('Size (Ixx+Iyy)')
+
+    # Plot residuals
+    dsizesq = dixx+diyy
+    pos = dsizesq >= 0
+    neg = dsizesq < 0
+    logger.debug('lengths dsizesq = %d, pos,neg = %d,%d',
+                 len(sizesq),len(x[pos]),len(x[neg]))
+    ax[2,1].scatter(x[pos],y[pos],s=dsizesq[pos]*size_scale,
+                    c='blue',alpha=0.5,edgecolors='none')
+    ax[2,1].scatter(x[neg],y[neg],s=-dsizesq[neg]*size_scale,
+                    c='magenta',alpha=0.5,edgecolors='none')
+    ax[2,1].scatter(key_pos*(xmax-xmin)+xmin,size_key_height*(ymax-ymin)+ymin,
+                    s=2*0.62**2*size_scale,
+                    c='darkred',edgecolors='none')
+    ax[2,1].text((key_pos+0.03)*(xmax-xmin)+xmin,0.03*(ymax-ymin)+ymin,
+                 '0.62 arcsec (sigma)', color='darkred', size='x-small')
+    ax[2,1].set_title('Residuals')
+
+    plt.savefig(plt_name, dpi=dpi)  # For some reason, savefig overrides dpi if you don't
+                                    # re-specify it here.
+    logger.debug('wrote plot to %s',plt_name)
+ 
+
+def process_chip(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger):
 
     wl = ((ixx-iyy)**2 + (2.*ixy)**2 )**0.25
     theta = numpy.arctan2( 2.*ixy, ixx-iyy )
@@ -338,20 +508,22 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger
     A = numpy.ones( shape=(n,3) )
     A[:,1] = x
     A[:,2] = y
-    W = numpy.ones( shape=(n,5) )
+    W = numpy.ones( shape=(n,7) )
     W[:,0] = wl1
     W[:,1] = wl2
     W[:,2] = ixx
     W[:,3] = ixy
     W[:,4] = iyy
+    W[:,5] = (ixx-iyy)/(ixx+iyy)
+    W[:,6] = (2.*ixy)/(ixx+iyy)
+    dW = numpy.zeros( shape=(n,7) )
 
-    # The version with all values, including outliers.
-    Afull = A
-    Wfull = W 
+    # Start with all true
+    ok = (ixx > -1.)
 
     nclip = n
     while nclip > 0:
-        (M, resids, rank, s) = numpy.linalg.lstsq(A,W)
+        (M, resids, rank, s) = numpy.linalg.lstsq(A[ok],W[ok])
 
         logger.debug('M = %s',str(M))
         logger.debug('resids = %s',str(resids))
@@ -368,18 +540,15 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger
                     M[0,3],M[1,3]*numpy.pi/180.,M[2,3]*numpy.pi/180.)
         logger.info('  Iyy = %f + (%f/deg) x + (%f/deg) y',
                     M[0,4],M[1,4]*numpy.pi/180.,M[2,4]*numpy.pi/180.)
-        dW = W - numpy.dot(A,M)
+        dW[ok] = W[ok] - numpy.dot(A[ok],M)
+        logger.debug('shape of W[ok] = %s',str(W[ok].shape))
+        logger.debug('shape of A[ok] = %s',str(A[ok].shape))
+        logger.debug('shape of dW[ok] = %s',str(dW[ok].shape))
         
-        dwl1 = dW[:,0]
-        dwl2 = dW[:,1]
-        dixx = dW[:,2]
-        dixy = dW[:,3]
-        diyy = dW[:,4]
-
         # Look for outliers in the residual moment values:
-        sorted_dixx = sorted(dixx)
-        sorted_dixy = sorted(dixy)
-        sorted_diyy = sorted(diyy)
+        sorted_dixx = sorted(dW[ok,2])
+        sorted_dixy = sorted(dW[ok,3])
+        sorted_diyy = sorted(dW[ok,4])
         dixx_median = sorted_dixx[n/2]
         dixx_quartile = 0.5*(sorted_dixx[n*3/4] - sorted_dixx[n/4])
         logger.info('median dixx = %f, 1-quartile deviation = %f',dixx_median,dixx_quartile)
@@ -389,101 +558,105 @@ def print_stats(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger
         diyy_median = sorted_diyy[n/2]
         diyy_quartile = 0.5*(sorted_diyy[n*3/4] - sorted_diyy[n/4])
         logger.info('median diyy = %f, 1-quartile deviation = %f',diyy_median,diyy_quartile)
-        ok = ( (numpy.fabs(dixx - dixx_median) < nquart*dixx_quartile) *
-               (numpy.fabs(dixy - dixy_median) < nquart*dixy_quartile) *
-               (numpy.fabs(diyy - diyy_median) < nquart*diyy_quartile) ) 
-
-        W = W[ok]
-        A = A[ok]
+        ok = ( (numpy.fabs(dW[:,2] - dixx_median) < nquart*dixx_quartile) *
+               (numpy.fabs(dW[:,3] - dixy_median) < nquart*dixy_quartile) *
+               (numpy.fabs(dW[:,4] - diyy_median) < nquart*diyy_quartile) ) 
 
         # Update the number of objects
-        nclip = n-len(dwl1)
-        n = len(dwl1)
+        nclip = n-len(wl1[ok])
+        n -= nclip
         logger.info('clipped %d objects with large residuals.  Now n = %d',nclip,n)
+    logger.warn('    After clipping: number of stars = %d',n)
 
+    dwl1 = dW[ok,0]
+    dwl2 = dW[ok,1]
     dwl = (dwl1**2 + dwl2**2)**0.5
+    di1 = dW[ok,2] - dW[ok,4]
+    di2 = 2*dW[ok,3]
 
     mean_dwl1 = dwl1.mean()
     mean_dwl2 = dwl2.mean()
     mean_dwl = dwl.mean()
-    mean_dixx = dixx.mean()
-    mean_dixy = dixy.mean()
-    mean_diyy = diyy.mean()
+    mean_di1 = di1.mean()
+    mean_di2 = di2.mean()
     rms_dwl = numpy.sqrt(((dwl1-mean_dwl1)**2 + (dwl2-mean_dwl2)**2).mean())
-    rms_wl_dmeanmom = (((dixx-mean_dixx-diyy+mean_diyy)**2 + 4.*(dixy-mean_dixy)**2).mean())**0.25
+    rms_wl_dmeanmom = (((di1-mean_di1)**2 + (di2-mean_di2)**2).mean())**0.25
     logger.debug('mean_dwl1 = %f  (should = 0)',mean_dwl1)
     logger.debug('mean_dwl2 = %f  (should = 0)',mean_dwl2)
-    logger.debug('mean_dixx = %f  (should = 0)',mean_dixx)
-    logger.debug('mean_dixy = %f  (should = 0)',mean_dixy)
-    logger.debug('mean_diyy = %f  (should = 0)',mean_diyy)
+    logger.debug('mean_di1 = %f  (should = 0)',mean_di1)
+    logger.debug('mean_di2 = %f  (should = 0)',mean_di2)
     logger.warn('  After removing bilinear fit:')
     logger.warn('    Mean |WL| = %f',mean_dwl)
     logger.warn('    RMS WL = %f',rms_dwl)
     logger.warn('    RMS WL from mean moments = %f',rms_wl_dmeanmom)
 
-    out.write('%8d   %2d   %6d  %10.6f  %10.6f  %10.6f  %10.6f  %10.6f  %10.6f\n'%(
-        exp_num, chip_num, len(ixx),
-        mean_ixx, mean_ixy, mean_iyy,
-        wl_meanmom, rms_wl_meanmom, rms_wl_dmeanmom))
+    table_row = ( 
+            exp_num, chip_num, len(dwl1),
+            mean_ixx, mean_ixy, mean_iyy,
+            wl_meanmom, rms_wl_meanmom, rms_wl_dmeanmom)
+    if out:
+        out.write('%8d   %2d   %6d  %10.6f  %10.6f  %10.6f  %10.6f  %10.6f  %10.6f\n'%table_row)
 
     if plt_name:
-        import matplotlib.pyplot as plt
-        plt.clf()
-        if chip_num == 0:
-            tag = 'Full Exposure'
-        elif chip_num == -1:
-            tag = 'Using Chip Averages'
-        elif chip_num == -2:
-            tag = 'Residuals From Chip-wise Bilinear Fits'
+        draw_plots(plt_name,exp_num,chip_num,A,W,dW,ok,logger)
+
+    # Have the dixx,diyy values keep the same total size.  Just remove fitted shapes.
+    dixx = ((ixx[ok]+iyy[ok]) + di1)/2
+    dixy = di2/2
+    diyy = ((ixx[ok]+iyy[ok]) - di1)/2
+
+    return (table_row, ok, dixx, dixy, diyy)
+
+
+
+def process_all(root_dir, exp_num, out_file=None, append=False, make_plots=False, logger=None):
+    """Do all the whisker processing for an exposure.
+
+    Parameters:
+        root_dir    [str] The directory with the catalog files.
+        exp_num     [int] The exposure number.  
+                    Files should match $root_dir/*$exp_num_??*_cat.fits
+                    where ?? is the two-digit chip number from 01 to 62..
+        out_file    [str or None] If given, the output file to write the results to.  
+                    If None, then no output file will be written. (default=None)
+        append      [bool] If out_file is given, this declares whether to append to an
+                    existing file (if any) or to overwrite it. (default=False)
+        make_plots  [bool] Whether or not to produce an output file with plots.
+                    (default=False)
+        logger      [logger instance or None] A logger instance to output information 
+                    if desired.  (default=None)
+    
+    Returns:
+        results     [2-d numpy array] An array with the same values as those that are written
+                    to the output file.
+                    Each row is:
+                        expnum  chipnum  <ixx>  <ixy>  <iyy>  WL  RMS_WL  RMS_WL_after_fit
+                    There is a row for each chip plus 3 extras:
+                    results[-3,:] uses all the stars in the exposure.
+                    results[-2,:] uses the means for each chip as "stars".
+                    results[-1,:] uses the residuals for all stars in the exposure after 
+                                subtracting the bilinear fit for each chip.
+    """
+
+    if out_file:
+        if append:
+            out = open(out_file,'a')
         else:
-            tag = 'Chip %02d'%chip_num
-        plt.title('Whisker Plots for Exposure %d\n%s'%(exp_num,tag))
+            out = open(out_file,'w')
+            out.write('# expnum  chip    nstar     <ixx>       <ixy>       <iyy>        WL        RMS WL  RMS WL after fit\n')
+            out.write('# chip 0 = Full exposure\n')
+            out.write('# chip -1 = Use mean moments for each chip as 62 "stars"\n')
+            out.write('# chip -2 = Full exposure after subtracting chip-wise bilinear fits\n')
+    else:
+        out = None
 
-        # Plot whiskers
-        plt.subplot(2,1,1)
-        # The existing whiskers, wl1, wl2 are |w| exp(2it), but for quiver, we want to 
-        # plot them as |w| exp(it)
-        theta = numpy.arctan2(wl2,wl1)/2.
-        r = numpy.sqrt(wl1**2 + wl2**2)
-        u = r*numpy.cos(theta)
-        v = r*numpy.sin(theta)
-        qv = plt.quiver(x,y,u,v, width=0.004, color='red', pivot='middle', 
-                        headwidth=0., headlength=0., headaxislength=0.,
-                        scale_units='width')
-        plt.quiverkey(qv, -150, -240, 0.1, str(0.1), coordinates='data', color='blue')
-        plt.axes().set_aspect(1)
-        plt.title('Whisker length')
-
-        # Plot residual whiskers
-        plt.subplot(2,1,2)
-        theta = numpy.arctan2(dwl2,dwl1)/2.
-        r = numpy.sqrt(dwl1**2 + dwl2**2)
-        u = r*numpy.cos(theta)
-        v = r*numpy.sin(theta)
-        qv = plt.quiver(x,y,u,v, width=0.004, color='red', pivot='middle', 
-                        headwidth=0., headlength=0., headaxislength=0.,
-                        scale_units='width')
-        plt.quiverkey(qv, -150, -240, 0.1, str(0.1), coordinates='data', color='blue')
-        plt.axes().set_aspect(1)
-        plt.title('Residual whisker length')
-
-        plt.savefig(plt_name)
- 
-
-    dW = Wfull - numpy.dot(Afull,M)
+    if not logger:
+        logger = logging.getLogger(script_name)
+        class NullHandler(logging.Handler):
+            def emit(self, record):
+                pass
+        logger.addHandler(NullHandler())
         
-    dwl1 = dW[:,0]
-    dwl2 = dW[:,1]
-    dixx = dW[:,2]
-    dixy = dW[:,3]
-    diyy = dW[:,4]
-
-    return (dwl1, dwl2, dixx, dixy, diyy)
-
-def main(argv):
-
-    (root_dir, exp_num, out, make_plots, logger) = parse_command_line(argv)
-
     all_ra = numpy.array([], dtype=float)
     all_dec = numpy.array([], dtype=float)
     all_ixx = numpy.array([], dtype=float)
@@ -498,11 +671,11 @@ def main(argv):
     chip_iyy = []
 
     # These are the values after removing a bilinear fit
-    all_dwl1 = numpy.array([], dtype=float)
-    all_dwl2 = numpy.array([], dtype=float)
     all_dixx = numpy.array([], dtype=float)
     all_dixy = numpy.array([], dtype=float)
     all_diyy = numpy.array([], dtype=float)
+
+    table = numpy.zeros( shape=(nchips+3,9) )
 
     root_name = None
     plt_name = None
@@ -525,7 +698,7 @@ def main(argv):
         filename = filename[0]
         logger.info('filename = %s',filename)
         if root_name is None:
-            root_name = filename[0:filename.rindex('%08d'%exp_num)]
+            root_name = filename[0:filename.rindex('%02d'%chip_num)]
             logger.info('root_name = %s',root_name)
         hdulist = pyfits.open(filename)
         if not hdulist:
@@ -541,32 +714,34 @@ def main(argv):
 
         if len(ra) < min_nstars:
             logger.info('Skipping chip_num %d because too few stars',chip_num)
-
-        all_ra = numpy.append(all_ra,ra)
-        all_dec = numpy.append(all_dec,dec)
-        all_ixx = numpy.append(all_ixx,ixx)
-        all_ixy = numpy.append(all_ixy,ixy)
-        all_iyy = numpy.append(all_iyy,iyy)
-
-        chip_ra += [ ra ]
-        chip_dec += [ dec ]
-        chip_ixx += [ ixx ]
-        chip_ixy += [ ixy ]
-        chip_iyy += [ iyy ]
-
         logger.warn('Whisker stats for chip %d:',chip_num)
         if make_plots: plt_name = '%s_%02d.png'%(root_name,chip_num)
-        dwl1, dwl2, dixx, dixy, diyy = print_stats(
+
+        (table_row, ok, dixx, dixy, diyy) = process_chip(
                 ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logger)
-        all_dwl1 = numpy.append(all_dwl1,dwl1)
-        all_dwl2 = numpy.append(all_dwl2,dwl2)
+        table[chip_num-1] = table_row
+
+        all_ra = numpy.append(all_ra,ra[ok])
+        all_dec = numpy.append(all_dec,dec[ok])
+        all_ixx = numpy.append(all_ixx,ixx[ok])
+        all_ixy = numpy.append(all_ixy,ixy[ok])
+        all_iyy = numpy.append(all_iyy,iyy[ok])
+
+        chip_ra += [ ra[ok] ]
+        chip_dec += [ dec[ok] ]
+        chip_ixx += [ ixx[ok] ]
+        chip_ixy += [ ixy[ok] ]
+        chip_iyy += [ iyy[ok] ]
+
         all_dixx = numpy.append(all_dixx,dixx)
         all_dixy = numpy.append(all_dixy,dixy)
         all_diyy = numpy.append(all_diyy,diyy)
 
     logger.warn('Overall whisker stats:')
     if make_plots: plt_name = '%s_all.png'%(root_name)
-    print_stats(all_ra, all_dec, all_ixx, all_ixy, all_iyy, exp_num, 0, out, plt_name, logger)
+    table_row = process_chip(
+            all_ra, all_dec, all_ixx, all_ixy, all_iyy, exp_num, 0, out, plt_name, logger)[0]
+    table[nchips] = table_row
 
     logger.warn('Exposure whisker stats using chip-wise averages:')
     chipmean_ra = numpy.array([ c.mean() for c in chip_ra ])
@@ -575,12 +750,29 @@ def main(argv):
     chipmean_ixy = numpy.array([ c.mean() for c in chip_ixy ])
     chipmean_iyy = numpy.array([ c.mean() for c in chip_iyy ])
     if make_plots: plt_name = '%s_chip.png'%(root_name)
-    print_stats(chipmean_ra, chipmean_dec, chipmean_ixx, chipmean_ixy, chipmean_iyy, 
-                exp_num, -1, out, plt_name, logger)
+    table_row = process_chip(
+            chipmean_ra, chipmean_dec, chipmean_ixx, chipmean_ixy, chipmean_iyy, 
+            exp_num, -1, out, plt_name, logger)[0]
+    table[nchips+1] = table_row
 
     logger.warn('Overall whisker stats after chip-wise bilinear moment fits:')
     if make_plots: plt_name = '%s_resid.png'%(root_name)
-    print_stats(all_ra, all_dec, all_dixx, all_dixy, all_diyy, exp_num, -2, out, plt_name, logger)
+    table_row = process_chip(
+            all_ra, all_dec, all_dixx, all_dixy, all_diyy, exp_num, -2, out, plt_name, logger)[0]
+    table[nchips+2] = table_row
+
+    return table
+
+
+def main(argv):
+    """
+    This is the function that gets run when executing whisker.py from the command line.
+    All it does is parse the command line, and then pass the appropriate options to process_all.
+    """
+
+    args = parse_command_line(argv)
+    process_all(*args)
+
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main(sys.argv[1:])
