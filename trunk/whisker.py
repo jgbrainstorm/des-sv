@@ -682,6 +682,13 @@ def process_all(root_dir, exp_num, out_file=None, append=False, make_plots=False
     for chip_num in range(1,nchips+1):
         if chip_num in skip: 
             logger.info('Skipping chip_num %d because in skip list',chip_num)
+            table_row = ( 
+                    exp_num, chip_num, 0, 
+                    -999, -999, -999, 
+                    -999, -999, -999)
+            if out:
+                out.write('%8d   %2d   %6d  %10.6f  %10.6f  %10.6f  %10.6f  %10.6f  %10.6f\n'%table_row)
+            table[chip_num-1] = table_row
             continue;
         filename_pattern = "%s/*%08d*%02d*%s"%(root_dir, exp_num, chip_num, filename_suffix)
         filename = glob.glob(filename_pattern)
