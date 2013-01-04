@@ -35,10 +35,10 @@ expid.sort()
 reshao = []
 resmike = []
 for eid in expid:
-    print eid
+    #print eid
     #reshao.append(whiskerStat_firstcut(eid))
     resmike.append(whiskerStat_firstcut_mike(eid))
-    print resmike
+    #print resmike
 
 #np.savetxt('firstcut_stat_hao_12272012.txt',np.array(reshao),fmt='%10.5f')
 np.savetxt('firstcut_stat_mike_new_1_4_2012.txt',np.array(resmike),fmt='%10.5f')
