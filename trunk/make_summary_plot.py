@@ -295,4 +295,27 @@ pl.figtext(0.35,0.95,'Distribution of Median R50',color='b',fontsize=18)
 pl.savefig('r50_median_summary.png')
 
 
+#---first cut plot
 
+b=np.genfromtxt('firstcut_as_of_1_4_2013.txt',delimiter=',')
+
+pl.figure(figsize=(10,5))
+pl.subplot(1,2,1)
+pl.plot(b[:,2],b[:,6],'b.')
+pl.plot([0,1],[0,1],'r-')
+pl.xlim(0,0.5)
+pl.ylim(0,0.5)
+pl.xlabel('whisker_wmomts')
+pl.ylabel('whisker_mike')
+pl.grid()
+
+pl.subplot(1,2,2)
+pl.plot(b[:,3],b[:,7],'b.')
+pl.plot([0,1],[0,1],'r-')
+pl.xlim(0,0.5)
+pl.ylim(0,0.5)
+pl.xlabel('whisker_rms_wmomts')
+pl.ylabel('whisker_rms_mike')
+pl.grid()
+
+pl.savefig('firstcut_1_4_2013_whisker_hao_mike.png')

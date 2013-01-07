@@ -132,7 +132,6 @@ def moments(data):
     the gaussian parameters of a 2D distribution by calculating its
     moments
     """
-    sigma=2. # 2 pix as weight kernel
     nrow,ncol=data.shape
     Isum = data.sum()
     Icol = data.sum(axis=0) # sum over all rows
@@ -141,16 +140,12 @@ def moments(data):
     rowgrid = np.arange(nrow)
     rowmean=np.sum(rowgrid*Irow)/Isum
     colmean=np.sum(colgrid*Icol)/Isum
-    ROW,COL=np.indices((nrow,ncol))
-    wrmat = wr(ROW,COL,rowmean,colmean,sigma)
-    IWmat = data*wrmat
-    IWcol = IWmat.sum(axis=0)
-    IWrow = IWmat.sum(axis=1)
-    IWsum = IWmat.sum()
+    ROW,COL=np.indices((nrow,ncol))   
     rowgrid = rowgrid - rowmean # centered
     colgrid = colgrid - colmean
-    Mrr = np.sum(rowgrid**2*IWrow)/IWsum
-    Mcc = np.sum(colgrid**2*IWcol)/IWsum
+    Mrr = np.sum(rowgrid**2*data)/Isum
+    Mcc = np.sum(colgrid**2*data)/Isum
+    Mrc = np.sum(np.outer(rowgrid,colgrid)*data)/Isum
     width = np.sqrt((Mrr+Mcc)*0.5)
     datasrt = np.sort(data.flatten())
     height = np.median(datasrt[-20:-1])
@@ -315,7 +310,7 @@ def measureIQstamp(stamp=None,bkg=None,sigma=None):
         else:
             data = stamp[i]-bkg[i]
             if data.sum > 0.:
-                Mcc[i],Mrr[i],Mrc[i]=complex2ndMoments(data=data,sigma=sigma)               
+                Mcc[i],Mrr[i],Mrc[i]=complex2ndMoments(data=data,sigma=sigma)      
     return robust_mean(Mcc), robust_mean(Mrr), robust_mean(Mrc)
 
 

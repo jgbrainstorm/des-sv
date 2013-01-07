@@ -24,6 +24,7 @@ import logging
 import math
 import numpy
 import glob
+from decamImgAnalyzer_def import *
 
 # Various hard-coded values here:
 nchips = 62
