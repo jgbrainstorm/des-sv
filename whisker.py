@@ -458,30 +458,6 @@ def process_chip(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logge
     wl2 = wl * numpy.sin(theta)
     wl = (wl1**2 + wl2**2)**0.5
 
-    mean_ixx = ixx.mean()
-    mean_ixy = ixy.mean()
-    mean_iyy = iyy.mean()
-    wl_meanmom = ((mean_ixx-mean_iyy)**2 + (2.*mean_ixy)**2 )**0.25
-    theta_meanmom = numpy.arctan2( 2.*mean_ixy, mean_ixx-mean_iyy )
-    wl1_meanmom = wl_meanmom * numpy.cos(theta_meanmom)
-    wl2_meanmom = wl_meanmom * numpy.sin(theta_meanmom)
-    rms_wl_meanmom = ( ( (ixx-mean_ixx-iyy+mean_iyy)**2 + 4.*(ixy-mean_ixy)**2 ).mean() )**0.25
-    mean_wl1 = wl1.mean()
-    mean_wl2 = wl2.mean()
-    mean_wl = wl.mean()
-    rms_wl = numpy.sqrt( ((wl1-mean_wl1)**2 + (wl2-mean_wl2)**2).mean() )
-    logger.warn('    Number of stars = %d',len(ixx))
-    logger.warn('    Mean moments: <ixx> = %f, <ixy> = %f, <iyy> = %f',
-                mean_ixx,mean_ixy,mean_iyy)
-    logger.warn('    WL from mean moments = %f, theta = %f rad',wl_meanmom,theta_meanmom)
-    logger.warn('    In cartesian coordinates: (%f,%f)',wl1_meanmom,wl2_meanmom)
-    logger.warn('    RMS WL from mean moments = %f',rms_wl_meanmom)
-              
-    logger.warn('    Mean WL = (%f,%f)',mean_wl1,mean_wl2)
-    logger.warn('    |Mean WL| = %f',(mean_wl1**2+mean_wl2**2)**0.5)
-    logger.warn('    Mean |WL| = %f',mean_wl)
-    logger.warn('    RMS WL = %f',rms_wl)
-
     # Remove a bilinear fit:
     # wl1 = a + bx + cy
     # wl2 = d + ex + fy
@@ -566,7 +542,31 @@ def process_chip(ra, dec, ixx, ixy, iyy, exp_num, chip_num, out, plt_name, logge
         nclip = n-len(wl1[ok])
         n -= nclip
         logger.info('clipped %d objects with large residuals.  Now n = %d',nclip,n)
+
+    mean_ixx = ixx[ok].mean()
+    mean_ixy = ixy[ok].mean()
+    mean_iyy = iyy[ok].mean()
+    wl_meanmom = ((mean_ixx-mean_iyy)**2 + (2.*mean_ixy)**2 )**0.25
+    theta_meanmom = numpy.arctan2( 2.*mean_ixy, mean_ixx-mean_iyy )
+    wl1_meanmom = wl_meanmom * numpy.cos(theta_meanmom)
+    wl2_meanmom = wl_meanmom * numpy.sin(theta_meanmom)
+    rms_wl_meanmom = ( ( (ixx[ok]-mean_ixx-iyy[ok]+mean_iyy)**2 + 
+                         4.*(ixy[ok]-mean_ixy)**2 ).mean() )**0.25
+    mean_wl1 = wl1[ok].mean()
+    mean_wl2 = wl2[ok].mean()
+    mean_wl = wl[ok].mean()
+    rms_wl = numpy.sqrt( ((wl1[ok]-mean_wl1)**2 + (wl2[ok]-mean_wl2)**2).mean() )
+    logger.warn('    Number of stars = %d',len(ixx))
     logger.warn('    After clipping: number of stars = %d',n)
+    logger.warn('    Mean moments: <ixx> = %f, <ixy> = %f, <iyy> = %f',mean_ixx,mean_ixy,mean_iyy)
+    logger.warn('    WL from mean moments = %f, theta = %f rad',wl_meanmom,theta_meanmom)
+    logger.warn('    In cartesian coordinates: (%f,%f)',wl1_meanmom,wl2_meanmom)
+    logger.warn('    RMS WL from mean moments = %f',rms_wl_meanmom)
+              
+    logger.warn('    Mean WL = (%f,%f)',mean_wl1,mean_wl2)
+    logger.warn('    |Mean WL| = %f',(mean_wl1**2+mean_wl2**2)**0.5)
+    logger.warn('    Mean |WL| = %f',mean_wl)
+    logger.warn('    RMS WL = %f',rms_wl)
 
     dwl1 = dW[ok,0]
     dwl2 = dW[ok,1]
