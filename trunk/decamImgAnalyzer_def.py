@@ -18,14 +18,56 @@ try:
     import scipy.ndimage as nd
     import pylab as pl
     from scipy.optimize import leastsq
-    from DECamCCD_def import *
+    #from DECamCCD_def import *
     from scipy.misc import factorial as fac
 except ImportError:
     print "Error: missing one of the libraries (numpy, pyfits, scipy, matplotlib)"
     sys.exit()
 
 
+def remOutlierIdx(x):
+    y = x.flatten()
+    if len(y) < 6:
+        return -999.
+    if len(np.unique(y))==1:
+        ok = False
+    else:
+        n = len(y)
+        y.sort()
+        ind_qt1 = round((n+1)/4.)
+        ind_qt3 = round((n+1)*3/4.)
+        IQR = y[ind_qt3]- y[ind_qt1]
+        lowFense = y[ind_qt1] - 1.5*IQR
+        highFense = y[ind_qt3] + 1.5*IQR
+        if lowFense == highFense:
+            ok = np.repeat(False,n)
+        else:
+            ok = (y>lowFense)*(y<highFense)
+        return ok
+
 def robust_mean(x):
+    y = x.flatten()
+    if len(y) < 6:
+        return -999.
+    if len(np.unique(y))==1:
+        meany=y[0]
+    else:
+        n = len(y)
+        y.sort()
+        ind_qt1 = round((n+1)/4.)
+        ind_qt3 = round((n+1)*3/4.)
+        IQR = y[ind_qt3]- y[ind_qt1]
+        lowFense = y[ind_qt1] - 1.*IQR
+        highFense = y[ind_qt3] + 1.*IQR
+        if lowFense == highFense:
+            meany=lowFense
+        else:
+            ok = (y>lowFense)*(y<highFense)
+            yy=y[ok]
+            meany=yy.mean(dtype='double')
+    return meany
+
+def non_outlier(x):
     y = x.flatten()
     if len(y) < 6:
         return -999.
@@ -45,8 +87,7 @@ def robust_mean(x):
             ok = (y>lowFense)*(y<highFense)
             yy=y[ok]
             meany=yy.mean(dtype='double')
-    return meany
-
+    return len(yy)
 
 
 def robust_mean_std(x):
@@ -319,16 +360,52 @@ def whiskerStat_firstcut(expid,plot=False):
     Note that here, the sigma is not fwhm. Sigma is given in arcsec
     """
     #ff = gl.glob('/home/jghao/research/data/firstcutcat/DECam_00'+expid+'_??_cat.fits')
-    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
+    #ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
+    ff.sort()
     data=[]
+    goodext = np.append(np.arange(60),61)
+    xworld = []
+    ximage = []
+    yworld = []
+    yimage = []
+    xyworld = []
+    xyimage = []
     if len(ff) == 62:
-        for f in ff:
-            b = firstcutStar(pf.getdata(f,2))
-            #ok = (b.FLAGS == 0)*(b.CLASS_STAR >= 0.95)*(b.MAG_AUTO > 12)*(b.MAG_AUTO < 16)*(b.MAG_AUTO/b.MAGERR_AUTO>100)
-            #ok = (b.CLASS_STAR >= 0.95)
-            Mcc = robust_mean(b.X2_IMAGE)
-            Mrr = robust_mean(b.Y2_IMAGE)
-            Mrc = robust_mean(b.XY_IMAGE)
+        for i in goodext:
+            sigma_maxval = 0.01
+            b = firstcutStar(pf.getdata(ff[i],2))
+            yimage=yimage+list(b.Y2_IMAGE)
+            yworld=yworld+list(b.Y2_WORLD*3600**2/(0.27**2))
+            ximage=yimage+list(b.X2_IMAGE)
+            xworld=yworld+list(b.X2_WORLD*3600**2/(0.27**2))
+            xyimage=yimage+list(b.XY_IMAGE)
+            xyworld=yworld+list(b.XY_WORLD*3600**2/(0.27**2))
+            #ixx = b.X2_WORLD*3600**2/(0.27**2)
+            #iyy = b.Y2_WORLD*3600**2/(0.27**2)
+            #ixy = b.XY_WORLD*3600**2/(0.27**2)
+            ixx = b.X2_IMAGE
+            iyy = b.Y2_IMAGE
+            ixy = b.XY_IMAGE
+            sigixx = b.ERRX2_IMAGE
+            sigiyy = b.ERRY2_IMAGE
+            sigixy = b.ERRXY_IMAGE
+            wl = ( (ixx-iyy)**2 + (2.*ixy)**2 )**0.25
+            sigma_wl = 0.5 * ( (ixx-iyy)**2 * sigixx**2 + 16. * ixy**2 * sigixy**2 )**0.5 / wl**3
+            ok = (sigma_wl <= sigma_maxval)
+            ixx = ixx[ok]
+            ixy = ixy[ok]
+            iyy = iyy[ok]
+            size = np.log(ixx+iyy)
+            wl = ( (ixx-iyy)**2 + (2.*ixy)**2 )**0.25 
+            good = remOutlierIdx(size)*remOutlierIdx(wl)
+            Mcc = ixx[good].mean()
+            Mrr = iyy[good].mean()
+            Mrc = ixy[good].mean()
+            #Mcc = robust_mean(b.X2_IMAGE)
+            #Mrr = robust_mean(b.Y2_IMAGE)
+            #Mrc = robust_mean(b.XY_IMAGE)
+            #print i, len(ixx[good])
             fluxrad = robust_mean(b.FLUX_RADIUS)
             fwhmworld =  robust_mean(b.FWHM_WORLD)
             data.append([Mcc,Mrr,Mrc,fluxrad,fwhmworld])
@@ -358,6 +435,22 @@ def whiskerStat_firstcut(expid,plot=False):
         pl.xlabel('Mrc [pix^2]')
         pl.title('Mean: '+str(round(datamean[2],5)))
     return r50,whk,whkrms,phi,fwhm
+
+def whiskerStat_firstcut_mike(expid):
+    #ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
+    if len(ff) == 62:
+        try:
+            #kwargs = {'root_dir' : '/data/des08.b/data/jiangang/firstcut','exp_num' : int(expid)}
+            kwargs = {'root_dir' : '/home/jghao/research/data/firstcutcat/164026','exp_num' : int(expid)}
+            b = whisker.process_all(**kwargs)
+            res = np.concatenate((b[-2,6:9],b[-1,6:9]))
+        except:
+            res=np.array([-999,-999,-999,-999,-999,-999])
+    else:
+        res=np.array([-999,-999,-999,-999,-999,-999])
+    # res are: whk, whkRMS,whkRMSfit,whk_bfit, whkRMS_bfit,whkRMSfit_bfit
+    return res
 
 
 
@@ -390,20 +483,6 @@ def AcomplexMoments(img,sigma=1.1/scale):
     M20 = Mrr + Mcc
     M22 = complex(Mcc - Mrr,2*Mrc)
     return M20, M22
-
-def whiskerStat_firstcut_mike(expid):
-    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
-    if len(ff) == 62:
-        try:
-            kwargs = {'root_dir' : '/data/des08.b/data/jiangang/firstcut','exp_num' : int(expid)}
-            b = whisker.process_all(**kwargs)
-            res = np.concatenate((b[-2,6:9],b[-1,6:9]))
-        except:
-            res=np.array([-999,-999,-999,-999,-999,-999])
-    else:
-        res=np.array([-999,-999,-999,-999,-999,-999])
-    # res are: whk, whkRMS,whkRMSfit,whk_bfit, whkRMS_bfit,whkRMSfit_bfit
-    return res
 
 
 
