@@ -3,7 +3,7 @@
 
 import sys,glob
 sys.path.append('/usr/remote/user/sispi/jiangang/decam-fermi')
-from DECamCCD import *
+#from DECamCCD import *
 
 if len(sys.argv) == 1:
     print 'syntax: '
