@@ -355,35 +355,20 @@ def measureIQstamp(stamp=None,bkg=None,sigma=None):
     return robust_mean(Mcc), robust_mean(Mrr), robust_mean(Mrc)
 
 
-def whiskerStat_firstcut(expid,plot=False):
+def whiskerStat_firstcut_test(expid,plot=False):
     """
     Note that here, the sigma is not fwhm. Sigma is given in arcsec
     """
     #ff = gl.glob('/home/jghao/research/data/firstcutcat/DECam_00'+expid+'_??_cat.fits')
-    #ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
-    ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
+    #ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
     ff.sort()
     data=[]
     goodext = np.append(np.arange(60),61)
-    xworld = []
-    ximage = []
-    yworld = []
-    yimage = []
-    xyworld = []
-    xyimage = []
     if len(ff) == 62:
         for i in goodext:
             sigma_maxval = 0.01
             b = firstcutStar(pf.getdata(ff[i],2))
-            yimage=yimage+list(b.Y2_IMAGE)
-            yworld=yworld+list(b.Y2_WORLD*3600**2/(0.27**2))
-            ximage=yimage+list(b.X2_IMAGE)
-            xworld=yworld+list(b.X2_WORLD*3600**2/(0.27**2))
-            xyimage=yimage+list(b.XY_IMAGE)
-            xyworld=yworld+list(b.XY_WORLD*3600**2/(0.27**2))
-            #ixx = b.X2_WORLD*3600**2/(0.27**2)
-            #iyy = b.Y2_WORLD*3600**2/(0.27**2)
-            #ixy = b.XY_WORLD*3600**2/(0.27**2)
             ixx = b.X2_IMAGE
             iyy = b.Y2_IMAGE
             ixy = b.XY_IMAGE
@@ -435,6 +420,52 @@ def whiskerStat_firstcut(expid,plot=False):
         pl.xlabel('Mrc [pix^2]')
         pl.title('Mean: '+str(round(datamean[2],5)))
     return r50,whk,whkrms,phi,fwhm
+
+def whiskerStat_firstcut(expid,plot=False):
+    """
+    Note that here, the sigma is not fwhm. Sigma is given in arcsec
+    """
+    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
+    ff.sort()
+    data=[]
+    goodext = np.append(np.arange(60),61)
+    if len(ff) == 62:
+        for i in goodext:
+            b = firstcutStar(pf.getdata(ff[i],2))
+            Mcc = robust_mean(b.X2_IMAGE)
+            Mrr = robust_mean(b.Y2_IMAGE)
+            Mrc = robust_mean(b.XY_IMAGE)
+            #print i, len(ixx[good])
+            fluxrad = robust_mean(b.FLUX_RADIUS)
+            fwhmworld =  robust_mean(b.FWHM_WORLD)
+            data.append([Mcc,Mrr,Mrc,fluxrad,fwhmworld])
+    else:
+        return -999., -999., -999., -999.,-999. 
+    data = np.array(data)
+    datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2]),robust_mean(data[:,3]),robust_mean(data[:,4])])
+    whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
+    phi = np.rad2deg(0.5*np.arctan2(2.*datamean[2],(datamean[0]-datamean[1])))
+    r50 = datamean[3]*0.27
+    fwhm = datamean[4]
+    datasubmean = data - datamean
+    whkrms = (robust_mean((datasubmean[:,0] - datasubmean[:,1])**2 + 4.*datasubmean[:,2]**2))**(0.25)*0.27
+    #np.savetxt(filename[0:-6]+'txt',[r50,whk,phi,whkrms],fmt='%10.5f')
+    if plot == True:
+        pl.figure(figsize=(15,6))
+        pl.subplot(1,3,1)
+        pl.hist(data[:,0],bins=50,normed=True,range=[-10,10])
+        pl.xlabel('Mcc [pix^2]')
+        pl.title('Mean: '+str(round(datamean[0],5)))
+        pl.subplot(1,3,2)
+        pl.hist(data[:,1],bins=50,normed=True,range=[-10,10])
+        pl.xlabel('Mrr [pix^2]')
+        pl.title('Mean: '+str(round(datamean[1],5)))
+        pl.subplot(1,3,3)
+        pl.hist(data[:,2],bins=50,normed=True,range=[-10,10])
+        pl.xlabel('Mrc [pix^2]')
+        pl.title('Mean: '+str(round(datamean[2],5)))
+    return r50,whk,whkrms,phi,fwhm
+
 
 def whiskerStat_firstcut_mike(expid):
     #ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
