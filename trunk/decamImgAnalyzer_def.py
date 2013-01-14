@@ -425,7 +425,7 @@ def whiskerStat_firstcut(expid,plot=False):
     """
     Note that here, the sigma is not fwhm. Sigma is given in arcsec
     """
-    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/data/des08.b/data/jiangang/firstcut_aos/DECam_00'+expid+'_??_cat.fits')
     ff.sort()
     data=[]
     goodext = np.append(np.arange(60),61)
@@ -468,12 +468,12 @@ def whiskerStat_firstcut(expid,plot=False):
 
 
 def whiskerStat_firstcut_mike(expid):
-    #ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
-    ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/data/des08.b/data/jiangang/firstcut_aos/DECam_00'+expid+'_??_cat.fits')
+    #ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
     if len(ff) == 62:
         try:
-            #kwargs = {'root_dir' : '/data/des08.b/data/jiangang/firstcut','exp_num' : int(expid)}
-            kwargs = {'root_dir' : '/home/jghao/research/data/firstcutcat/164026','exp_num' : int(expid)}
+            kwargs = {'root_dir' : '/data/des08.b/data/jiangang/firstcut_aos','exp_num' : int(expid)}
+            #kwargs = {'root_dir' : '/home/jghao/research/data/firstcutcat/164026','exp_num' : int(expid)}
             b = whisker.process_all(**kwargs)
             res = np.concatenate((b[-2,6:9],b[-1,6:9]))
         except:
