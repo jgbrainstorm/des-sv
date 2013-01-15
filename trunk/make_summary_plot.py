@@ -297,13 +297,14 @@ pl.savefig('r50_median_summary.png')
 
 #---first cut plot ----
 
-b=np.genfromtxt('firstcut_before_163831.txt',delimiter=',')
+#b=np.genfromtxt('firstcut_before_163831.txt',delimiter=',')
 #b=np.genfromtxt('firstcut_163831.txt',delimiter=',')
+b = np.genfromtxt('firstcut_AOS_1_13_2013.txt',delimiter=',')
 ok = b[:,2] != -999.
 b = b[ok,:]
 pl.figure(figsize=(10,5))
 pl.subplot(1,2,1)
-pl.plot(b[:,2],b[:,6],'b.')
+pl.plot(b[:,2]*0.264/0.27,b[:,6],'b.')
 pl.plot([0,1],[0,1],'r-')
 pl.xlim(0,0.5)
 pl.ylim(0,0.5)
@@ -312,7 +313,7 @@ pl.ylabel('whisker_mike')
 pl.grid()
 
 pl.subplot(1,2,2)
-pl.plot(b[:,3],b[:,7],'b.')
+pl.plot(b[:,3]*0.264/0.27,b[:,7],'b.')
 pl.plot([0,1],[0,1],'r-')
 pl.xlim(0,0.5)
 pl.ylim(0,0.5)
