@@ -37,12 +37,12 @@ if i ==0:
     for eid in expid:
         print eid
         reshao.append(whiskerStat_firstcut(eid))
-    np.savetxt('firstcut_stat_aos_hao_1_13_2013_new.txt',np.array(reshao),fmt='%10.5f')
+    np.savetxt('firstcut_stat_163831_hao_new.txt',np.array(reshao),fmt='%10.5f')
 
 if i == 1:
     for eid in expid:
         print eid
         resmike.append(whiskerStat_firstcut_mike(eid))
-        np.savetxt('firstcut_stat_aos_mike_1_13_2013_new.txt',np.array(resmike),fmt='%10.5f')
+        np.savetxt('firstcut_stat_163831_mike_new.txt',np.array(resmike),fmt='%10.5f')
 
-"""
+
