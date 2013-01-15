@@ -5,8 +5,8 @@ from decamImgAnalyzer_def import *
 
 #expid = np.genfromtxt('/home/jghao/research/ggsvn/des-sv/downiq.cat',dtype='S10')
 #expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/downiq.cat',dtype='S10')
-#expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq_163831.cat',dtype='S10')
-expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/aos_exposures_1_13_2013.txt',dtype='S10')
+expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq_163831_new.cat',dtype='S10')
+#expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/aos_exposures_1_13_2013.txt',dtype='S10')
 
 expid.sort()
 
@@ -16,9 +16,8 @@ expid.sort()
 #runid=['20121219145915_20121217','20121223151438_20121220','20121222135459_20121221','20121223151000_20121222']
 #runid=['20121227110356_20121223', '20130105122302_20121226','20130104154724_20121227','20121231093746_20121228','20130101152443_20121229','20130105113400_20130103','20130105171408_20130104']
 
-"""
 
-runid=['20121231093746_20121228','20130101152443_20121229','20130105113400_20130103','20130105171408_20130104','20130106142401_20130105','20130107104210_20130106','20130108095202_20130107','20130111160812_20130108']
+runid=['20130106141337_20121227','20121231093746_20121228','20130101152443_20121229','20130105113400_20130103','20130105171408_20130104','20130106142401_20130105','20130107104210_20130106','20130108095202_20130107','20130111160812_20130108']
 
 for j in range(len(expid)):
     print i, j
@@ -46,3 +45,4 @@ if i == 1:
         resmike.append(whiskerStat_firstcut_mike(eid))
         np.savetxt('firstcut_stat_aos_mike_1_13_2013.txt',np.array(resmike),fmt='%10.5f')
 
+"""
