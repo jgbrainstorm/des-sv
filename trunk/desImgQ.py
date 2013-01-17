@@ -208,6 +208,8 @@ def runanalysis(img_name=None):
             moms = measureIQstamp(stamp,bkg,2.)
             data.append(moms)
             dataSex.append([Mcc,Mrr,Mrc,r50Sex,fwhmSex])
+    if nstall < 300:
+        return 0
     data = np.array(data)
     dataSex = np.array(dataSex)
     datamean = np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2])])
