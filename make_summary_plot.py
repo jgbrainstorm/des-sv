@@ -322,3 +322,10 @@ pl.ylabel('whisker_rms_mike')
 pl.grid()
 
 pl.savefig('firstcut_before_163831_whisker_hao_mike.png')
+
+
+#-----aos comparison -----
+
+aos = np.genfromtxt('firstcut_AOS_1_13_2013.txt',delimiter=',')
+b = np.genfromtxt('firstcut_163831.txt',delimiter=',')
+
