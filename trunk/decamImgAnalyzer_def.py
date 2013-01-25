@@ -25,6 +25,15 @@ except ImportError:
     sys.exit()
 
 
+def whisker_whiskerrms(data):
+    datamean =np.array([robust_mean(data[:,0]),robust_mean(data[:,1]),robust_mean(data[:,2])])
+    whk = ((datamean[0]-datamean[1])**2 + (2.*datamean[2])**2)**(0.25)*0.27
+    phi = np.rad2deg(0.5*np.arctan2(2.*datamean[2],(datamean[0]-datamean[1])))
+    datasubmean = data - datamean
+    whkrms = (robust_mean((datasubmean[:,0] - datasubmean[:,1])**2 + 4.*datasubmean[:,2]**2))**(0.25)*0.27
+    return whk, whkrms,phi
+
+
 def remOutlierIdx(x):
     y = x.flatten()
     if len(y) < 6:
@@ -468,7 +477,7 @@ def whiskerStat_firstcut(expid,plot=False):
 
 
 def whiskerStat_firstcut_mike(expid):
-    ff = gl.glob('/data/des08.b/data/jiangang/firstcut_aos/DECam_00'+expid+'_??_cat.fits')
+    ff = gl.glob('/data/des08.b/data/jiangang/firstcut/DECam_00'+expid+'_??_cat.fits')
     #ff = gl.glob('/home/jghao/research/data/firstcutcat/164026/DECam_00'+expid+'_??_cat.fits')
     if len(ff) == 62:
         try:

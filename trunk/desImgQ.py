@@ -6,7 +6,7 @@
 import sys
 import glob as gl
 import cPickle as p
-
+from DECamCCD_def import *
 sys.path.append('/usr/remote/user/sispi/jiangang/des-sv')
 
 from decamImgAnalyzer_def import *
