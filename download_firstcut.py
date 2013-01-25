@@ -12,6 +12,8 @@ expid.sort()
 
 i = int(sys.argv[1])
 
+
+"""
 #runid = ['20121210144218_20121207','20121211104015_20121208','20121212123519_20121209','20121217091522_20121215','20121219150303_20121216']
 #runid=['20121219090047_20121217','20121219150555_20121218','20120720091430_20121219','20120720174936_20121220']
 #runid=['20121219145915_20121217','20121223151438_20121220','20121222135459_20121221','20121223151000_20121222']
@@ -37,13 +39,12 @@ if i ==0:
     for eid in expid:
         print eid
         reshao.append(whiskerStat_firstcut(eid))
-    np.savetxt('firstcut_stat_163831_hao_new.txt',np.array(reshao),fmt='%10.5f')
+    np.savetxt('firstcut_stat_165131_hao.txt',np.array(reshao),fmt='%10.5f')
 
 if i == 1:
     for eid in expid:
         print eid
         resmike.append(whiskerStat_firstcut_mike(eid))
-        np.savetxt('firstcut_stat_163831_mike_new.txt',np.array(resmike),fmt='%10.5f')
+        np.savetxt('firstcut_stat_165131_mike.txt',np.array(resmike),fmt='%10.5f')
 
 
-"""
