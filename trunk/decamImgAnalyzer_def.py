@@ -1194,7 +1194,7 @@ def display_2nd_moments(data=None):
     pl.grid(color='g')
     pl.xlabel('Camera WEST [mm]')
     pl.ylabel('Camera NORTH [mm]')
-    pl.title('mean |M22|= '+str(round(abs(datamean[:,3]),5))+' pix^2')
+    pl.title('Mean |M22|= '+str(round(abs(datamean[3]),5))+' pix^2')
     pl.subplot(1,2,2)
     m20sqr = np.sqrt(data[:,2].real)
     x = data[:,0].real
