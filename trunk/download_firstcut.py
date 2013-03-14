@@ -8,8 +8,8 @@ from decamImgAnalyzer_def import *
 #expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq_163831_new.cat',dtype='S10')
 #expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/aos_exposures_1_13_2013.txt',dtype='S10')
 #expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq_20130131_newentry.cat',dtype='S10')
-expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq_20130214.cat',dtype='S10')
 
+expid = np.genfromtxt('/home/s1/jghao/ggsvn/des-sv/iq_20130214.cat',dtype='S10')
 expid.sort()
 
 i = int(sys.argv[1])
